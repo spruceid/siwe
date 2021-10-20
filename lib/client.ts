@@ -5,6 +5,7 @@ import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import Web3Modal from 'web3modal';
 import type { ICoreOptions } from 'web3modal';
 import * as sigUtil from '@metamask/eth-sig-util';
+import Cookies from 'js-cookie';
 
 import { ParsedMessage } from './abnf';
 
@@ -47,6 +48,8 @@ export class Client {
 	messageOpts: Partial<MessageOpts>;
 	sessionOpts: SessionOpts;
 	pubkey: string;
+	message: string;
+	signature: string;
 	ens: string;
 
 	constructor(opts: ClientOpts) {
@@ -68,20 +71,32 @@ export class Client {
 			// Default to 48 hours.
 			this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
 		}
+
+		const login_cookie = Cookies.get('siwe');
+		if (login_cookie) {
+			const result: LoginResult = JSON.parse(login_cookie)
+			this.pubkey = result.pubkey;
+			this.message = result.message;
+			this.signature = result.signature;
+		}
 	}
 
 	logout() {
 		this.provider = false;
 		this.messageGenerator = false;
 		this.pubkey = '';
+		this.message = '';
+		this.signature = '';
 		this.ens = '';
+
+		Cookies.remove('siwe')
 	}
 
 	async login(): Promise<LoginResult> {
 		const web3Modal = new Web3Modal({ ...this.modalOpts });
 
 		this.provider = await web3Modal.connect();
-		this.messageGenerator = await makeMessageGenerator(
+		this.messageGenerator = makeMessageGenerator(
 			this.sessionOpts.domain,
 			this.sessionOpts.url,
 			this.sessionOpts.useENS,
@@ -108,10 +123,13 @@ export class Client {
 			pubkey: this.pubkey,
 		};
 
-		// const maybeENS = await checkENS(this.provider, this.pubkey);
-		// if (maybeENS) {
-		// 	result.ens = maybeENS;
-		// }
+		const maybeENS = await checkENS(this.provider, this.pubkey);
+		if (maybeENS) {
+			result.ens = maybeENS;
+			this.ens = maybeENS;
+		}
+
+		Cookies.set('siwe', JSON.stringify(result), { expires: new Date(new Date().getTime() + this.sessionOpts.expiration) })
 
 		return result;
 	}
@@ -205,8 +223,11 @@ export function makeMessageGenerator(
 export async function checkENS(provider: any, address: string): Promise<string | false> {
 	const ens = new ENS({ provider, ensAddress: getEnsAddress('1') });
 
-	const name = await ens.getName(address);
-	return (await ens.name(name).getAddress()) === address && name;
+	const name = (await ens.getName(address)).name;
+	if ((await ens.name(name).getAddress()).toLowerCase() === address.toLowerCase()) {
+		return name;
+	}
+	return false;
 }
 
 export default Client;
