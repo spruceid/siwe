@@ -1,12 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
 // TODO: Figure out how to get types from this lib:
-// @ts-ignore
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
-import Web3Modal from 'web3modal';
-import type { ICoreOptions } from 'web3modal';
 import * as sigUtil from '@metamask/eth-sig-util';
 import Cookies from 'js-cookie';
-
+import Web3 from 'web3';
+import type { ICoreOptions } from 'web3modal';
+import Web3Modal from 'web3modal';
 import { ParsedMessage } from './abnf';
 
 export interface LoginResult {
@@ -74,7 +72,7 @@ export class Client {
 
 		const login_cookie = Cookies.get('siwe');
 		if (login_cookie) {
-			const result: LoginResult = JSON.parse(login_cookie)
+			const result: LoginResult = JSON.parse(login_cookie);
 			this.pubkey = result.pubkey;
 			this.message = result.message;
 			this.signature = result.signature;
@@ -89,7 +87,7 @@ export class Client {
 		this.signature = '';
 		this.ens = '';
 
-		Cookies.remove('siwe')
+		Cookies.remove('siwe');
 	}
 
 	async login(): Promise<LoginResult> {
@@ -101,21 +99,23 @@ export class Client {
 			this.sessionOpts.url,
 			this.sessionOpts.useENS,
 			this.provider,
-			this.sessionOpts.expiration,
+			this.sessionOpts.expiration
 		);
+		const web3 = new Web3(this.provider);
 
-		const arr = await this.provider.request({ method: 'eth_requestAccounts' });
-		this.pubkey = Array.isArray(arr) && typeof arr[0] === 'string' ? arr[0] : '';
+		// Get list of accounts of the connected wallet
+		const accounts = await web3.eth.getAccounts();
+
+		// MetaMask does not give you all accounts, only the selected account
+
+		this.pubkey = accounts[0];
 		if (!this.pubkey) {
 			throw new Error('Address not found');
 		}
 
 		const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: this.pubkey }));
 
-		const signature = await this.provider.request({
-			method: 'personal_sign',
-			params: [this.pubkey, message],
-		});
+		const signature = await web3.eth.personal.sign(message, this.pubkey, '');
 
 		const result: LoginResult = {
 			message,
@@ -129,7 +129,9 @@ export class Client {
 			this.ens = maybeENS;
 		}
 
-		Cookies.set('siwe', JSON.stringify(result), { expires: new Date(new Date().getTime() + this.sessionOpts.expiration) })
+		Cookies.set('siwe', JSON.stringify(result), {
+			expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
+		});
 
 		return result;
 	}
@@ -161,7 +163,7 @@ export function makeMessageGenerator(
 	useENS: boolean,
 	// TODO: Properly type.
 	provider: any,
-	expiresIn?: number,
+	expiresIn?: number
 ): MessageGenerator {
 	const header = `${domain} wants you to sign in with your Ethereum account:`;
 	const urlField = `URI: ${url}`;
@@ -208,7 +210,7 @@ export function makeMessageGenerator(
 
 		let suffix = suffixArray.join('\n');
 		if (!opts.resources) {
-			suffix += '\n'
+			suffix += '\n';
 		}
 
 		if (opts.statement) {
