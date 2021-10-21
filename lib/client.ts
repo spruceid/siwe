@@ -1,6 +1,7 @@
 // TODO: Figure out how to get types from this lib:
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import * as sigUtil from '@metamask/eth-sig-util';
+import EventEmitter from 'events';
 import Cookies from 'js-cookie';
 import Web3 from 'web3';
 import type { ICoreOptions } from 'web3modal';
@@ -38,7 +39,7 @@ export interface ClientOpts {
 	message?: Partial<MessageOpts>;
 }
 
-export class Client {
+export class Client extends EventEmitter {
 	// TODO: Type properly
 	provider: any;
 	modalOpts: Partial<ICoreOptions>;
@@ -51,6 +52,8 @@ export class Client {
 	ens: string;
 
 	constructor(opts: ClientOpts) {
+		super();
+
 		this.provider = false;
 		this.messageGenerator = false;
 
@@ -88,71 +91,103 @@ export class Client {
 		this.ens = '';
 
 		Cookies.remove('siwe');
+		this.emit('logout');
 	}
 
 	async login(): Promise<LoginResult> {
-		const web3Modal = new Web3Modal({ ...this.modalOpts });
+		return new Promise(async (resolve, reject) => {
+			const web3Modal = new Web3Modal({ ...this.modalOpts });
 
-		this.provider = await web3Modal.connect();
-		this.messageGenerator = makeMessageGenerator(
-			this.sessionOpts.domain,
-			this.sessionOpts.url,
-			this.sessionOpts.useENS,
-			this.provider,
-			this.sessionOpts.expiration
-		);
-		const web3 = new Web3(this.provider);
+			this.provider = await web3Modal.connect();
+			this.messageGenerator = makeMessageGenerator(
+				this.sessionOpts.domain,
+				this.sessionOpts.url,
+				this.sessionOpts.useENS,
+				this.provider,
+				this.sessionOpts.expiration
+			);
+			const web3 = new Web3(this.provider);
 
-		// Get list of accounts of the connected wallet
-		const accounts = await web3.eth.getAccounts();
+			// Get list of accounts of the connected wallet
+			const accounts = await web3.eth.getAccounts();
 
-		// MetaMask does not give you all accounts, only the selected account
+			// MetaMask does not give you all accounts, only the selected account
 
-		this.pubkey = accounts[0];
-		if (!this.pubkey) {
-			throw new Error('Address not found');
-		}
+			this.pubkey = accounts[0]?.toLowerCase();
+			if (!this.pubkey) {
+				reject(new Error('Address not found'));
+			}
 
-		const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: this.pubkey }));
+			const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: this.pubkey }));
 
-		const signature = await web3.eth.personal.sign(message, this.pubkey, '');
+			const signature = await web3.eth.personal.sign(message, this.pubkey, '');
 
-		const result: LoginResult = {
-			message,
-			signature,
-			pubkey: this.pubkey,
-		};
+			const result: LoginResult = {
+				message,
+				signature,
+				pubkey: this.pubkey,
+			};
 
-		const maybeENS = await checkENS(this.provider, this.pubkey);
-		if (maybeENS) {
-			result.ens = maybeENS;
-			this.ens = maybeENS;
-		}
+			const maybeENS = await checkENS(this.provider, this.pubkey);
+			if (maybeENS) {
+				result.ens = maybeENS;
+				this.ens = maybeENS;
+			}
 
-		Cookies.set('siwe', JSON.stringify(result), {
-			expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
+			Cookies.set('siwe', JSON.stringify(result), {
+				expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
+			});
+
+			// Disconects the provider in case of wallet connect (prevents spamming requests to Infura)
+			try {
+				this.provider.disconnect();
+			} catch (e) {}
+
+			this.emit('login', result);
+
+			resolve(result);
 		});
-
-		this.provider.disconnect();
-
-		return result;
 	}
 
-	valitate(msg: string, textSig: string, pubkey: string) {
-		const addr = sigUtil.recoverPersonalSignature({
-			data: msg,
-			signature: textSig,
+	async valitate(cookie: LoginResult = null): Promise<LoginResult> {
+		return new Promise((resolve, reject) => {
+			if (!cookie) {
+				try {
+					const { message, signature, pubkey } = JSON.parse(Cookies.get('siwe'));
+					cookie = {
+						message,
+						signature,
+						pubkey,
+					};
+				} catch (e) {
+					this.emit('validate', null);
+					reject(new Error('Invalid Cookie.'));
+				}
+			}
+
+			const addr = sigUtil.recoverPersonalSignature({
+				data: cookie.message,
+				signature: cookie.signature,
+			});
+
+			if (addr !== cookie.pubkey) {
+				this.emit('validate', false);
+				reject(new Error(`Invalid Signature`));
+			}
+
+			const parsedMessage = new ParsedMessage(cookie.message);
+
+			if (
+				parsedMessage.expirationTime &&
+				new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
+			) {
+				this.emit('validate', false);
+				reject(new Error(`Expired Signature`));
+			}
+
+			this.emit('validate', cookie);
+			resolve(cookie);
 		});
-
-		if (addr !== pubkey) {
-			throw new Error(`Invalid Signature`);
-		}
-
-		const parsedMessage = new ParsedMessage(msg);
-
-		if (parsedMessage.expirationTime && new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()) {
-			throw new Error(`Expired Signature`);
-		}
 	}
 }
 
