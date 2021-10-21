@@ -25,7 +25,6 @@
     "@types/js-cookie": "^3.0.0",
     "apg-js": "^4.1.1",
     "js-cookie": "^3.0.1",
-    "uuid": "^8.3.2",
     "web3": "^1.6.0",
     "web3modal": "^1.9.4"
   }

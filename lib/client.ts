@@ -133,6 +133,8 @@ export class Client {
 			expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
 		});
 
+		this.provider.disconnect();
+
 		return result;
 	}
 
