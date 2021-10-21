@@ -24,6 +24,9 @@ Resources:
 		expect(parsedMessage.nonce).toBe('32891757');
 		expect(parsedMessage.issuedAt).toBe('2021-09-30T16:25:24Z');
 		expect(parsedMessage.chainId).toBe('1');
-		expect(parsedMessage.resources).toStrictEqual(['ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu', 'https://example.com/my-web2-claim.json']);
-	})
-})
+		expect(parsedMessage.resources).toStrictEqual([
+			'ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu',
+			'https://example.com/my-web2-claim.json',
+		]);
+	});
+});
