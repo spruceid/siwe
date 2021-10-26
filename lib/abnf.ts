@@ -10,12 +10,12 @@ sign-in-with-ethereum =
     %s"URI: " URI LF
     %s"Version: " version LF
     %s"Nonce: " nonce LF
-    %s"Issued At: " issued-at LF
-    [ %s"Expiration Time: " expiration-time LF ]
-    [ %s"Not Before: " not-before LF ]
-    [ %s"Request ID: " request-id LF ]
-    [ %s"Chain ID: " chain-id LF ]
-    [ %s"Resources:" LF
+    %s"Issued At: " issued-at
+    [ LF %s"Expiration Time: " expiration-time ]
+    [ LF %s"Not Before: " not-before ]
+    [ LF %s"Request ID: " request-id ]
+    [ LF %s"Chain ID: " chain-id ]
+    [ LF %s"Resources:"
     resources ]
 
 domain = dnsauthority
@@ -41,7 +41,7 @@ request-id = *pchar
 chain-id = 1*DIGIT
     ; See EIP-155 for valid CHAIN_IDs.
 
-resources = resource *( LF resource )
+resources = *( LF resource )
 
 resource = "- " URI
 
@@ -271,7 +271,7 @@ export class ParsedMessage {
 		const resources = function(state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.resources = apgLib.utils.charsToString(chars, phraseIndex, phraseLength).slice(2).split('\n- ');
+				data.resources = apgLib.utils.charsToString(chars, phraseIndex, phraseLength).slice(3).split('\n- ');
 			}
 			return ret;
 		};
