@@ -24,6 +24,7 @@
     "@metamask/eth-sig-util": "^4.0.0",
     "@types/js-cookie": "^3.0.0",
     "apg-js": "^4.1.1",
+    "axios": "^0.24.0",
     "events": "^3.3.0",
     "js-cookie": "^3.0.1",
     "web3": "^1.6.0",
