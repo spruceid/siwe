@@ -1,6 +1,7 @@
 // TODO: Figure out how to get types from this lib:
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import * as sigUtil from '@metamask/eth-sig-util';
+import axios from 'axios';
 import EventEmitter from 'events';
 import Cookies from 'js-cookie';
 import Web3 from 'web3';
@@ -8,7 +9,7 @@ import type { ICoreOptions } from 'web3modal';
 import Web3Modal from 'web3modal';
 import { ParsedMessage } from './abnf';
 
-export interface LoginResult {
+export interface SiweSession {
 	message: string;
 	signature: string;
 	pubkey: string;
@@ -24,6 +25,12 @@ export interface MessageOpts {
 	resources?: Array<string>;
 }
 
+export enum ErrorTypes {
+	INVALID_SIGNATURE = 'Invalid signature.',
+	EXPIRED_SIGNATURE = 'Expired signature.',
+	MALFORMED_SESSION = 'Malformed session.',
+}
+
 export interface SessionOpts {
 	domain: string;
 	url: string;
@@ -31,6 +38,7 @@ export interface SessionOpts {
 	// Defaults to 48 hours.
 	expiration?: number;
 	// TODO: Add a way pass a function to determine notBefore
+	fetchNonce?: string;
 }
 
 export interface ClientOpts {
@@ -75,7 +83,7 @@ export class Client extends EventEmitter {
 
 		const login_cookie = Cookies.get('siwe');
 		if (login_cookie) {
-			const result: LoginResult = JSON.parse(login_cookie);
+			const result: SiweSession = JSON.parse(login_cookie);
 			this.pubkey = result.pubkey;
 			this.message = result.message;
 			this.signature = result.signature;
@@ -94,7 +102,7 @@ export class Client extends EventEmitter {
 		this.emit('logout');
 	}
 
-	async login(): Promise<LoginResult> {
+	async login(): Promise<SiweSession> {
 		return new Promise(async (resolve, reject) => {
 			const web3Modal = new Web3Modal({ ...this.modalOpts });
 
@@ -104,7 +112,8 @@ export class Client extends EventEmitter {
 				this.sessionOpts.url,
 				this.sessionOpts.useENS,
 				this.provider,
-				this.sessionOpts.expiration
+				this.sessionOpts.expiration,
+				this.sessionOpts.fetchNonce
 			);
 			const web3 = new Web3(this.provider);
 
@@ -112,7 +121,6 @@ export class Client extends EventEmitter {
 			const accounts = await web3.eth.getAccounts();
 
 			// MetaMask does not give you all accounts, only the selected account
-
 			this.pubkey = accounts[0]?.toLowerCase();
 			if (!this.pubkey) {
 				reject(new Error('Address not found'));
@@ -122,7 +130,7 @@ export class Client extends EventEmitter {
 
 			const signature = await web3.eth.personal.sign(message, this.pubkey, '');
 
-			const result: LoginResult = {
+			const result: SiweSession = {
 				message,
 				signature,
 				pubkey: this.pubkey,
@@ -149,7 +157,7 @@ export class Client extends EventEmitter {
 		});
 	}
 
-	async valitate(cookie: LoginResult = null): Promise<LoginResult> {
+	async valitate(cookie: SiweSession = null): Promise<SiweSession> {
 		return new Promise((resolve, reject) => {
 			if (!cookie) {
 				try {
@@ -161,7 +169,7 @@ export class Client extends EventEmitter {
 					};
 				} catch (e) {
 					this.emit('validate', null);
-					reject(new Error('Invalid Cookie.'));
+					reject(new Error(ErrorTypes.MALFORMED_SESSION));
 				}
 			}
 
@@ -172,7 +180,7 @@ export class Client extends EventEmitter {
 
 			if (addr !== cookie.pubkey) {
 				this.emit('validate', false);
-				reject(new Error(`Invalid Signature`));
+				reject(new Error(ErrorTypes.INVALID_SIGNATURE));
 			}
 
 			const parsedMessage = new ParsedMessage(cookie.message);
@@ -182,7 +190,7 @@ export class Client extends EventEmitter {
 				new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
 			) {
 				this.emit('validate', false);
-				reject(new Error(`Expired Signature`));
+				reject(new Error(ErrorTypes.EXPIRED_SIGNATURE));
 			}
 
 			this.emit('validate', cookie);
@@ -190,6 +198,27 @@ export class Client extends EventEmitter {
 		});
 	}
 }
+
+export const validate = (session: SiweSession): ParsedMessage => {
+	if (!session.message || !session.signature || !session.pubkey) {
+		throw new Error(ErrorTypes.MALFORMED_SESSION);
+	}
+
+	const addr = sigUtil.recoverPersonalSignature({
+		data: session.message,
+		signature: session.signature,
+	});
+
+	if (addr !== session.pubkey) {
+		throw new Error(`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${session.pubkey}`);
+	}
+	const parsedMessage = new ParsedMessage(session.message);
+
+	if (parsedMessage.expirationTime && new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()) {
+		throw new Error(ErrorTypes.EXPIRED_SIGNATURE);
+	}
+	return parsedMessage;
+};
 
 export type MessageGenerator = (opts: MessageOpts) => Promise<string>;
 
@@ -200,7 +229,8 @@ export function makeMessageGenerator(
 	useENS: boolean,
 	// TODO: Properly type.
 	provider: any,
-	expiresIn?: number
+	expiresIn?: number,
+	fetchNonce?: string
 ): MessageGenerator {
 	const header = `${domain} wants you to sign in with your Ethereum account:`;
 	const urlField = `URI: ${url}`;
@@ -216,7 +246,13 @@ export function makeMessageGenerator(
 
 		let prefix = [header, addrStr].join('\n');
 		const versionField = `Version: 1`;
-		const nonceField = `Nonce: ${(Math.random() + 1).toString(36).substring(4)}`;
+
+		let nonceField;
+		if (fetchNonce) {
+			nonceField = await axios.get(fetchNonce, { withCredentials: true }).then((res) => res.data);
+		} else {
+			nonceField = `Nonce: ${(Math.random() + 1).toString(36).substring(4)}`;
+		}
 		const current = new Date();
 
 		const suffixArray = [urlField, versionField, nonceField];
@@ -269,4 +305,6 @@ export async function checkENS(provider: any, address: string): Promise<string |
 	return false;
 }
 
-export default Client;
+export type Message = ParsedMessage;
+
+export default { Client, validate };
