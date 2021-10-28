@@ -282,9 +282,6 @@ export function makeMessageGenerator(
 		}
 
 		let suffix = suffixArray.join('\n');
-		if (!opts.resources) {
-			suffix += '\n';
-		}
 
 		if (opts.statement) {
 			prefix = [prefix, opts.statement].join('\n\n');
