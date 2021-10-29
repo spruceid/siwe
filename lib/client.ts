@@ -2,6 +2,7 @@
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import * as sigUtil from '@metamask/eth-sig-util';
 import axios from 'axios';
+import { Contract, getDefaultProvider, utils } from 'ethers';
 import EventEmitter from 'events';
 import Cookies from 'js-cookie';
 import Web3 from 'web3';
@@ -27,7 +28,7 @@ export interface MessageOpts {
 
 export enum ErrorTypes {
 	INVALID_SIGNATURE = 'Invalid signature.',
-	EXPIRED_SIGNATURE = 'Expired signature.',
+	EXPIRED_MESSAGE = 'Expired signature.',
 	MALFORMED_SESSION = 'Malformed session.',
 }
 
@@ -58,6 +59,7 @@ export class Client extends EventEmitter {
 	message: string;
 	signature: string;
 	ens: string;
+	web3Modal: Web3Modal;
 
 	constructor(opts: ClientOpts) {
 		super();
@@ -97,6 +99,10 @@ export class Client extends EventEmitter {
 		this.message = '';
 		this.signature = '';
 		this.ens = '';
+		try {
+			this.provider.disconnect();
+		} catch {}
+		this.web3Modal.clearCachedProvider();
 
 		Cookies.remove('siwe');
 		this.emit('logout');
@@ -104,9 +110,8 @@ export class Client extends EventEmitter {
 
 	async login(): Promise<SiweSession> {
 		return new Promise(async (resolve, reject) => {
-			const web3Modal = new Web3Modal({ ...this.modalOpts });
-
-			this.provider = await web3Modal.connect();
+			this.web3Modal = new Web3Modal({ ...this.modalOpts, cacheProvider: true });
+			this.provider = await this.web3Modal.connect();
 			this.messageGenerator = makeMessageGenerator(
 				this.sessionOpts.domain,
 				this.sessionOpts.url,
@@ -123,6 +128,9 @@ export class Client extends EventEmitter {
 			// MetaMask does not give you all accounts, only the selected account
 			this.pubkey = accounts[0]?.toLowerCase();
 			if (!this.pubkey) {
+				try {
+					this.provider.disconnect();
+				} catch {}
 				reject(new Error('Address not found'));
 			}
 
@@ -146,26 +154,25 @@ export class Client extends EventEmitter {
 				expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
 			});
 
-			// Disconects the provider in case of wallet connect (prevents spamming requests to Infura)
-			try {
-				this.provider.disconnect();
-			} catch (e) {}
-
 			this.emit('login', result);
 
+			try {
+				this.provider.disconnect();
+			} catch {}
 			resolve(result);
 		});
 	}
 
 	async valitate(cookie: SiweSession = null): Promise<SiweSession> {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			if (!cookie) {
 				try {
-					const { message, signature, pubkey } = JSON.parse(Cookies.get('siwe'));
+					const { message, signature, pubkey, ens } = JSON.parse(Cookies.get('siwe'));
 					cookie = {
 						message,
 						signature,
 						pubkey,
+						ens,
 					};
 				} catch (e) {
 					this.emit('validate', null);
@@ -179,6 +186,25 @@ export class Client extends EventEmitter {
 			});
 
 			if (addr !== cookie.pubkey) {
+				//EIP1271
+				try {
+					const abi = [
+						'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
+					];
+					const walletContract = new Contract(cookie.pubkey, abi, getDefaultProvider());
+					const hashMessage = utils.hashMessage(cookie.message);
+					const isValidSignature = await walletContract.isValidSignature(hashMessage, cookie.signature);
+					if (!isValidSignature) {
+						throw new Error(
+							`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${cookie.pubkey} contract ${isValidSignature}`
+						);
+					}
+				} catch (e) {
+					throw e;
+				}
+			}
+
+			if (addr !== cookie.pubkey) {
 				this.emit('validate', false);
 				reject(new Error(ErrorTypes.INVALID_SIGNATURE));
 			}
@@ -190,7 +216,7 @@ export class Client extends EventEmitter {
 				new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
 			) {
 				this.emit('validate', false);
-				reject(new Error(ErrorTypes.EXPIRED_SIGNATURE));
+				reject(new Error(ErrorTypes.EXPIRED_MESSAGE));
 			}
 
 			this.emit('validate', cookie);
@@ -199,7 +225,7 @@ export class Client extends EventEmitter {
 	}
 }
 
-export const validate = (session: SiweSession): ParsedMessage => {
+export const validate = async (session: SiweSession): Promise<ParsedMessage> => {
 	if (!session.message || !session.signature || !session.pubkey) {
 		throw new Error(ErrorTypes.MALFORMED_SESSION);
 	}
@@ -210,12 +236,25 @@ export const validate = (session: SiweSession): ParsedMessage => {
 	});
 
 	if (addr !== session.pubkey) {
-		throw new Error(`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${session.pubkey}`);
+		//EIP1271
+		try {
+			const abi = ['function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)'];
+			const walletContract = new Contract(session.pubkey, abi, getDefaultProvider());
+			const hashMessage = utils.hashMessage(session.message);
+			const isValidSignature = await walletContract.isValidSignature(hashMessage, session.signature);
+			if (!isValidSignature) {
+				throw new Error(
+					`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${session.pubkey} contract ${isValidSignature}`
+				);
+			}
+		} catch (e) {
+			throw e;
+		}
 	}
 	const parsedMessage = new ParsedMessage(session.message);
 
 	if (parsedMessage.expirationTime && new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()) {
-		throw new Error(ErrorTypes.EXPIRED_SIGNATURE);
+		throw new Error(ErrorTypes.EXPIRED_MESSAGE);
 	}
 	return parsedMessage;
 };
@@ -235,14 +274,15 @@ export function makeMessageGenerator(
 	const header = `${domain} wants you to sign in with your Ethereum account:`;
 	const urlField = `URI: ${url}`;
 	return async (opts: MessageOpts): Promise<string> => {
-		const addrStr = opts.address;
+		let addrStr = opts.address;
 
-		// if (useENS) {
-		// 	const ensStr = await checkENS(provider, opts.address);
-		// 	if (ensStr) {
-		// 		addrStr = `${opts.address} (${ensStr})`
-		// 	}
-		// }
+		let ens;
+		if (useENS) {
+			ens = await checkENS(provider, opts.address);
+			if (ens !== '') {
+				addrStr = `${addrStr} (${ens})`;
+			}
+		}
 
 		let prefix = [header, addrStr].join('\n');
 		const versionField = `Version: 1`;
@@ -292,14 +332,14 @@ export function makeMessageGenerator(
 }
 
 // TODO: Get type of provider.
-export async function checkENS(provider: any, address: string): Promise<string | false> {
+export async function checkENS(provider: any, address: string): Promise<string> {
 	const ens = new ENS({ provider, ensAddress: getEnsAddress('1') });
 
 	const name = (await ens.getName(address)).name;
 	if ((await ens.name(name).getAddress()).toLowerCase() === address.toLowerCase()) {
 		return name;
 	}
-	return false;
+	return '';
 }
 
 export type Message = ParsedMessage;
