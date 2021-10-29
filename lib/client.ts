@@ -2,7 +2,7 @@
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import * as sigUtil from '@metamask/eth-sig-util';
 import axios from 'axios';
-import { Contract, getDefaultProvider, utils } from 'ethers';
+import { Contract, ethers, utils } from 'ethers';
 import EventEmitter from 'events';
 import Cookies from 'js-cookie';
 import Web3 from 'web3';
@@ -60,6 +60,7 @@ export class Client extends EventEmitter {
 	signature: string;
 	ens: string;
 	web3Modal: Web3Modal;
+	infuraId: string;
 
 	constructor(opts: ClientOpts) {
 		super();
@@ -90,6 +91,8 @@ export class Client extends EventEmitter {
 			this.message = result.message;
 			this.signature = result.signature;
 		}
+
+		this.web3Modal = new Web3Modal({ ...this.modalOpts, cacheProvider: true });
 	}
 
 	logout() {
@@ -110,8 +113,10 @@ export class Client extends EventEmitter {
 
 	async login(): Promise<SiweSession> {
 		return new Promise(async (resolve, reject) => {
-			this.web3Modal = new Web3Modal({ ...this.modalOpts, cacheProvider: true });
-			this.provider = await this.web3Modal.connect();
+			if (!this.provider) {
+				this.provider = await this.web3Modal.connect();
+			}
+			this.emit('modalClosed');
 			this.messageGenerator = makeMessageGenerator(
 				this.sessionOpts.domain,
 				this.sessionOpts.url,
@@ -138,17 +143,17 @@ export class Client extends EventEmitter {
 
 			const signature = await web3.eth.personal.sign(message, this.pubkey, '');
 
+			const maybeENS = await checkENS(this.provider, this.pubkey);
+			if (maybeENS) {
+				this.ens = maybeENS;
+			}
+
 			const result: SiweSession = {
 				message,
 				signature,
 				pubkey: this.pubkey,
+				ens: this.ens,
 			};
-
-			const maybeENS = await checkENS(this.provider, this.pubkey);
-			if (maybeENS) {
-				result.ens = maybeENS;
-				this.ens = maybeENS;
-			}
 
 			Cookies.set('siwe', JSON.stringify(result), {
 				expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
@@ -156,9 +161,6 @@ export class Client extends EventEmitter {
 
 			this.emit('login', result);
 
-			try {
-				this.provider.disconnect();
-			} catch {}
 			resolve(result);
 		});
 	}
@@ -174,9 +176,13 @@ export class Client extends EventEmitter {
 						pubkey,
 						ens,
 					};
+					if (!message || !signature || !pubkey) {
+						throw new Error(ErrorTypes.MALFORMED_SESSION);
+					}
 				} catch (e) {
 					this.emit('validate', null);
-					reject(new Error(ErrorTypes.MALFORMED_SESSION));
+					reject(e);
+					return;
 				}
 			}
 
@@ -191,9 +197,13 @@ export class Client extends EventEmitter {
 					const abi = [
 						'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
 					];
-					const walletContract = new Contract(cookie.pubkey, abi, getDefaultProvider());
+					this.provider = await this.web3Modal.connect();
+					const ethersProvider = new ethers.providers.Web3Provider(this.provider);
+					const walletContract = new Contract(cookie.pubkey, abi, ethersProvider);
 					const hashMessage = utils.hashMessage(cookie.message);
-					const isValidSignature = await walletContract.isValidSignature(hashMessage, cookie.signature);
+					const isValidSignature = await new Promise((resolve, reject) =>
+						walletContract.isValidSignature(hashMessage, cookie.signature).then(resolve).catch(reject)
+					);
 					if (!isValidSignature) {
 						throw new Error(
 							`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${cookie.pubkey} contract ${isValidSignature}`
@@ -202,11 +212,6 @@ export class Client extends EventEmitter {
 				} catch (e) {
 					throw e;
 				}
-			}
-
-			if (addr !== cookie.pubkey) {
-				this.emit('validate', false);
-				reject(new Error(ErrorTypes.INVALID_SIGNATURE));
 			}
 
 			const parsedMessage = new ParsedMessage(cookie.message);
@@ -225,7 +230,7 @@ export class Client extends EventEmitter {
 	}
 }
 
-export const validate = async (session: SiweSession): Promise<ParsedMessage> => {
+export const validate = async (session: SiweSession, provider: ethers.providers.Provider): Promise<ParsedMessage> => {
 	if (!session.message || !session.signature || !session.pubkey) {
 		throw new Error(ErrorTypes.MALFORMED_SESSION);
 	}
@@ -239,7 +244,7 @@ export const validate = async (session: SiweSession): Promise<ParsedMessage> => 
 		//EIP1271
 		try {
 			const abi = ['function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)'];
-			const walletContract = new Contract(session.pubkey, abi, getDefaultProvider());
+			const walletContract = new Contract(session.pubkey, abi, provider);
 			const hashMessage = utils.hashMessage(session.message);
 			const isValidSignature = await walletContract.isValidSignature(hashMessage, session.signature);
 			if (!isValidSignature) {
