@@ -44,7 +44,7 @@ export interface ClientOpts {
 	session: SessionOpts;
 	modal?: Partial<ICoreOptions>;
 	message?: Partial<MessageOpts>;
-	currentSession: SiweSession;
+	currentSession?: SiweSession;
 }
 
 export class Client extends EventEmitter {
