@@ -178,100 +178,207 @@ export class ParsedMessage {
 		parser.ast = new apgLib.ast();
 		const id = apgLib.ids;
 
-		const domain = function(state, chars, phraseIndex, phraseLength, data) {
+		const domain = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.domain = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.domain = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks.domain = domain;
-		const address = function(state, chars, phraseIndex, phraseLength, data) {
+		const address = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.address = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.address = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks.address = address;
-		const statement = function(state, chars, phraseIndex, phraseLength, data) {
+		const statement = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.statement = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.statement = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks.statement = statement;
-		const uri = function(state, chars, phraseIndex, phraseLength, data) {
+		const uri = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
 				if (!data.uri) {
-					data.uri = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+					data.uri = apgLib.utils.charsToString(
+						chars,
+						phraseIndex,
+						phraseLength
+					);
 				}
 			}
 			return ret;
 		};
 		parser.ast.callbacks.uri = uri;
-		const version = function(state, chars, phraseIndex, phraseLength, data) {
+		const version = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.version = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.version = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks.version = version;
-		const chainId = function(state, chars, phraseIndex, phraseLength, data) {
+		const chainId = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.chainId = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.chainId = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks['chain-id'] = chainId;
-		const nonce = function(state, chars, phraseIndex, phraseLength, data) {
+		const nonce = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.nonce = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.nonce = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks.nonce = nonce;
-		const issuedAt = function(state, chars, phraseIndex, phraseLength, data) {
+		const issuedAt = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.issuedAt = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.issuedAt = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks['issued-at'] = issuedAt;
-		const expirationTime = function(state, chars, phraseIndex, phraseLength, data) {
+		const expirationTime = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.expirationTime = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.expirationTime = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks['expiration-time'] = expirationTime;
-		const notBefore = function(state, chars, phraseIndex, phraseLength, data) {
+		const notBefore = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.notBefore = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.notBefore = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks['not-before'] = notBefore;
-		const requestId = function(state, chars, phraseIndex, phraseLength, data) {
+		const requestId = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.requestId = apgLib.utils.charsToString(chars, phraseIndex, phraseLength);
+				data.requestId = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
 			}
 			return ret;
 		};
 		parser.ast.callbacks['request-id'] = requestId;
-		const resources = function(state, chars, phraseIndex, phraseLength, data) {
+		const resources = function (
+			state,
+			chars,
+			phraseIndex,
+			phraseLength,
+			data
+		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.resources = apgLib.utils.charsToString(chars, phraseIndex, phraseLength).slice(3).split('\n- ');
+				data.resources = apgLib.utils
+					.charsToString(chars, phraseIndex, phraseLength)
+					.slice(3)
+					.split('\n- ');
 			}
 			return ret;
 		};

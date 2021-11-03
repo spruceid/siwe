@@ -1,29 +1,7 @@
 // TODO: Figure out how to get types from this lib:
-import * as sigUtil from '@metamask/eth-sig-util';
-import axios from 'axios';
 import { Contract, ethers, utils } from 'ethers';
-import EventEmitter from 'events';
-import Cookies from 'js-cookie';
-import type { ICoreOptions } from 'web3modal';
-import Web3Modal from 'web3modal';
-import { ParsedMessage } from './abnf';
-
-export interface SiweSession {
-	message: string;
-	signature: string;
-	pubkey: string;
-	ens?: string;
-	ensAvatar?: string;
-}
-
-export interface MessageOpts {
-	address: string;
-	chainId?: string;
-	statement?: string;
-	notBefore?: string;
-	requestId?: string;
-	resources?: Array<string>;
-}
+import { ParsedMessage as ABNFParsedMessage } from './abnf';
+import { ParsedMessage as RegExpParsedMessage } from './regex';
 
 export enum ErrorTypes {
 	INVALID_SIGNATURE = 'Invalid signature.',
@@ -31,283 +9,227 @@ export enum ErrorTypes {
 	MALFORMED_SESSION = 'Malformed session.',
 }
 
-export interface SessionOpts {
+export enum SignatureType {
+	PERSONAL_SIGNATURE = 'Personal signature',
+}
+
+export class SiweMessage {
 	domain: string;
-	url: string;
-	useENS: boolean;
-	// Defaults to 48 hours.
-	expiration?: number;
-	// TODO: Add a way pass a function to determine notBefore
-	fetchNonce?: string;
-}
+	address: string;
+	statement?: string;
+	uri: string;
+	version: string;
+	nonce?: string;
+	issuedAt?: string;
+	expirationTime?: string;
+	notBefore?: string;
+	requestId?: string;
+	chainId?: string;
+	resources?: Array<string>;
+	signature?: string;
+	pubkey?: string;
+	//maybe get this from version?
+	type?: SignatureType;
 
-export interface ClientOpts {
-	session: SessionOpts;
-	modal?: Partial<ICoreOptions>;
-	message?: Partial<MessageOpts>;
-	currentSession?: SiweSession;
-}
-
-export class Client extends EventEmitter {
-	provider: ethers.providers.JsonRpcProvider;
-	modalOpts: Partial<ICoreOptions>;
-	messageGenerator: MessageGenerator;
-	messageOpts: Partial<MessageOpts>;
-	sessionOpts: SessionOpts;
-	session: SiweSession;
-	web3Modal: Web3Modal;
-
-	constructor(opts: ClientOpts) {
-		super();
-
-		this.modalOpts = opts?.modal || {};
-		this.messageOpts = opts?.message || {};
-		this.session = opts?.currentSession;
-		this.sessionOpts = opts.session;
-
-		const sanity =
-			this.sessionOpts?.expiration &&
-			typeof this.sessionOpts.expiration === 'number' &&
-			this.sessionOpts.expiration > 0;
-
-		if (!sanity) {
-			// Default to 48 hours.
-			this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
+	constructor(
+		param:
+			| string
+			| {
+					domain: string;
+					address: string;
+					statement?: string;
+					uri: string;
+					version: string;
+					nonce?: string;
+					issuedAt?: string;
+					expirationTime?: string;
+					notBefore?: string;
+					requestId?: string;
+					chainId?: string;
+					resources?: Array<string>;
+					signature?: string;
+					pubkey?: string;
+					type?: SignatureType;
+			  }
+	) {
+		if (typeof param === 'string') {
+			const parsedMessage = new ABNFParsedMessage(param);
+			this.domain = parsedMessage.domain;
+			this.address = parsedMessage.address;
+			this.statement = parsedMessage.statement;
+			this.uri = parsedMessage.uri;
+			this.version = parsedMessage.version;
+			this.nonce = parsedMessage.nonce;
+			this.issuedAt = parsedMessage.issuedAt;
+			this.expirationTime = parsedMessage.expirationTime;
+			this.notBefore = parsedMessage.notBefore;
+			this.requestId = parsedMessage.requestId;
+			this.chainId = parsedMessage.chainId;
+			this.resources = parsedMessage.resources;
+		} else {
+			this.domain = param.domain;
+			this.address = param.address;
+			this.statement = param.statement;
+			this.uri = param.uri;
+			this.version = param.version;
+			this.nonce = param.nonce;
+			this.issuedAt = param.issuedAt;
+			this.expirationTime = param.expirationTime;
+			this.notBefore = param.notBefore;
+			this.requestId = param.requestId;
+			this.chainId = param.chainId;
+			this.resources = param.resources;
+			this.signature = param.signature;
+			this.pubkey = param.pubkey;
+			this.type = param.type;
 		}
-
-		const sessionCookie = Cookies.get('siwe');
-		if (sessionCookie) {
-			this.session = JSON.parse(sessionCookie);
-		}
-
-		this.web3Modal = new Web3Modal({ ...this.modalOpts, cacheProvider: true });
 	}
 
-	async logout() {
-		this.provider = null;
-		this.session = null;
-		this.web3Modal.clearCachedProvider();
-
-		Cookies.remove('siwe');
-		this.emit('logout');
+	regexFromMessage(message: string) {
+		const parsedMessage = new RegExpParsedMessage(message);
+		return parsedMessage.match;
 	}
 
-	async login(): Promise<SiweSession> {
-		return new Promise(async (resolve, reject) => {
-			try {
-				await this.initializeProvider();
+	toMessage(): string {
+		this.type = SignatureType.PERSONAL_SIGNATURE;
+		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
+		const uriField = `URI: ${this.uri}`;
+		let prefix = [header, this.address].join('\n');
+		const versionField = `Version: ${this.version}`;
 
-				this.emit('modalClosed');
+		if (!this.nonce) {
+			this.nonce = (Math.random() + 1).toString(36).substring(4);
+		}
 
-				this.messageGenerator = makeMessageGenerator(
-					this.sessionOpts.domain,
-					this.sessionOpts.url,
-					this.sessionOpts.expiration,
-					this.sessionOpts.fetchNonce
-				);
+		const nonceField = `Nonce: ${this.nonce}`;
 
-				// Get list of accounts of the connected wallet
-				const accounts = await this.provider.listAccounts();
+		const suffixArray = [uriField, versionField, nonceField];
 
-				// MetaMask does not give you all accounts, only the selected account
-				const pubkey = accounts[0]?.toLowerCase();
-				if (!pubkey) {
-					throw new Error('Address not found');
-				}
-				const ens = await this.provider.lookupAddress(pubkey);
+		const current = new Date(this.issuedAt ?? '');
+		this.issuedAt = current.toISOString();
+		suffixArray.push(`Issued At: ${current.toISOString()}`);
 
-				const ensAvatar = ens && await this.provider.getAvatar(ens);
+		if (this.expirationTime) {
+			const expiryField = `Expiration Time: ${new Date(
+				current.getTime() + this.expirationTime
+			).toISOString()}`;
 
-				const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: pubkey }));
+			suffixArray.push(expiryField);
+		}
 
-				const signature = await this.provider.getSigner().signMessage(message);
+		if (this.notBefore) {
+			suffixArray.push(`Not Before: ${this.notBefore}`);
+		}
 
-				const session: SiweSession = {
-					message,
-					signature,
-					pubkey,
-					ens,
-					ensAvatar,
-				};
+		if (this.requestId) {
+			suffixArray.push(`Request ID: ${this.requestId}`);
+		}
 
-				Cookies.set('siwe', JSON.stringify(session), {
-					expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
-				});
+		if (this.chainId) {
+			suffixArray.push(`Chain ID: ${this.chainId}`);
+		}
 
-				this.emit('login', session);
+		if (this.resources) {
+			suffixArray.push(
+				[`Resources:`, ...this.resources.map((x) => `- ${x}`)].join(
+					'\n'
+				)
+			);
+		}
 
-				resolve(session);
-			} catch (e) {
-				this.logout();
-				reject(e);
+		let suffix = suffixArray.join('\n');
+
+		if (this.statement) {
+			prefix = [prefix, this.statement].join('\n\n');
+		}
+
+		return [prefix, suffix].join('\n\n');
+	}
+
+	signMessage() {
+		let message: string;
+		switch (this.type) {
+			case SignatureType.PERSONAL_SIGNATURE: {
+				message = this.toMessage();
+				break;
 			}
-		});
+
+			default: {
+				message = this.toMessage();
+				break;
+			}
+		}
+		return message;
 	}
 
-	async valitate(): Promise<SiweSession> {
-		return new Promise<SiweSession>(async (resolve, reject) => {
-			let session: SiweSession;
-
+	async validate(
+		provider?: ethers.providers.Provider | any
+	): Promise<SiweMessage> {
+		return new Promise<SiweMessage>(async (resolve, reject) => {
+			const message = this.signMessage();
 			try {
-				session = JSON.parse(Cookies.get('siwe'));
-				if (!session.message || !session.signature || !session.pubkey) {
-					this.emit('validate', null);
+				if (!message || !this.signature || !this.pubkey) {
 					throw new Error(ErrorTypes.MALFORMED_SESSION);
 				}
 
-				const addr = sigUtil.recoverPersonalSignature({
-					data: session.message,
-					signature: session.signature,
-				});
+				const addr = ethers.utils.recoverAddress(
+					message,
+					this.signature
+				);
 
-				if (addr !== session.pubkey) {
-					//EIP1271
-					await this.initializeProvider();
-					const isValidSignature = await checkContractWalletSignature(session, this.provider);
-					if (!isValidSignature) {
-						throw new Error(`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${session.pubkey}`);
+				if (addr !== this.pubkey) {
+					try {
+						//EIP1271
+						const isValidSignature =
+							await checkContractWalletSignature(this, provider);
+						if (!isValidSignature) {
+							throw new Error(
+								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.pubkey}`
+							);
+						}
+					} catch (e) {
+						throw e;
 					}
 				}
-
-				const parsedMessage = new ParsedMessage(session.message);
+				const parsedMessage = new SiweMessage(message);
 
 				if (
 					parsedMessage.expirationTime &&
-					new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
+					new Date().getTime() >=
+						new Date(parsedMessage.expirationTime).getTime()
 				) {
-					this.emit('validate', false);
 					throw new Error(ErrorTypes.EXPIRED_MESSAGE);
 				}
-
-				this.session = session;
-				this.emit('validate', session);
-				resolve(session);
+				resolve(parsedMessage);
 			} catch (e) {
 				reject(e);
-			}
-		});
-	}
-
-	async initializeProvider(): Promise<ethers.providers.JsonRpcProvider> {
-		return new Promise<ethers.providers.JsonRpcProvider>((resolve, reject) => {
-			if (!this.provider) {
-				return this.web3Modal
-					.connect()
-					.then((provider) => {
-						this.provider = new ethers.providers.Web3Provider(provider);
-						resolve(this.provider);
-					})
-					.catch(reject);
-			} else {
-				resolve(this.provider);
 			}
 		});
 	}
 }
 
 export const checkContractWalletSignature = async (
-	session: SiweSession,
-	provider: ethers.providers.Provider | ethers.providers.Web3Provider
+	message: SiweMessage,
+	provider?: ethers.providers.Provider | any
 ): Promise<boolean> => {
-	const abi = ['function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)'];
-	const walletContract = new Contract(session.pubkey, abi, provider);
-	const hashMessage = utils.hashMessage(session.message);
-	return await walletContract.isValidSignature(hashMessage, session.signature);
-};
+	if (!provider) {
+		return false;
+	}
 
-export const validate = async (session: SiweSession, provider: ethers.providers.Provider): Promise<ParsedMessage> => {
-	return new Promise<ParsedMessage>(async (resolve, reject) => {
+	const abi = [
+		'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
+	];
+	if (typeof provider !== typeof ethers.providers.Provider) {
 		try {
-			if (!session.message || !session.signature || !session.pubkey) {
-				throw new Error(ErrorTypes.MALFORMED_SESSION);
-			}
-
-			const addr = sigUtil.recoverPersonalSignature({
-				data: session.message,
-				signature: session.signature,
-			});
-
-			if (addr !== session.pubkey) {
-				//EIP1271
-				const isValidSignature = await checkContractWalletSignature(session, provider);
-				if (!isValidSignature) {
-					throw new Error(`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${session.pubkey}`);
-				}
-			}
-			const parsedMessage = new ParsedMessage(session.message);
-
-			if (
-				parsedMessage.expirationTime &&
-				new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
-			) {
-				throw new Error(ErrorTypes.EXPIRED_MESSAGE);
-			}
-			resolve(parsedMessage);
+			provider = new ethers.providers.Web3Provider(provider);
 		} catch (e) {
-			reject(e);
+			throw e;
 		}
-	});
+	}
+	const walletContract = new Contract(message.pubkey, abi, provider);
+	const hashMessage = utils.hashMessage(message.signMessage());
+	return await walletContract.isValidSignature(
+		hashMessage,
+		message.signature
+	);
 };
-
-export type MessageGenerator = (opts: MessageOpts) => Promise<string>;
-
-// Personal Sign Impl.
-export function makeMessageGenerator(
-	domain: string,
-	url: string,
-	expiresIn?: number,
-	fetchNonce?: string
-): MessageGenerator {
-	const header = `${domain} wants you to sign in with your Ethereum account:`;
-	const urlField = `URI: ${url}`;
-	return async (opts: MessageOpts): Promise<string> => {
-		let prefix = [header, opts.address].join('\n');
-		const versionField = `Version: 1`;
-
-		let nonceField;
-		if (fetchNonce) {
-			nonceField = await axios.get(fetchNonce, { withCredentials: true }).then((res) => res.data);
-		} else {
-			nonceField = `Nonce: ${(Math.random() + 1).toString(36).substring(4)}`;
-		}
-		const current = new Date();
-
-		const suffixArray = [urlField, versionField, nonceField];
-
-		suffixArray.push(`Issued At: ${current.toISOString()}`);
-
-		if (expiresIn) {
-			const expiryField = `Expiration Time: ${new Date(current.getTime() + expiresIn).toISOString()}`;
-
-			suffixArray.push(expiryField);
-		}
-
-		if (opts.notBefore) {
-			suffixArray.push(`Not Before: ${opts.notBefore}`);
-		}
-
-		if (opts.requestId) {
-			suffixArray.push(`Request ID: ${opts.requestId}`);
-		}
-
-		if (opts.chainId) {
-			suffixArray.push(`Chain ID: ${opts.chainId}`);
-		}
-
-		if (opts.resources) {
-			suffixArray.push([`Resources:`, ...opts.resources.map((x) => `- ${x}`)].join('\n'));
-		}
-
-		let suffix = suffixArray.join('\n');
-
-		if (opts.statement) {
-			prefix = [prefix, opts.statement].join('\n\n');
-		}
-
-		return [prefix, suffix].join('\n\n');
-	};
-}
-
-export type Message = ParsedMessage;
-
-export default { Client, validate };
