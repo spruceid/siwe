@@ -13,6 +13,7 @@ export interface SiweSession {
 	signature: string;
 	pubkey: string;
 	ens?: string;
+	ensAvatar?: string;
 }
 
 export interface MessageOpts {
@@ -48,7 +49,6 @@ export interface ClientOpts {
 }
 
 export class Client extends EventEmitter {
-	// TODO: Type properly
 	provider: ethers.providers.JsonRpcProvider;
 	modalOpts: Partial<ICoreOptions>;
 	messageGenerator: MessageGenerator;
@@ -116,6 +116,8 @@ export class Client extends EventEmitter {
 				}
 				const ens = await this.provider.lookupAddress(pubkey);
 
+				const ensAvatar = ens && await this.provider.getAvatar(ens);
+
 				const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: pubkey }));
 
 				const signature = await this.provider.getSigner().signMessage(message);
@@ -125,6 +127,7 @@ export class Client extends EventEmitter {
 					signature,
 					pubkey,
 					ens,
+					ensAvatar,
 				};
 
 				Cookies.set('siwe', JSON.stringify(session), {
