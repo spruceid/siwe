@@ -27,7 +27,6 @@ export class SiweMessage {
 	chainId?: string;
 	resources?: Array<string>;
 	signature?: string;
-	pubkey?: string;
 	//maybe get this from version?
 	type?: SignatureType;
 
@@ -80,7 +79,6 @@ export class SiweMessage {
 			this.chainId = param.chainId;
 			this.resources = param.resources;
 			this.signature = param.signature;
-			this.pubkey = param.pubkey;
 			this.type = param.type;
 		}
 	}
@@ -167,7 +165,7 @@ export class SiweMessage {
 		return new Promise<SiweMessage>(async (resolve, reject) => {
 			const message = this.signMessage();
 			try {
-				if (!message || !this.signature || !this.pubkey) {
+				if (!message || !this.signature || !this.address) {
 					throw new Error(ErrorTypes.MALFORMED_SESSION);
 				}
 
@@ -175,14 +173,14 @@ export class SiweMessage {
 					.verifyMessage(message, this.signature)
 					.toLowerCase();
 
-				if (addr !== this.pubkey) {
+				if (addr !== this.address) {
 					try {
 						//EIP1271
 						const isValidSignature =
 							await checkContractWalletSignature(this, provider);
 						if (!isValidSignature) {
 							throw new Error(
-								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.pubkey}`
+								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.address}`
 							);
 						}
 					} catch (e) {
@@ -218,7 +216,7 @@ export const checkContractWalletSignature = async (
 		'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
 	];
 	try {
-		const walletContract = new Contract(message.pubkey, abi, provider);
+		const walletContract = new Contract(message.address, abi, provider);
 		const hashMessage = utils.hashMessage(message.signMessage());
 		return await walletContract.isValidSignature(
 			hashMessage,
