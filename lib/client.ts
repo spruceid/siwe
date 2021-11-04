@@ -47,7 +47,6 @@ export class SiweMessage {
 					chainId?: string;
 					resources?: Array<string>;
 					signature?: string;
-					pubkey?: string;
 					type?: SignatureType;
 			  }
 	) {
