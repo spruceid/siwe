@@ -165,8 +165,23 @@ export class SiweMessage {
 		return new Promise<SiweMessage>(async (resolve, reject) => {
 			const message = this.signMessage();
 			try {
-				if (!message || !this.signature || !this.address) {
-					throw new Error(ErrorTypes.MALFORMED_SESSION);
+				let missing: Array<string> = [];
+				if (!message) {
+					missing.push('`message`');
+				}
+
+				if (!this.signature) {
+					missing.push('`signature`');
+				}
+				if (!this.address) {
+					missing.push('`address`');
+				}
+				if (missing.length > 0) {
+					throw new Error(
+						`${
+							ErrorTypes.MALFORMED_SESSION
+						} missing: ${missing.join(', ')}.`
+					);
 				}
 
 				const addr = ethers.utils
