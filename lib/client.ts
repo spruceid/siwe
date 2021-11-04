@@ -105,14 +105,13 @@ export class SiweMessage {
 
 		const suffixArray = [uriField, versionField, nonceField];
 
-		const current = new Date(this.issuedAt ?? '');
-		this.issuedAt = current.toISOString();
-		suffixArray.push(`Issued At: ${current.toISOString()}`);
+		this.issuedAt = this.issuedAt
+			? new Date(Date.parse(this.issuedAt)).toISOString()
+			: new Date().toISOString();
+		suffixArray.push(`Issued At: ${this.issuedAt}`);
 
 		if (this.expirationTime) {
-			const expiryField = `Expiration Time: ${new Date(
-				current.getTime() + this.expirationTime
-			).toISOString()}`;
+			const expiryField = `Expiration Time: ${this.expirationTime}`;
 
 			suffixArray.push(expiryField);
 		}
@@ -172,10 +171,9 @@ export class SiweMessage {
 					throw new Error(ErrorTypes.MALFORMED_SESSION);
 				}
 
-				const addr = ethers.utils.recoverAddress(
-					message,
-					this.signature
-				);
+				const addr = ethers.utils
+					.verifyMessage(message, this.signature)
+					.toLowerCase();
 
 				if (addr !== this.pubkey) {
 					try {
@@ -210,7 +208,7 @@ export class SiweMessage {
 
 export const checkContractWalletSignature = async (
 	message: SiweMessage,
-	provider?: ethers.providers.Provider | any
+	provider?: any
 ): Promise<boolean> => {
 	if (!provider) {
 		return false;
@@ -219,17 +217,14 @@ export const checkContractWalletSignature = async (
 	const abi = [
 		'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
 	];
-	if (typeof provider !== typeof ethers.providers.Provider) {
-		try {
-			provider = new ethers.providers.Web3Provider(provider);
-		} catch (e) {
-			throw e;
-		}
+	try {
+		const walletContract = new Contract(message.pubkey, abi, provider);
+		const hashMessage = utils.hashMessage(message.signMessage());
+		return await walletContract.isValidSignature(
+			hashMessage,
+			message.signature
+		);
+	} catch (e) {
+		throw e;
 	}
-	const walletContract = new Contract(message.pubkey, abi, provider);
-	const hashMessage = utils.hashMessage(message.signMessage());
-	return await walletContract.isValidSignature(
-		hashMessage,
-		message.signature
-	);
 };
