@@ -1,6 +1,6 @@
 {
   "name": "siwe",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Sign-In with Ethereum",
   "main": "dist/siwe.js",
   "types": "dist/siwe.d.ts",
@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "apg-js": "^4.1.1",
-    "ethers": "^5.5.1",
-    "events": "^3.3.0"
+    "ethers": "^5.5.1"
   }
 }
