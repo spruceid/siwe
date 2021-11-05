@@ -9,12 +9,14 @@
   },
   "scripts": {
     "test": "jest",
-    "docs": "typedoc --plugin typedoc-plugin-extras --favicon ./favicon.svg --out docs lib/siwe.ts"
+    "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs lib/siwe.ts",
+    "docs:base": "find ./docs -type f -name '*.html' -exec sed -i 's#</head>#<base href='/docs/'></head>#' {} \\;"
   },
   "author": "Spruce Systems Inc.",
   "license": "Apache-2.0",
   "devDependencies": {
     "jest": "^27.3.1",
+    "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",
     "ts-jest": "^27.0.7",
     "typedoc": "^0.22.7",
     "typedoc-plugin-extras": "^2.2.1",
