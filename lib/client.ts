@@ -3,53 +3,73 @@ import { Contract, ethers, utils } from 'ethers';
 import { ParsedMessage as ABNFParsedMessage } from './abnf';
 import { ParsedMessage as RegExpParsedMessage } from './regex';
 
+/**
+ * Possible message error types.
+ */
 export enum ErrorTypes {
+	/**Thrown when the `validate()` function can verify the message. */
 	INVALID_SIGNATURE = 'Invalid signature.',
+	/**Thrown when the `expirationTime` is present and in the past. */
 	EXPIRED_MESSAGE = 'Expired message.',
+	/**Thrown when some required field is missing. */
 	MALFORMED_SESSION = 'Malformed session.',
 }
 
+/**
+ * Possible signature types that this library supports.
+ */
 export enum SignatureType {
+	/**EIP-191 signature scheme */
 	PERSONAL_SIGNATURE = 'Personal signature',
 }
 
 export class SiweMessage {
+	/**RFC 4501 dns authority that is requesting the signing. */
 	domain: string;
+	/**Ethereum address performing the signing conformant to capitalization
+	 * encoded checksum specified in EIP-55 where applicable. */
 	address: string;
+	/**Human-readable ASCII assertion that the user will sign, and it must not
+	 * contain `\n`. */
 	statement?: string;
+	/**RFC 3986 URI referring to the resource that is the subject of the signing
+	 *  (as in the __subject__ of a claim). */
 	uri: string;
+	/**Current version of the message. */
 	version: string;
+	/**Randomized token used to prevent replay attacks, at least 8 alphanumeric
+	 * characters. */
 	nonce?: string;
+	/**ISO 8601 datetime string of the current time. */
 	issuedAt?: string;
+	/**ISO 8601 datetime string that, if present, indicates when the signed
+	 * authentication message is no longer valid. */
 	expirationTime?: string;
+	/**ISO 8601 datetime string that, if present, indicates when the signed
+	 * authentication message will become valid. */
 	notBefore?: string;
+	/**System-specific identifier that may be used to uniquely refer to the
+	 * sign-in request. */
 	requestId?: string;
+	/**EIP-155 Chain ID to which the session is bound, and the network where
+	 * Contract Accounts must be resolved. */
 	chainId?: string;
+	/**List of information or references to information the user wishes to have
+	 * resolved as part of authentication by the relying party. They are
+	 * expressed as RFC 3986 URIs separated by `\n- `. */
 	resources?: Array<string>;
+	/**Signature of the message signed by the wallet. */
 	signature?: string;
-	//maybe get this from version?
+	/**Type of sign message to be generated. */
 	type?: SignatureType;
 
-	constructor(
-		param:
-			| string
-			| {
-					domain: string;
-					address: string;
-					statement?: string;
-					uri: string;
-					version: string;
-					nonce?: string;
-					issuedAt?: string;
-					expirationTime?: string;
-					notBefore?: string;
-					requestId?: string;
-					chainId?: string;
-					resources?: Array<string>;
-					signature?: string;
-					type?: SignatureType;
-			  }
-	) {
+	/**
+	 * Creates a parsed Sign-In with Ethereum Message (EIP-4361) object from a
+	 * string or an object. If a string is used an ABNF parser is called to
+	 * validate the parameter, otherwise the fields are attributed.
+	 * @param param {string | SiweMessage} Sign message as a string or an object.
+	 */
+	constructor(param: string | SiweMessage) {
 		if (typeof param === 'string') {
 			const parsedMessage = new ABNFParsedMessage(param);
 			this.domain = parsedMessage.domain;
@@ -82,13 +102,25 @@ export class SiweMessage {
 		}
 	}
 
-	regexFromMessage(message: string) {
+	/**
+	 * Given a sign message (EIP-4361) returns the correct matching groups.
+	 * @param message {string}
+	 * @returns {RegExpExecArray} The matching groups for the message
+	 */
+	regexFromMessage(message: string): RegExpExecArray {
 		const parsedMessage = new RegExpParsedMessage(message);
 		return parsedMessage.match;
 	}
 
+	/**
+	 * This function can be used to retrieve an EIP-712 formated message for
+	 * signature, although you can call it directly it's advised to use
+	 * [signMessage()] instead which will resolve to the correct method based
+	 * on the [type] attribute of this object, in case of other formats being
+	 * implemented.
+	 * @returns {string} EIP-712 formated message.
+	 */
 	toMessage(): string {
-		this.type = SignatureType.PERSONAL_SIGNATURE;
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
 		const uriField = `URI: ${this.uri}`;
 		let prefix = [header, this.address].join('\n');
@@ -142,7 +174,13 @@ export class SiweMessage {
 		return [prefix, suffix].join('\n\n');
 	}
 
-	signMessage() {
+	/**
+	 * This method parses all the fields in the object and creates a sign
+	 * message according with the type defined.
+	 * @returns {string} Returns a message ready to be signed according with the
+	 * type defined in the object.
+	 */
+	signMessage(): string {
 		let message: string;
 		switch (this.type) {
 			case SignatureType.PERSONAL_SIGNATURE: {
@@ -158,6 +196,14 @@ export class SiweMessage {
 		return message;
 	}
 
+	/**
+	 * Validates the integrity of the fields of this objects by matching it's
+	 * signature.
+	 * @param provider A Web3 provider able to perform a contract check, this is
+	 * required if support for Smart Contract Wallets that implement EIP-1271 is
+	 * needed.
+	 * @returns {Promise<SiweMessage>} This object if valid.
+	 */
 	async validate(
 		provider?: ethers.providers.Provider | any
 	): Promise<SiweMessage> {
@@ -189,7 +235,7 @@ export class SiweMessage {
 
 				if (addr !== this.address) {
 					try {
-						//EIP1271
+						//EIP-1271
 						const isValidSignature =
 							await checkContractWalletSignature(this, provider);
 						if (!isValidSignature) {
@@ -218,6 +264,13 @@ export class SiweMessage {
 	}
 }
 
+/**
+ * This method calls the EIP-1271 method for Smart Contract wallets
+ * @param message The EIP-4361 parsed message
+ * @param provider Web3 provider able to perform a contract check (Web3/EthersJS).
+ * @returns {Promise<boolean>} Checks for the smart contract (if it exists) if
+ * the signature is valid for given address.
+ */
 export const checkContractWalletSignature = async (
 	message: SiweMessage,
 	provider?: any
