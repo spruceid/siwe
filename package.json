@@ -10,7 +10,7 @@
   "scripts": {
     "test": "jest",
     "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs lib/siwe.ts",
-    "docs:path": "find ./docs -type f -name '*.html' -exec sed -i 's#href=\"#href=\"/docs/\"#' {} \\; && sed -i -E 's#(url\":\")#\\1/docs/#g' docs/assets/search.js;"
+    "docs:path": "find ./docs -type f -name '*.html' -exec sed -i 's#<head>#<base href='/docs/'>' {} \\; && sed -i -E 's#(url\":\")#\\1/docs/#g' docs/assets/search.js;"
   },
   "author": "Spruce Systems Inc.",
   "license": "Apache-2.0",
