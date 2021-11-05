@@ -15,6 +15,7 @@
   "author": "Spruce Systems Inc.",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "jest": "^27.3.1",
     "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",
     "ts-jest": "^27.0.7",
