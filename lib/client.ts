@@ -1,272 +1,295 @@
 // TODO: Figure out how to get types from this lib:
-import ENS, { getEnsAddress } from '@ensdomains/ensjs';
-import * as sigUtil from '@metamask/eth-sig-util';
-import EventEmitter from 'events';
-import Cookies from 'js-cookie';
-import Web3 from 'web3';
-import type { ICoreOptions } from 'web3modal';
-import Web3Modal from 'web3modal';
-import { ParsedMessage } from './abnf';
+import { Contract, ethers, utils } from 'ethers';
+import { ParsedMessage as ABNFParsedMessage } from './abnf';
+import { ParsedMessage as RegExpParsedMessage } from './regex';
 
-export interface LoginResult {
-	message: string;
-	signature: string;
-	pubkey: string;
-	ens?: string;
+/**
+ * Possible message error types.
+ */
+export enum ErrorTypes {
+	/**Thrown when the `validate()` function can verify the message. */
+	INVALID_SIGNATURE = 'Invalid signature.',
+	/**Thrown when the `expirationTime` is present and in the past. */
+	EXPIRED_MESSAGE = 'Expired message.',
+	/**Thrown when some required field is missing. */
+	MALFORMED_SESSION = 'Malformed session.',
 }
 
-export interface MessageOpts {
-	address: string;
-	chainId?: string;
-	statement?: string;
-	notBefore?: string;
-	requestId?: string;
-	resources?: Array<string>;
+/**
+ * Possible signature types that this library supports.
+ */
+export enum SignatureType {
+	/**EIP-191 signature scheme */
+	PERSONAL_SIGNATURE = 'Personal signature',
 }
 
-export interface SessionOpts {
+export class SiweMessage {
+	/**RFC 4501 dns authority that is requesting the signing. */
 	domain: string;
-	url: string;
-	useENS: boolean;
-	// Defaults to 48 hours.
-	expiration?: number;
-	// TODO: Add a way pass a function to determine notBefore
-}
+	/**Ethereum address performing the signing conformant to capitalization
+	 * encoded checksum specified in EIP-55 where applicable. */
+	address: string;
+	/**Human-readable ASCII assertion that the user will sign, and it must not
+	 * contain `\n`. */
+	statement?: string;
+	/**RFC 3986 URI referring to the resource that is the subject of the signing
+	 *  (as in the __subject__ of a claim). */
+	uri: string;
+	/**Current version of the message. */
+	version: string;
+	/**Randomized token used to prevent replay attacks, at least 8 alphanumeric
+	 * characters. */
+	nonce?: string;
+	/**ISO 8601 datetime string of the current time. */
+	issuedAt?: string;
+	/**ISO 8601 datetime string that, if present, indicates when the signed
+	 * authentication message is no longer valid. */
+	expirationTime?: string;
+	/**ISO 8601 datetime string that, if present, indicates when the signed
+	 * authentication message will become valid. */
+	notBefore?: string;
+	/**System-specific identifier that may be used to uniquely refer to the
+	 * sign-in request. */
+	requestId?: string;
+	/**EIP-155 Chain ID to which the session is bound, and the network where
+	 * Contract Accounts must be resolved. */
+	chainId?: string;
+	/**List of information or references to information the user wishes to have
+	 * resolved as part of authentication by the relying party. They are
+	 * expressed as RFC 3986 URIs separated by `\n- `. */
+	resources?: Array<string>;
+	/**Signature of the message signed by the wallet. */
+	signature?: string;
+	/**Type of sign message to be generated. */
+	type?: SignatureType;
 
-export interface ClientOpts {
-	session: SessionOpts;
-	modal?: Partial<ICoreOptions>;
-	message?: Partial<MessageOpts>;
-}
+	/**
+	 * Creates a parsed Sign-In with Ethereum Message (EIP-4361) object from a
+	 * string or an object. If a string is used an ABNF parser is called to
+	 * validate the parameter, otherwise the fields are attributed.
+	 * @param param {string | SiweMessage} Sign message as a string or an object.
+	 */
+	constructor(param: string | SiweMessage) {
+		if (typeof param === 'string') {
+			const parsedMessage = new ABNFParsedMessage(param);
+			this.domain = parsedMessage.domain;
+			this.address = parsedMessage.address;
+			this.statement = parsedMessage.statement;
+			this.uri = parsedMessage.uri;
+			this.version = parsedMessage.version;
+			this.nonce = parsedMessage.nonce;
+			this.issuedAt = parsedMessage.issuedAt;
+			this.expirationTime = parsedMessage.expirationTime;
+			this.notBefore = parsedMessage.notBefore;
+			this.requestId = parsedMessage.requestId;
+			this.chainId = parsedMessage.chainId;
+			this.resources = parsedMessage.resources;
+		} else {
+			this.domain = param.domain;
+			this.address = param.address;
+			this.statement = param.statement;
+			this.uri = param.uri;
+			this.version = param.version;
+			this.nonce = param.nonce;
+			this.issuedAt = param.issuedAt;
+			this.expirationTime = param.expirationTime;
+			this.notBefore = param.notBefore;
+			this.requestId = param.requestId;
+			this.chainId = param.chainId;
+			this.resources = param.resources;
+			this.signature = param.signature;
+			this.type = param.type;
+		}
+	}
 
-export class Client extends EventEmitter {
-	// TODO: Type properly
-	provider: any;
-	modalOpts: Partial<ICoreOptions>;
-	messageGenerator: MessageGenerator | false;
-	messageOpts: Partial<MessageOpts>;
-	sessionOpts: SessionOpts;
-	pubkey: string;
-	message: string;
-	signature: string;
-	ens: string;
+	/**
+	 * Given a sign message (EIP-4361) returns the correct matching groups.
+	 * @param message {string}
+	 * @returns {RegExpExecArray} The matching groups for the message
+	 */
+	regexFromMessage(message: string): RegExpExecArray {
+		const parsedMessage = new RegExpParsedMessage(message);
+		return parsedMessage.match;
+	}
 
-	constructor(opts: ClientOpts) {
-		super();
+	/**
+	 * This function can be used to retrieve an EIP-712 formated message for
+	 * signature, although you can call it directly it's advised to use
+	 * [signMessage()] instead which will resolve to the correct method based
+	 * on the [type] attribute of this object, in case of other formats being
+	 * implemented.
+	 * @returns {string} EIP-712 formated message.
+	 */
+	toMessage(): string {
+		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
+		const uriField = `URI: ${this.uri}`;
+		let prefix = [header, this.address].join('\n');
+		const versionField = `Version: ${this.version}`;
 
-		this.provider = false;
-		this.messageGenerator = false;
-
-		this.modalOpts = opts?.modal || {};
-		this.messageOpts = opts?.message || {};
-		this.pubkey = '';
-		this.ens = '';
-		this.sessionOpts = opts.session;
-
-		const sanity =
-			this.sessionOpts?.expiration &&
-			typeof this.sessionOpts.expiration === 'number' &&
-			this.sessionOpts.expiration > 0;
-
-		if (!sanity) {
-			// Default to 48 hours.
-			this.sessionOpts.expiration = 2 * 24 * 60 * 60 * 1000;
+		if (!this.nonce) {
+			this.nonce = (Math.random() + 1).toString(36).substring(4);
 		}
 
-		const login_cookie = Cookies.get('siwe');
-		if (login_cookie) {
-			const result: LoginResult = JSON.parse(login_cookie);
-			this.pubkey = result.pubkey;
-			this.message = result.message;
-			this.signature = result.signature;
-		}
-	}
+		const nonceField = `Nonce: ${this.nonce}`;
 
-	logout() {
-		this.provider = false;
-		this.messageGenerator = false;
-		this.pubkey = '';
-		this.message = '';
-		this.signature = '';
-		this.ens = '';
+		const suffixArray = [uriField, versionField, nonceField];
 
-		Cookies.remove('siwe');
-		this.emit('logout');
-	}
+		this.issuedAt = this.issuedAt
+			? new Date(Date.parse(this.issuedAt)).toISOString()
+			: new Date().toISOString();
+		suffixArray.push(`Issued At: ${this.issuedAt}`);
 
-	async login(): Promise<LoginResult> {
-		return new Promise(async (resolve, reject) => {
-			const web3Modal = new Web3Modal({ ...this.modalOpts });
-
-			this.provider = await web3Modal.connect();
-			this.messageGenerator = makeMessageGenerator(
-				this.sessionOpts.domain,
-				this.sessionOpts.url,
-				this.sessionOpts.useENS,
-				this.provider,
-				this.sessionOpts.expiration
-			);
-			const web3 = new Web3(this.provider);
-
-			// Get list of accounts of the connected wallet
-			const accounts = await web3.eth.getAccounts();
-
-			// MetaMask does not give you all accounts, only the selected account
-
-			this.pubkey = accounts[0]?.toLowerCase();
-			if (!this.pubkey) {
-				reject(new Error('Address not found'));
-			}
-
-			const message = await this.messageGenerator(Object.assign(this.messageOpts, { address: this.pubkey }));
-
-			const signature = await web3.eth.personal.sign(message, this.pubkey, '');
-
-			const result: LoginResult = {
-				message,
-				signature,
-				pubkey: this.pubkey,
-			};
-
-			const maybeENS = await checkENS(this.provider, this.pubkey);
-			if (maybeENS) {
-				result.ens = maybeENS;
-				this.ens = maybeENS;
-			}
-
-			Cookies.set('siwe', JSON.stringify(result), {
-				expires: new Date(new Date().getTime() + this.sessionOpts.expiration),
-			});
-
-			// Disconects the provider in case of wallet connect (prevents spamming requests to Infura)
-			try {
-				this.provider.disconnect();
-			} catch (e) {}
-
-			this.emit('login', result);
-
-			resolve(result);
-		});
-	}
-
-	async valitate(cookie: LoginResult = null): Promise<LoginResult> {
-		return new Promise((resolve, reject) => {
-			if (!cookie) {
-				try {
-					const { message, signature, pubkey } = JSON.parse(Cookies.get('siwe'));
-					cookie = {
-						message,
-						signature,
-						pubkey,
-					};
-				} catch (e) {
-					this.emit('validate', null);
-					reject(new Error('Invalid Cookie.'));
-				}
-			}
-
-			const addr = sigUtil.recoverPersonalSignature({
-				data: cookie.message,
-				signature: cookie.signature,
-			});
-
-			if (addr !== cookie.pubkey) {
-				this.emit('validate', false);
-				reject(new Error(`Invalid Signature`));
-			}
-
-			const parsedMessage = new ParsedMessage(cookie.message);
-
-			if (
-				parsedMessage.expirationTime &&
-				new Date().getTime() >= new Date(parsedMessage.expirationTime).getTime()
-			) {
-				this.emit('validate', false);
-				reject(new Error(`Expired Signature`));
-			}
-
-			this.emit('validate', cookie);
-			resolve(cookie);
-		});
-	}
-}
-
-export type MessageGenerator = (opts: MessageOpts) => Promise<string>;
-
-// Personal Sign Impl.
-export function makeMessageGenerator(
-	domain: string,
-	url: string,
-	useENS: boolean,
-	// TODO: Properly type.
-	provider: any,
-	expiresIn?: number
-): MessageGenerator {
-	const header = `${domain} wants you to sign in with your Ethereum account:`;
-	const urlField = `URI: ${url}`;
-	return async (opts: MessageOpts): Promise<string> => {
-		const addrStr = opts.address;
-
-		// if (useENS) {
-		// 	const ensStr = await checkENS(provider, opts.address);
-		// 	if (ensStr) {
-		// 		addrStr = `${opts.address} (${ensStr})`
-		// 	}
-		// }
-
-		let prefix = [header, addrStr].join('\n');
-		const versionField = `Version: 1`;
-		const nonceField = `Nonce: ${(Math.random() + 1).toString(36).substring(4)}`;
-		const current = new Date();
-
-		const suffixArray = [urlField, versionField, nonceField];
-
-		suffixArray.push(`Issued At: ${current.toISOString()}`);
-
-		if (expiresIn) {
-			const expiryField = `Expiration Time: ${new Date(current.getTime() + expiresIn).toISOString()}`;
+		if (this.expirationTime) {
+			const expiryField = `Expiration Time: ${this.expirationTime}`;
 
 			suffixArray.push(expiryField);
 		}
 
-		if (opts.notBefore) {
-			suffixArray.push(`Not Before: ${opts.notBefore}`);
+		if (this.notBefore) {
+			suffixArray.push(`Not Before: ${this.notBefore}`);
 		}
 
-		if (opts.requestId) {
-			suffixArray.push(`Request ID: ${opts.requestId}`);
+		if (this.requestId) {
+			suffixArray.push(`Request ID: ${this.requestId}`);
 		}
 
-		if (opts.chainId) {
-			suffixArray.push(`Chain ID: ${opts.chainId}`);
+		if (this.chainId) {
+			suffixArray.push(`Chain ID: ${this.chainId}`);
 		}
 
-		if (opts.resources) {
-			suffixArray.push([`Resources:`, ...opts.resources.map((x) => `- ${x}`)].join('\n'));
+		if (this.resources) {
+			suffixArray.push(
+				[`Resources:`, ...this.resources.map((x) => `- ${x}`)].join(
+					'\n'
+				)
+			);
 		}
 
 		let suffix = suffixArray.join('\n');
-		if (!opts.resources) {
-			suffix += '\n';
-		}
 
-		if (opts.statement) {
-			prefix = [prefix, opts.statement].join('\n\n');
+		if (this.statement) {
+			prefix = [prefix, this.statement].join('\n\n');
 		}
 
 		return [prefix, suffix].join('\n\n');
-	};
-}
-
-// TODO: Get type of provider.
-export async function checkENS(provider: any, address: string): Promise<string | false> {
-	const ens = new ENS({ provider, ensAddress: getEnsAddress('1') });
-
-	const name = (await ens.getName(address)).name;
-	if ((await ens.name(name).getAddress()).toLowerCase() === address.toLowerCase()) {
-		return name;
 	}
-	return false;
+
+	/**
+	 * This method parses all the fields in the object and creates a sign
+	 * message according with the type defined.
+	 * @returns {string} Returns a message ready to be signed according with the
+	 * type defined in the object.
+	 */
+	signMessage(): string {
+		let message: string;
+		switch (this.type) {
+			case SignatureType.PERSONAL_SIGNATURE: {
+				message = this.toMessage();
+				break;
+			}
+
+			default: {
+				message = this.toMessage();
+				break;
+			}
+		}
+		return message;
+	}
+
+	/**
+	 * Validates the integrity of the fields of this objects by matching it's
+	 * signature.
+	 * @param provider A Web3 provider able to perform a contract check, this is
+	 * required if support for Smart Contract Wallets that implement EIP-1271 is
+	 * needed.
+	 * @returns {Promise<SiweMessage>} This object if valid.
+	 */
+	async validate(
+		provider?: ethers.providers.Provider | any
+	): Promise<SiweMessage> {
+		return new Promise<SiweMessage>(async (resolve, reject) => {
+			const message = this.signMessage();
+			try {
+				let missing: Array<string> = [];
+				if (!message) {
+					missing.push('`message`');
+				}
+
+				if (!this.signature) {
+					missing.push('`signature`');
+				}
+				if (!this.address) {
+					missing.push('`address`');
+				}
+				if (missing.length > 0) {
+					throw new Error(
+						`${
+							ErrorTypes.MALFORMED_SESSION
+						} missing: ${missing.join(', ')}.`
+					);
+				}
+
+				const addr = ethers.utils
+					.verifyMessage(message, this.signature)
+					.toLowerCase();
+
+				if (addr !== this.address) {
+					try {
+						//EIP-1271
+						const isValidSignature =
+							await checkContractWalletSignature(this, provider);
+						if (!isValidSignature) {
+							throw new Error(
+								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.address}`
+							);
+						}
+					} catch (e) {
+						throw e;
+					}
+				}
+				const parsedMessage = new SiweMessage(message);
+
+				if (
+					parsedMessage.expirationTime &&
+					new Date().getTime() >=
+						new Date(parsedMessage.expirationTime).getTime()
+				) {
+					throw new Error(ErrorTypes.EXPIRED_MESSAGE);
+				}
+				resolve(parsedMessage);
+			} catch (e) {
+				reject(e);
+			}
+		});
+	}
 }
 
-export default Client;
+/**
+ * This method calls the EIP-1271 method for Smart Contract wallets
+ * @param message The EIP-4361 parsed message
+ * @param provider Web3 provider able to perform a contract check (Web3/EthersJS).
+ * @returns {Promise<boolean>} Checks for the smart contract (if it exists) if
+ * the signature is valid for given address.
+ */
+export const checkContractWalletSignature = async (
+	message: SiweMessage,
+	provider?: any
+): Promise<boolean> => {
+	if (!provider) {
+		return false;
+	}
+
+	const abi = [
+		'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
+	];
+	try {
+		const walletContract = new Contract(message.address, abi, provider);
+		const hashMessage = utils.hashMessage(message.signMessage());
+		return await walletContract.isValidSignature(
+			hashMessage,
+			message.signature
+		);
+	} catch (e) {
+		throw e;
+	}
+};
