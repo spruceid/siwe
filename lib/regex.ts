@@ -1,7 +1,8 @@
-const DOMAIN = "(([a-zA-Z]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}";
-const ADDRESS = "0x[a-zA-Z0-9]{40}";
-const URI = "(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
-const DATETIME = "([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\.[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))";
+const DOMAIN = '(([a-zA-Z]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}';
+const ADDRESS = '0x[a-zA-Z0-9]{40}';
+const URI = '(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?';
+const DATETIME =
+	'([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\.[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))';
 const REQUESTID = "[-._~!$&'()*+,;=:@%a-zA-Z0-9]*";
 
 export class ParsedMessage {
@@ -17,15 +18,19 @@ export class ParsedMessage {
 	requestId: string | null;
 	chainId: string | null;
 	resources: string[] | null;
+	match?: RegExpExecArray;
 
 	constructor(msg: string) {
-		const REGEX = new RegExp(`(?<domain>${DOMAIN})\\ wants\\ you\\ to\\ sign\\ in\\ with\\ your\\ Ethereum\\ account\\:\\n(?<address>${ADDRESS})\\n\\n(?<statement>[^\\n]+)\\n?\\nURI\\:\\ (?<uri>${URI})\\nVersion\\:\\ (?<version>1)\\nNonce\\:\\ (?<nonce>[a-zA-Z0-9]{8})\\nIssued\\ At\\:\\ (?<issuedAt>${DATETIME})(\\nExpiration\\ Time\\:\\ (?<expirationTime>${DATETIME}))?(\\nNot\\ Before\\:\\ (?<notBefore>${DATETIME}))?(\\nRequest\\ ID\\:\\ (?<requestId>${REQUESTID}))?(\\nChain\\ ID\\:\\ (?<chainId>[0-9]+))?(\\nResources\\:(?<resources>(\\n-\\ ${URI})+))?$`, 'g');
+		const REGEX = new RegExp(
+			`(?<domain>${DOMAIN})\\ wants\\ you\\ to\\ sign\\ in\\ with\\ your\\ Ethereum\\ account\\:\\n(?<address>${ADDRESS})\\n\\n(?<statement>[^\\n]+)\\n?\\nURI\\:\\ (?<uri>${URI})\\nVersion\\:\\ (?<version>1)\\nNonce\\:\\ (?<nonce>[a-zA-Z0-9]{8})\\nIssued\\ At\\:\\ (?<issuedAt>${DATETIME})(\\nExpiration\\ Time\\:\\ (?<expirationTime>${DATETIME}))?(\\nNot\\ Before\\:\\ (?<notBefore>${DATETIME}))?(\\nRequest\\ ID\\:\\ (?<requestId>${REQUESTID}))?(\\nChain\\ ID\\:\\ (?<chainId>[0-9]+))?(\\nResources\\:(?<resources>(\\n-\\ ${URI})+))?$`,
+			'g'
+		);
 
 		let match = REGEX.exec(msg);
 		if (!match) {
-			throw new Error("Message did not match the regular expression.");
+			throw new Error('Message did not match the regular expression.');
 		}
-
+		this.match = match;
 		this.domain = match?.groups?.domain;
 		this.address = match?.groups?.address;
 		this.statement = match?.groups?.statement;
