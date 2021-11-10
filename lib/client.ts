@@ -149,7 +149,7 @@ export class Client extends EventEmitter {
 		});
 	}
 
-	async valitate(cookie: LoginResult = null): Promise<LoginResult> {
+	async validate(cookie: LoginResult = null): Promise<LoginResult> {
 		return new Promise((resolve, reject) => {
 			if (!cookie) {
 				try {
