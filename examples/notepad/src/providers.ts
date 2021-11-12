@@ -121,7 +121,6 @@ const signIn = async (connector: Providers) => {
 const signOut = async () => {
     updateTitle('Untitled');
     updateNotepad('');
-    alert(`You'll lose all your information, are you sure?`);
     return fetch('/api/sign_out', {
         method: 'POST',
         credentials: 'include',
