@@ -1,0 +1,13 @@
+{
+    "example message": {
+        "domain": "login.xyz",
+        "address": "0xe2f03cb7a54ddd886da9b0d227bfcb2d61429699",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "k13wuejc",
+        "issuedAt": "2021-11-12T17:37:48.462Z",
+        "chainId": "1",
+        "signature": "0x795110331a07a4d475419fbdb346feb4c0579dcc8228989964474e07d98dbf425f38776cd6ca037f58288acc7b15e720c9cecac988479177fb70592f2391aaff1b"
+    }
+}

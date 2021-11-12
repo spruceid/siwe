@@ -69,7 +69,7 @@ export class SiweMessage {
 	 * validate the parameter, otherwise the fields are attributed.
 	 * @param param {string | SiweMessage} Sign message as a string or an object.
 	 */
-	constructor(param: string | SiweMessage) {
+	constructor(param: string | Partial<SiweMessage>) {
 		if (typeof param === 'string') {
 			const parsedMessage = new ABNFParsedMessage(param);
 			this.domain = parsedMessage.domain;
@@ -134,8 +134,11 @@ export class SiweMessage {
 
 		const suffixArray = [uriField, versionField, nonceField];
 
+		if (this.issuedAt) {
+			Date.parse(this.issuedAt);
+		}
 		this.issuedAt = this.issuedAt
-			? new Date(Date.parse(this.issuedAt)).toISOString()
+			? this.issuedAt
 			: new Date().toISOString();
 		suffixArray.push(`Issued At: ${this.issuedAt}`);
 
@@ -223,8 +226,7 @@ export class SiweMessage {
 				}
 				if (missing.length > 0) {
 					throw new Error(
-						`${
-							ErrorTypes.MALFORMED_SESSION
+						`${ErrorTypes.MALFORMED_SESSION
 						} missing: ${missing.join(', ')}.`
 					);
 				}
@@ -252,7 +254,7 @@ export class SiweMessage {
 				if (
 					parsedMessage.expirationTime &&
 					new Date().getTime() >=
-						new Date(parsedMessage.expirationTime).getTime()
+					new Date(parsedMessage.expirationTime).getTime()
 				) {
 					throw new Error(ErrorTypes.EXPIRED_MESSAGE);
 				}
