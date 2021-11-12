@@ -12,6 +12,9 @@ to Infura.
 npm i
 ```
 
+## Create a `.env`
+Copy the `.env.example` file and change some fields if you want.
+
 ## Run
 ```bash
 npm run dev
