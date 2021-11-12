@@ -19,6 +19,17 @@ config();
 const PROD = process.env.ENVIRONMENT === 'production';
 const STAGING = process.env.ENVIRONMENT === 'staging';
 
+if (!process.env.SESSION_COOKIE_NAME || !process.env.SECRET) {
+    setTimeout(
+        () =>
+            console.log(
+                '\n\n\n\nProject running with default values!\n\n\n\n',
+                'To get rid of this message please define SESSION_COOKIE_NAME and SECRET in a .env file.\n\n',
+            ),
+        5000,
+    );
+}
+
 declare module 'express-session' {
     interface SessionData {
         siwe: SiweMessage;
@@ -57,8 +68,8 @@ app.use(Morgan('combined'));
 
 app.use(
     Session({
-        name: process.env.SESSION_COOKIE_NAME,
-        secret: process.env.SECRET,
+        name: process.env.SESSION_COOKIE_NAME ?? 'siwe-notepad-session',
+        secret: process.env.SECRET ?? 'siwe',
         resave: true,
         saveUninitialized: true,
         store: new FileStoreStore({
