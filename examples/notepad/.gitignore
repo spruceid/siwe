@@ -1,0 +1,5 @@
+node_modules
+.env
+build
+public/*bundle*js*
+db/

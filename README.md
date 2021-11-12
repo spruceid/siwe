@@ -9,28 +9,7 @@ Ethereum-based authentication, and provide wallet vendors a consistent
 machine-readable message format to achieve improved user experiences and 
 consent management.
 
-## Quickstart Example
-
-1. Ensure that the latest `npm` is installed (`yarn` works as well).
-
-2. Clone the repository, install dependencies, and run the example.
-```bash=
-git clone https://github.com/spruceid/siwe
-cd siwe/examples/notepad
-npm install
-npm run serve
-```
-3. Visit the example at http://localhost:3000 (or whichever port `npm`
-   allocated). You will need a wallet, we recommend MetaMask. Additional
-   wallets are supported, but you may need to register your application with
-   them.
-
-[SCREENSHOT]
-
-4. Try signing in with Ethereum and saving your note. Log out, and login
-   again--you should see that the note was saved!
-
-[SCREENSHOT]
+## [Quickstart Example](./examples/notepad)
 
 ## Motivation
 When signing in to popular non-blockchain services today, users will typically 
