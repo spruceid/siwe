@@ -104,7 +104,7 @@ app.post('/api/sign_in', async (req, res) => {
         const infuraProvider = new providers.JsonRpcProvider(
             {
                 allowGzip: true,
-                url: `${getInfuraUrl(message.chainId)}/v3/8fcacee838e04f31b6ec145eb98879c8`,
+                url: `${getInfuraUrl(message.chainId)}/8fcacee838e04f31b6ec145eb98879c8`,
                 headers: {
                     Accept: '*/*',
                     Origin: `http://localhost:${PORT}`,
@@ -115,7 +115,7 @@ app.post('/api/sign_in', async (req, res) => {
             Number.parseInt(message.chainId),
         );
 
-        infuraProvider.connection.headers.Origin = `localhost:${PORT}`;
+        await infuraProvider.ready;
 
         const fields: SiweMessage = await message.validate(infuraProvider);
 
@@ -197,14 +197,14 @@ const getText = (address: string) => {
 const getInfuraUrl = (chainId: string) => {
     switch (Number.parseInt(chainId)) {
         case 1:
-            return 'mainnet.infura.io';
+            return 'https://mainnet.infura.io/v3';
         case 3:
-            return 'ropsten.infura.io';
+            return 'https://ropsten.infura.io/v3';
         case 4:
-            return 'rinkeby.infura.io';
+            return 'https://rinkeby.infura.io/v3';
         case 5:
-            return 'goerli.infura.io';
+            return 'https://goerli.infura.io/v3';
         case 137:
-            return 'polygon-mainnet.infura.io';
+            return 'https://polygon-mainnet.infura.io/v3';
     }
 };
