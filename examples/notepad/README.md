@@ -7,16 +7,9 @@ used. If you want to use the provided Infura ID, select one of the following por
 `3000`,`3010`,`4000`,`4010`,`4361`,`9080`. Otherwise you'll be unable to connect 
 to Infura.
 
-## Install the dependencies
+## Quickstart
 ```bash
 npm i
-```
-
-## Create a `.env`
-Copy the `.env.example` file and change some fields if you wish.
-
-## Run
-```bash
 npm run dev
 ```
 
