@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <title>SIWE Notepad</title>
+        <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://unpkg.com/98.css" />
+        <link href="./style.css" rel="stylesheet" />
+        <script src="./bundle.js"></script>
+        <script src="./utils.js"></script>
+        <link rel="icon" type="image/png" href="/favicon.png" />
+    </head>
+
+    <body class="h-screen w-screen flex flex-col">
+        <div class="w-full h-full" id="desktop">
+            <div class="window inline-block select-none">
+                <div class="title-bar">
+                    <div class="title-bar-text">
+                        <div class="flex">
+                            <img src="/favicon.png" alt="Notepad icon" class="w-4 h-4 mr-1" />
+                            <p id="title">Untitled</p>
+                            &nbsp- Notepad&nbsp
+                            <p id="unsaved"></p>
+                        </div>
+                    </div>
+                    <div class="title-bar-controls">
+                        <button id="toggleSize" aria-label="Maximize"></button>
+                        <button id="closeButton" aria-label="Close" title="Sign-Out"></button>
+                    </div>
+                </div>
+                <div class="flex py-0.5">
+                    <div
+                        id="disconnectButton"
+                        class="cursor-default hover:bg-blue-900 hover:text-white px-1 hidden"
+                    >
+                        Disconnect
+                    </div>
+                    <div
+                        id="saveButton"
+                        class="cursor-default hover:bg-blue-900 hover:text-white px-1 hidden"
+                    >
+                        Save
+                    </div>
+                    <div
+                        id="metamask"
+                        class="cursor-default hover:bg-blue-900 hover:text-white px-1"
+                    >
+                        Metamask
+                    </div>
+                    <div
+                        id="walletconnect"
+                        class="cursor-default hover:bg-blue-900 hover:text-white px-1"
+                    >
+                        WalletConnect
+                    </div>
+                </div>
+                <textarea
+                    name="notepad"
+                    id="notepad"
+                    cols="30"
+                    rows="10"
+                    spellcheck="false"
+                    class="mousetrap"
+                ></textarea>
+            </div>
+        </div>
+        <div class="h-8 menu-bar flex justify-between">
+            <a href="https://login.xyz" target="_blank">
+                <button class="m-1">
+                    <div class="flex items-center justify-evenly">
+                        <img
+                            src="/start-button.png"
+                            alt="Start Button"
+                            class="w-3 h-4 mb-0.5"
+                            draggable="false"
+                        />
+                        &nbsp&nbsplogin.xyz
+                    </div>
+                </button>
+            </a>
+            <div
+                id="clock"
+                class="clock justify-end px-2 items-center flex m-1 cursor-default select-none"
+            ></div>
+        </div>
+    </body>
+</html>

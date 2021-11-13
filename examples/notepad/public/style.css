@@ -1,0 +1,50 @@
+textarea {
+    resize: both;
+    cursor: auto;
+    overflow: scroll;
+    min-width: 660px;
+    min-height: 380px;
+    max-width: 99.7vw;
+    max-height: 91.7vh;
+    white-space: pre;
+    padding: 0.25rem;
+    font-size: 14px;
+}
+
+.title-bar, button {
+    font-size: 12px;
+}
+
+button {
+    cursor: default;
+}
+
+div [disabled], div [disabled]:hover {
+    background-color: transparent;
+    color: grey;
+}
+
+#desktop {
+    background-color: #018080;
+}
+
+.menu-bar {
+    background-color: silver;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
+}
+
+.clock {
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+    font-family: "Pixelated MS Sans Serif",Arial;
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+a {
+    color: black;
+    text-decoration: none; /* no underline */
+  }

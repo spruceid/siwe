@@ -9,6 +9,23 @@ Ethereum-based authentication, and provide wallet vendors a consistent
 machine-readable message format to achieve improved user experiences and 
 consent management.
 
+## [Quickstart Example](./examples/notepad)
+To try it out locally, there is an example that uses Sign-In With Ethereum to
+create a notepad that persists to a server after a user authenticates with
+their Ethereum address.
+
+![Sign-In with Ethereum Notepad](./examples/notepad/notepad.png "Sign-In with Ethereum Notepad")
+
+To use the example, run the following commands:
+```bash
+git clone https://github.com/spruceid/siwe
+cd siwe/examples/notepad
+npm install
+npm run dev
+```
+
+See the example README.md for more details.
+
 ## Motivation
 When signing in to popular non-blockchain services today, users will typically 
 use identity providers (IdPs) that are centralized entities with ultimate 
@@ -32,3 +49,4 @@ EIPs, and fits within product roadmaps.
 
 ## Specification
 Specification can be found at the [EIP-4361 GitHub page](https://github.com/ethereum/EIPs/blob/9a9c5d0abdaf5ce5c5dd6dc88c6d8db1b130e95b/EIPS/eip-4361.md).
+

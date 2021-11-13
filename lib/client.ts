@@ -85,20 +85,7 @@ export class SiweMessage {
 			this.chainId = parsedMessage.chainId;
 			this.resources = parsedMessage.resources;
 		} else {
-			this.domain = param.domain;
-			this.address = param.address;
-			this.statement = param.statement;
-			this.uri = param.uri;
-			this.version = param.version;
-			this.nonce = param.nonce;
-			this.issuedAt = param.issuedAt;
-			this.expirationTime = param.expirationTime;
-			this.notBefore = param.notBefore;
-			this.requestId = param.requestId;
-			this.chainId = param.chainId;
-			this.resources = param.resources;
-			this.signature = param.signature;
-			this.type = param.type;
+			Object.assign(this, param);
 		}
 	}
 
@@ -231,9 +218,10 @@ export class SiweMessage {
 					);
 				}
 
-				const addr = ethers.utils
-					.verifyMessage(message, this.signature)
-					.toLowerCase();
+				const addr = ethers.utils.verifyMessage(
+					message,
+					this.signature
+				);
 
 				if (addr !== this.address) {
 					try {
