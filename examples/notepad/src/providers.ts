@@ -123,8 +123,11 @@ const signOut = async () => {
  */
 const save = async (e?: Mousetrap.ExtendedKeyboardEvent) => {
     e?.preventDefault();
-    if (!document.getElementById('walletconnect').classList.contains('hidden')) return;
-    const text = (document.getElementById('notepad') as HTMLTextAreaElement).value;
+    const text = notepad.value;
+    if (Buffer.byteLength(JSON.stringify({ text })) > 43610) {
+        alert('Your message is too big.');
+        return;
+    }
     return fetch('/api/save', {
         method: 'PUT',
         credentials: 'include',

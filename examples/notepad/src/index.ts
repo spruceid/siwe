@@ -62,7 +62,7 @@ app.use(
         },
     }),
 );
-app.use(Express.json());
+app.use(Express.json({ limit: 43610 }));
 app.use(Express.urlencoded({ extended: true }));
 app.use(Morgan('combined'));
 
@@ -73,7 +73,7 @@ app.use(
         resave: true,
         saveUninitialized: true,
         store: new FileStoreStore({
-            path: Path.resolve(__dirname, '../db'),
+            path: Path.resolve(__dirname, '../db/sessions'),
         }),
         cookie: {
             httpOnly: true,
@@ -189,6 +189,14 @@ app.put('/api/save', async (req, res) => {
         res.status(401).json({ message: 'You have to first sign_in' });
         return;
     }
+
+    await fs.readdir(Path.resolve(__dirname, `../db`), (err, files) => {
+        if (files.length === 1000001) {
+            res.status(500).json({ message: 'File limit reached!' });
+            return;
+        }
+    });
+
     updateText(req.body.text, req.session.siwe.address);
     res.status(204).send().end();
 });
