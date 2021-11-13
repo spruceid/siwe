@@ -24,12 +24,7 @@ const signIn = async (connector: Providers) => {
      */
     if (connector === 'metamask') {
         await metamask.request({
-            method: 'wallet_requestPermissions',
-            params: [
-                {
-                    eth_accounts: {},
-                },
-            ],
+            method: 'eth_requestAccounts',
         });
         provider = new ethers.providers.Web3Provider(metamask);
     } else {
@@ -103,19 +98,6 @@ const signIn = async (connector: Providers) => {
             });
         }
     });
-
-    /**
-     * Clean up after connection
-     */
-    switch (connector) {
-        case Providers.METAMASK: {
-            break;
-        }
-        case Providers.WALLET_CONNECT: {
-            walletconnect.disconnect();
-            break;
-        }
-    }
 };
 
 const signOut = async () => {

@@ -85,7 +85,7 @@ app.use(Express.static(Path.resolve(__dirname, '../public')));
 
 app.get('/api/nonce', async (req, res) => {
     req.session.nonce = (Math.random() + 1).toString(36).substring(4);
-    res.status(200).send(req.session.nonce).end();
+    req.session.save(() => res.status(200).send(req.session.nonce).end());
 });
 
 app.get('/api/me', async (req, res) => {
@@ -141,13 +141,16 @@ app.post('/api/sign_in', async (req, res) => {
         req.session.ens = ens;
         req.session.nonce = null;
         req.session.cookie.expires = new Date(fields.expirationTime);
-        res.status(200)
-            .json({
-                text: getText(req.session.siwe.address),
-                address: req.session.siwe.address,
-                ens: req.session.ens,
-            })
-            .end();
+        req.session.save(() =>
+            res
+                .status(200)
+                .json({
+                    text: getText(req.session.siwe.address),
+                    address: req.session.siwe.address,
+                    ens: req.session.ens,
+                })
+                .end(),
+        );
     } catch (e) {
         req.session.siwe = null;
         req.session.nonce = null;
@@ -155,15 +158,15 @@ app.post('/api/sign_in', async (req, res) => {
         console.error(e);
         switch (e) {
             case ErrorTypes.EXPIRED_MESSAGE: {
-                res.status(440).json({ message: e.message });
+                req.session.save(() => res.status(440).json({ message: e.message }));
                 break;
             }
             case ErrorTypes.INVALID_SIGNATURE: {
-                res.status(422).json({ message: e.message });
+                req.session.save(() => res.status(422).json({ message: e.message }));
                 break;
             }
             default: {
-                res.status(500).json({ message: e.message });
+                req.session.save(() => res.status(500).json({ message: e.message }));
                 break;
             }
         }
@@ -191,15 +194,18 @@ app.put('/api/save', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Listening at port ${PORT}, visit http://localhost:${PORT}/`);
+    setTimeout(
+        () => console.log(`Listening at port ${PORT}, visit http://localhost:${PORT}/`),
+        5000,
+    );
 }).on('error', console.error);
 
 const updateText = (text: string, address: string) =>
-    fs.writeFileSync(Path.resolve(__dirname, `../db/${address}`), text, { flag: 'wx' });
+    fs.writeFileSync(Path.resolve(__dirname, `../db/${address}.txt`), text, { flag: 'w' });
 
 const getText = (address: string) => {
     try {
-        return fs.readFileSync(Path.resolve(__dirname, `../db/${address}`), 'utf-8');
+        return fs.readFileSync(Path.resolve(__dirname, `../db/${address}.txt`), 'utf-8');
     } catch (e) {
         return '';
     }
