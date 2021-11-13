@@ -2,8 +2,8 @@ textarea {
     resize: both;
     cursor: auto;
     overflow: scroll;
-    min-width: 460px;
-    min-height: 320px;
+    min-width: 600px;
+    min-height: 380px;
     max-width: 99.7vw;
     max-height: 91.7vh;
     white-space: pre;
@@ -19,7 +19,7 @@ button {
     cursor: default;
 }
 
-div .disabled, div .disabled:hover {
+div [disabled], div [disabled]:hover {
     background-color: transparent;
     color: grey;
 }
@@ -43,3 +43,8 @@ div .disabled, div .disabled:hover {
     font-size: 11px;
     letter-spacing: 0.5px;
 }
+
+a {
+    color: black;
+    text-decoration: none; /* no underline */
+  }

@@ -17,7 +17,8 @@
                         <div class="flex">
                             <img src="/favicon.png" alt="Notepad icon" class="w-4 h-4 mr-1" />
                             <p id="title">Untitled</p>
-                            &nbsp- Notepad
+                            &nbsp- Notepad&nbsp
+                            <p id="unsaved"></p>
                         </div>
                     </div>
                     <div class="title-bar-controls">
@@ -31,6 +32,12 @@
                         class="cursor-default hover:bg-blue-900 hover:text-white px-1 hidden"
                     >
                         Disconnect
+                    </div>
+                    <div
+                        id="saveButton"
+                        class="cursor-default hover:bg-blue-900 hover:text-white px-1 hidden"
+                    >
+                        Save
                     </div>
                     <div
                         id="metamask"
@@ -56,17 +63,19 @@
             </div>
         </div>
         <div class="h-8 menu-bar flex justify-between">
-            <button id="saveButton" class="m-1">
-                <div class="flex items-center justify-evenly">
-                    <img
-                        src="/start-button.png"
-                        alt="Start Button"
-                        class="w-3 h-4 mb-0.5"
-                        draggable="false"
-                    />
-                    Save
-                </div>
-            </button>
+            <a href="https://login.xyz" target="_blank">
+                <button class="m-1">
+                    <div class="flex items-center justify-evenly">
+                        <img
+                            src="/start-button.png"
+                            alt="Start Button"
+                            class="w-3 h-4 mb-0.5"
+                            draggable="false"
+                        />
+                        &nbsp&nbsplogin.xyz
+                    </div>
+                </button>
+            </a>
             <div
                 id="clock"
                 class="clock justify-end px-2 items-center flex m-1 cursor-default select-none"
