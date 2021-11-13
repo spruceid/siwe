@@ -186,8 +186,8 @@ const blockSave = () => {
 const enableSave = () => {
     saveButton.addEventListener('click', save);
     saveButton.removeAttribute('disabled');
-    updateUnsavedChanges('- Unsaved Changes');
-    window.onbeforeunload = () => 'Unsaved Changes!';
+    updateUnsavedChanges('- (***Unsaved Changes***)');
+    window.onbeforeunload = () => '(***Unsaved Changes***)';
 };
 
 Mousetrap.bind('mod+s', save);
