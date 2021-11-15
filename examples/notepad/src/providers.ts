@@ -70,10 +70,10 @@ const signIn = async (connector: Providers) => {
      * Creates the message object
      */
     const message = new SiweMessage({
-        domain: 'localhost',
+        domain: document.location.host,
         address,
         chainId: `${await provider.getNetwork().then(({ chainId }) => chainId)}`,
-        uri: 'https://localhost',
+        uri: document.location.origin,
         version: '1',
         statement: 'SIWE Notepad Example',
         type: SignatureType.PERSONAL_SIGNATURE,
