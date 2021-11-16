@@ -1,0 +1,29 @@
+{
+  "name": "passport-siwe",
+  "version": "0.1.0",
+  "description": "Sign-In with Ethereum, passport.js integration.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spruceid/siwe.git"
+  },
+  "keywords": [
+    "siwe",
+    "passport",
+    "ethereum"
+  ],
+  "author": "Spruce Systems Inc.",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/spruceid/siwe/issues"
+  },
+  "homepage": "https://github.com/spruceid/siwe#readme",
+  "dependencies": {
+    "passport-strategy": "^1.0.0",
+    "siwe": "^0.1.1"
+  }
+}
