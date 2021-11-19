@@ -7,6 +7,10 @@
         <script src="./bundle.js"></script>
         <script src="./utils.js"></script>
         <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' cdn-cors.ethers.io cdnjs.cloudflare.com; font-src 'self' unpkg.com; connect-src 'self' wss://*.walletconnect.org https://*.walletconnect.org https://*.infura.io; img-src 'self' data:; style-src 'self' 'unsafe-inline' unpkg.com;"
+        />
     </head>
 
     <body class="h-screen w-screen flex flex-col">
