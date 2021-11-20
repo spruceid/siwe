@@ -100,12 +100,12 @@ export class SiweMessage {
 	}
 
 	/**
-	 * This function can be used to retrieve an EIP-712 formated message for
+	 * This function can be used to retrieve an EIP-4361 formated message for
 	 * signature, although you can call it directly it's advised to use
 	 * [signMessage()] instead which will resolve to the correct method based
 	 * on the [type] attribute of this object, in case of other formats being
 	 * implemented.
-	 * @returns {string} EIP-712 formated message.
+	 * @returns {string} EIP-4361 formated message, ready for EIP-191 signing.
 	 */
 	toMessage(): string {
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
