@@ -3,13 +3,20 @@ import { ethers } from 'ethers';
 import Mousetrap from 'mousetrap';
 import { SignatureType, SiweMessage } from 'siwe';
 
+declare global {
+    interface Window {
+        ethereum: { request: (opt: { method: string }) => Promise<Array<string>> };
+        web3: unknown;
+    }
+}
+
 const enum Providers {
     METAMASK = 'metamask',
     WALLET_CONNECT = 'walletconnect',
 }
 
 //eslint-disable-next-line
-const metamask = (window as any).ethereum;
+const metamask = window.ethereum;
 let walletconnect: WalletConnect;
 
 let metamaskButton: HTMLButtonElement;
@@ -26,7 +33,7 @@ let unsaved: HTMLParagraphElement;
  */
 
 const signIn = async (connector: Providers) => {
-    let provider;
+    let provider: ethers.providers.Web3Provider;
 
     /**
      * Connects to the wallet and starts a etherjs provider.
@@ -56,7 +63,12 @@ const signIn = async (connector: Providers) => {
     /**
      * Try to resolve address ENS and updates the title accordingly.
      */
-    const ens = await provider.lookupAddress(address);
+    let ens: string;
+    try {
+        ens = await provider.lookupAddress(address);
+    } catch (error) {
+        console.error(error);
+    }
 
     updateTitle(ens ?? address);
 
@@ -121,7 +133,7 @@ const signOut = async () => {
 /**
  * Saves the current content of our notepad
  */
-const save = async (e?: Mousetrap.ExtendedKeyboardEvent) => {
+const save = async (e?: Mousetrap.ExtendedKeyboardEvent | MouseEvent) => {
     e?.preventDefault();
     const text = notepad.value;
     if (Buffer.byteLength(JSON.stringify({ text })) > 43610) {
