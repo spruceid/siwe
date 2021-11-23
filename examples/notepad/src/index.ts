@@ -45,21 +45,7 @@ const app = Express();
  */
 app.use(
     Helmet({
-        contentSecurityPolicy: {
-            directives: {
-                defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", 'cdn-cors.ethers.io', 'cdnjs.cloudflare.com'],
-                styleSrc: ["'self'", "'unsafe-inline'", 'unpkg.com'],
-                fontSrc: ["'self'", 'unpkg.com'],
-                imgSrc: ["'self'", 'data:'],
-                connectSrc: [
-                    "'self'",
-                    'wss://*.walletconnect.org',
-                    'https://*.walletconnect.org',
-                    'https://*.infura.io',
-                ],
-            },
-        },
+        contentSecurityPolicy: false,
     }),
 );
 app.use(Express.json({ limit: 43610 }));
