@@ -3,6 +3,7 @@
  */
 const PORT = 4361;
 
+import { randomStringForEntropy } from "@stablelib/random";
 import { config } from 'dotenv';
 import { providers } from 'ethers';
 import Express from 'express';
@@ -70,7 +71,7 @@ app.use(
 app.use(Express.static(Path.resolve(__dirname, '../public')));
 
 app.get('/api/nonce', async (req, res) => {
-    req.session.nonce = (Math.random() + 1).toString(36).substring(4);
+    req.session.nonce = randomStringForEntropy(96);
     req.session.save(() => res.status(200).send(req.session.nonce).end());
 });
 
