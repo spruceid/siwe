@@ -221,7 +221,7 @@ export class SiweMessage {
 					this.signature
 				);
 
-				if (addr !== this.address) {
+				if (addr.toLowerCase() !== this.address.toLowerCase()) {
 					try {
 						//EIP-1271
 						const isValidSignature =
