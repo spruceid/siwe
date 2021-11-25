@@ -11,18 +11,18 @@ export class ParsedMessage {
 	statement: string;
 	uri: string;
 	version: string;
+	chainId: string;
 	nonce: string;
 	issuedAt: string;
 	expirationTime: string | null;
 	notBefore: string | null;
 	requestId: string | null;
-	chainId: string | null;
 	resources: string[] | null;
 	match?: RegExpExecArray;
 
 	constructor(msg: string) {
 		const REGEX = new RegExp(
-			`^(?<domain>${DOMAIN})\\ wants\\ you\\ to\\ sign\\ in\\ with\\ your\\ Ethereum\\ account\\:\\n(?<address>${ADDRESS})\\n\\n((?<statement>[^\\n]+)\\n)?\\nURI\\:\\ (?<uri>${URI})\\nVersion\\:\\ (?<version>1)\\nNonce\\:\\ (?<nonce>[a-zA-Z0-9]{8})\\nIssued\\ At\\:\\ (?<issuedAt>${DATETIME})(\\nExpiration\\ Time\\:\\ (?<expirationTime>${DATETIME}))?(\\nNot\\ Before\\:\\ (?<notBefore>${DATETIME}))?(\\nRequest\\ ID\\:\\ (?<requestId>${REQUESTID}))?(\\nChain\\ ID\\:\\ (?<chainId>[0-9]+))?(\\nResources\\:(?<resources>(\\n-\\ ${URI})+))?$`,
+			`^(?<domain>${DOMAIN})\\ wants\\ you\\ to\\ sign\\ in\\ with\\ your\\ Ethereum\\ account\\:\\n(?<address>${ADDRESS})\\n\\n((?<statement>[^\\n]+)\\n)?\\nURI\\:\\ (?<uri>${URI})\\nVersion\\:\\ (?<version>1)\\nChain\\ ID\\:\\ (?<chainId>[0-9]+)\\nNonce\\:\\ (?<nonce>[a-zA-Z0-9]{8})\\nIssued\\ At\\:\\ (?<issuedAt>${DATETIME})(\\nExpiration\\ Time\\:\\ (?<expirationTime>${DATETIME}))?(\\nNot\\ Before\\:\\ (?<notBefore>${DATETIME}))?(\\nRequest\\ ID\\:\\ (?<requestId>${REQUESTID}))?(\\nResources\\:(?<resources>(\\n-\\ ${URI})+))?$`,
 			'g'
 		);
 
