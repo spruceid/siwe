@@ -37,11 +37,14 @@ export class SiweMessage {
 	uri: string;
 	/**Current version of the message. */
 	version: string;
+	/**EIP-155 Chain ID to which the session is bound, and the network where
+	 * Contract Accounts must be resolved. */
+	chainId: string;
 	/**Randomized token used to prevent replay attacks, at least 8 alphanumeric
 	 * characters. */
-	nonce?: string;
+	nonce: string;
 	/**ISO 8601 datetime string of the current time. */
-	issuedAt?: string;
+	issuedAt: string;
 	/**ISO 8601 datetime string that, if present, indicates when the signed
 	 * authentication message is no longer valid. */
 	expirationTime?: string;
@@ -51,9 +54,6 @@ export class SiweMessage {
 	/**System-specific identifier that may be used to uniquely refer to the
 	 * sign-in request. */
 	requestId?: string;
-	/**EIP-155 Chain ID to which the session is bound, and the network where
-	 * Contract Accounts must be resolved. */
-	chainId?: string;
 	/**List of information or references to information the user wishes to have
 	 * resolved as part of authentication by the relying party. They are
 	 * expressed as RFC 3986 URIs separated by `\n- `. */
@@ -117,9 +117,11 @@ export class SiweMessage {
 			this.nonce = (Math.random() + 1).toString(36).substring(4);
 		}
 
+		const chainField = `Chain ID: ` + this.chainId || "1";
+
 		const nonceField = `Nonce: ${this.nonce}`;
 
-		const suffixArray = [uriField, versionField, nonceField];
+		const suffixArray = [uriField, versionField, chainField, nonceField];
 
 		if (this.issuedAt) {
 			Date.parse(this.issuedAt);
@@ -141,10 +143,6 @@ export class SiweMessage {
 
 		if (this.requestId) {
 			suffixArray.push(`Request ID: ${this.requestId}`);
-		}
-
-		if (this.chainId) {
-			suffixArray.push(`Chain ID: ${this.chainId}`);
 		}
 
 		if (this.resources) {
@@ -223,7 +221,7 @@ export class SiweMessage {
 					this.signature
 				);
 
-				if (addr !== this.address) {
+				if (addr.toLowerCase() !== this.address.toLowerCase()) {
 					try {
 						//EIP-1271
 						const isValidSignature =
