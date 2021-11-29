@@ -1,4 +1,4 @@
-const DOMAIN = '(([a-zA-Z]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}';
+const DOMAIN = '([^/?#]*)';
 const ADDRESS = '0x[a-zA-Z0-9]{40}';
 const URI = '(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?';
 const DATETIME =

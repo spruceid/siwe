@@ -18,7 +18,7 @@ sign-in-with-ethereum =
     [ LF %s"Resources:"
     resources ]
 
-domain = dnsauthority
+domain = authority
 
 address = "0x" 40*40HEXDIG
     ; Must also conform to captilization
@@ -108,13 +108,6 @@ reserved      = gen-delims / sub-delims
 gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
 sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
               / "*" / "+" / "," / ";" / "="
-
-; ------------------------------------------------------------------------------
-; RFC 4501
-
-dnsauthority    = host [ ":" port ]
-                             ; See RFC 3986 for the
-                             ; definition of "host" and "port".
 
 ; ------------------------------------------------------------------------------
 ; RFC 3339
