@@ -1,3 +1,5 @@
+
+import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
 import { ParsedMessage as ABNFParsedMessage } from './abnf';
@@ -114,7 +116,7 @@ export class SiweMessage {
 		const versionField = `Version: ${this.version}`;
 
 		if (!this.nonce) {
-			this.nonce = (Math.random() + 1).toString(36).substring(4);
+			this.nonce = generateNonce();
 		}
 
 		const chainField = `Chain ID: ` + this.chainId || "1";
@@ -281,3 +283,18 @@ export const checkContractWalletSignature = async (
 		throw e;
 	}
 };
+
+/**
+ * This method leverages a native CSPRNG with support for both browser and Node.js
+ * environments in order generate a cryptographically secure nonce for use in the
+ * SiweMessage in order to prevent replay attacks.
+ * 
+ * 96 bits has been chosen as a number to sufficiently balance size and security considerations
+ * relative to the lifespan of it's usage.
+ * 
+ * @returns cryptographically generated random nonce with 96 bits of entropy encoded with
+ * an alphanumeric character set.
+ */
+export const generateNonce = (): string => {
+	return randomStringForEntropy(96);
+}

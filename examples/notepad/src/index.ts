@@ -12,7 +12,7 @@ import Helmet from 'helmet';
 import Morgan from 'morgan';
 import Path from 'path';
 import FileStore from 'session-file-store';
-import { ErrorTypes, SiweMessage } from 'siwe';
+import { ErrorTypes, SiweMessage, generateNonce } from 'siwe';
 const FileStoreStore = FileStore(Session);
 
 config();
@@ -70,7 +70,7 @@ app.use(
 app.use(Express.static(Path.resolve(__dirname, '../public')));
 
 app.get('/api/nonce', async (req, res) => {
-    req.session.nonce = (Math.random() + 1).toString(36).substring(4);
+    req.session.nonce = generateNonce();
     req.session.save(() => res.status(200).send(req.session.nonce).end());
 });
 
