@@ -7,8 +7,8 @@ All of the assets in this directory are being released under a CC0 1.0 license (
 
 For those incorporating Sign-In with Ethereum into their project and require a button for users, we have included two as part of this asset set, covering both a light and dark background:
 
-<img src="SIWE_Button_Light_BG.png">
-<img src="SIWE_Button_Dark_BG.png">
+<img width="200px" src="SIWE_Button_Light_BG.png">
+<img width="200px" src="SIWE_Button_Dark_BG.png">
 
 These buttons have also been made into Figma components and can be found [here](https://www.figma.com/community/file/1047625951123719630).
 
