@@ -1,9 +1,21 @@
-const DOMAIN = '([^/?#]*)';
-const ADDRESS = '0x[a-zA-Z0-9]{40}';
-const URI = '(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?';
-const DATETIME =
-	'([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\\.[0-9]+)?(([Zz])|([\\+|\\-]([01][0-9]|2[0-3]):[0-5][0-9]))';
-const REQUESTID = "[-._~!$&'()*+,;=:@%a-zA-Z0-9]*";
+const DOMAIN =
+	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
+const ADDRESS = '\\n(?<address>0x[a-zA-Z0-9]{40})\\n\\n';
+const STATEMENT = '((?<statement>[^\\n]+)\\n)?';
+const URI = '(([^:?#]+):)?(([^?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))';
+const URI_LINE = `\\nURI: (?<uri>${URI}?)`;
+const VERSION = '\\nVersion: (?<version>1)';
+const CHAIN_ID = '\\nChain ID: (?<chainId>[0-9]+)';
+const NONCE = '\\nNonce: (?<nonce>[a-zA-Z0-9]{8,})';
+const DATETIME = `([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([\+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))`;
+const ISSUED_AT = `\\nIssued At: (?<issuedAt>${DATETIME})`;
+const EXPIRATION_TIME = `(\\nExpiration Time: (?<expirationTime>${DATETIME}))?`;
+const NOT_BEFORE = `(\\nNot Before: (?<notBefore>${DATETIME}))?`;
+const REQUEST_ID =
+	"(\\nRequest ID: (?<requestId>[-._~!$&'()*+,;=:@%a-zA-Z0-9]*))?";
+const RESOURCES = `(\\nResources:(?<resources>(\\n- ${URI}?)+))?`;
+
+const MESSAGE = `^${DOMAIN}${ADDRESS}${STATEMENT}${URI_LINE}${VERSION}${CHAIN_ID}${NONCE}${ISSUED_AT}${EXPIRATION_TIME}${NOT_BEFORE}${REQUEST_ID}${RESOURCES}$`;
 
 export class ParsedMessage {
 	domain: string;
@@ -21,10 +33,7 @@ export class ParsedMessage {
 	match?: RegExpExecArray;
 
 	constructor(msg: string) {
-		const REGEX = new RegExp(
-			`^(?<domain>${DOMAIN})\\ wants\\ you\\ to\\ sign\\ in\\ with\\ your\\ Ethereum\\ account\\:\\n(?<address>${ADDRESS})\\n\\n((?<statement>[^\\n]+)\\n)?\\nURI\\:\\ (?<uri>${URI})\\nVersion\\:\\ (?<version>1)\\nChain\\ ID\\:\\ (?<chainId>[0-9]+)\\nNonce\\:\\ (?<nonce>[a-zA-Z0-9]{8})\\nIssued\\ At\\:\\ (?<issuedAt>${DATETIME})(\\nExpiration\\ Time\\:\\ (?<expirationTime>${DATETIME}))?(\\nNot\\ Before\\:\\ (?<notBefore>${DATETIME}))?(\\nRequest\\ ID\\:\\ (?<requestId>${REQUESTID}))?(\\nResources\\:(?<resources>(\\n-\\ ${URI})+))?$`,
-			'g'
-		);
+		const REGEX = new RegExp(MESSAGE, 'g');
 
 		let match = REGEX.exec(msg);
 		if (!match) {
