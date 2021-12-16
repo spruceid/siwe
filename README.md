@@ -1,3 +1,7 @@
+---
+SPDX-License-Identifier: Apache License 2.0 OR MIT
+---
+
 ![Sign-In with Ethereum logo](https://login.xyz/favicon.png "Sign-In with Ethereum logo")
 
 Sign-In with Ethereum describes how Ethereum accounts authenticate with 
