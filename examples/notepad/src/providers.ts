@@ -21,6 +21,7 @@ let walletconnect: WalletConnect;
 
 let metamaskButton: HTMLButtonElement;
 let walletConnectButton: HTMLButtonElement;
+let oidcConnectButton: HTMLButtonElement;
 let toggleSize: HTMLButtonElement;
 let closeButton: HTMLButtonElement;
 let disconnectButton: HTMLDivElement;
@@ -121,6 +122,10 @@ const signIn = async (connector: Providers) => {
     });
 };
 
+const signInOIDC = async () => {
+    window.location.replace('/oidc/sign_in');
+};
+
 const signOut = async () => {
     updateTitle('Untitled');
     updateNotepad('');
@@ -149,10 +154,12 @@ const save = async (e?: Mousetrap.ExtendedKeyboardEvent | MouseEvent) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    let searchParams = new URLSearchParams(window.location.href);
+    let access_token = searchParams.get('access_token');
     /**
      * Try to fetch user information and updates the state accordingly
      */
-    fetch('/api/me', { credentials: 'include' }).then((res) => {
+    fetch('/api/me', { credentials: 'include', headers: { access_token } }).then((res) => {
         if (res.status === 200) {
             res.json().then(({ text, address, ens }) => {
                 connectedState(text, address, ens);
@@ -170,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     metamaskButton = document.getElementById('metamask') as HTMLButtonElement;
     walletConnectButton = document.getElementById('walletconnect') as HTMLButtonElement;
+    oidcConnectButton = document.getElementById('oidc') as HTMLButtonElement;
     disconnectButton = document.getElementById('disconnectButton') as HTMLDivElement;
     toggleSize = document.getElementById('toggleSize') as HTMLButtonElement;
     saveButton = document.getElementById('saveButton') as HTMLDivElement;
@@ -187,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     disconnectButton.addEventListener('click', signOut);
     metamaskButton.addEventListener('click', () => signIn(Providers.METAMASK));
     walletConnectButton.addEventListener('click', () => signIn(Providers.WALLET_CONNECT));
+    oidcConnectButton.addEventListener('click', () => signInOIDC());
     saveButton.addEventListener('click', save);
     notepad.addEventListener('input', enableSave);
 });
@@ -213,6 +222,7 @@ const connectedState = (text: string, address: string, ens: string) => {
      */
     metamaskButton.classList.add('hidden');
     walletConnectButton.classList.add('hidden');
+    oidcConnectButton.classList.add('hidden');
     closeButton.addEventListener('click', signOut);
     closeButton.removeAttribute('disabled');
     saveButton.classList.remove('hidden');
@@ -229,6 +239,7 @@ const disconnectedState = () => {
         metamaskButton.classList.remove('hidden');
     }
     walletConnectButton.classList.remove('hidden');
+    oidcConnectButton.classList.remove('hidden');
     closeButton.removeEventListener('click', signOut);
     closeButton.setAttribute('disabled', 'disabled');
     saveButton.classList.add('hidden');

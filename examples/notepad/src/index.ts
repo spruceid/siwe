@@ -12,8 +12,26 @@ import Helmet from 'helmet';
 import Morgan from 'morgan';
 import Path from 'path';
 import FileStore from 'session-file-store';
+import { Issuer, generators } from 'openid-client';
 import { ErrorTypes, SiweMessage, generateNonce } from 'siwe';
 const FileStoreStore = FileStore(Session);
+
+const get_oidc_client = async () => {
+    const siweOidcIssuer = await Issuer.discover('https://siwe-oidc.spruceid.xyz');
+    return new siweOidcIssuer.Client({
+        client_id: '0a74e3d6-e63d-480e-bd60-601ae03b392f',
+        client_secret: '434f1c4c-c8d1-4e82-868d-a359f0fb1b84',
+        redirect_uris: [`http://localhost:${PORT}/oidc/cb`],
+        response_types: ['code'],
+        // id_token_signed_response_alg (default "RS256")
+        // token_endpoint_auth_method (default "client_secret_basic")
+    });
+}
+let state = "";
+let nonce = "";
+let access_token = "";
+let address = "";
+
 
 config();
 const PROD = process.env.ENVIRONMENT === 'production';
@@ -75,14 +93,20 @@ app.get('/api/nonce', async (req, res) => {
 });
 
 app.get('/api/me', async (req, res) => {
-    if (!req.session.siwe) {
+    if (!req.session.siwe && access_token == "") {
         res.status(401).json({ message: 'You have to first sign_in' });
         return;
     }
+    let address_;
+    if (req.session.siwe) {
+        address_ = req.session.siwe.address;
+    } else {
+        address_ = address;
+    }
     res.status(200)
         .json({
-            text: getText(req.session.siwe.address),
-            address: req.session.siwe.address,
+            text: getText(address_),
+            address: address_,
             ens: req.session.ens,
         })
         .end();
@@ -159,11 +183,49 @@ app.post('/api/sign_in', async (req, res) => {
     }
 });
 
+app.get('/oidc/sign_in', async (req, res) => {
+    const client = await get_oidc_client();
+    state = generators.state();
+    nonce = generators.nonce();
+    // const code_verifier = generators.codeVerifier();
+    // const code_challenge = generators.codeChallenge(code_verifier);
+    const url = client.authorizationUrl({
+        scope: 'openid',
+        // resource: 'https://my.api.example.com/resource/32178',
+        // code_challenge,
+        // code_challenge_method: 'S256',
+        state,
+        nonce,
+    });
+    res.redirect(url);
+});
+
+app.get('/oidc/cb', async (req, res) => {
+    const client = await get_oidc_client();
+    const params = client.callbackParams(req);
+    await client.callback('https://client.example.com/callback', params, { state, nonce }) // , { code_verifier })
+        .then(function(tokenSet) {
+            const claims = tokenSet.claims();
+            console.log('received and validated tokens %j', tokenSet);
+            console.log('validated ID Token claims %j', claims);
+            console.log('access token %j', tokenSet.access_token);
+            access_token = tokenSet.access_token;
+            address = claims.sub;
+        });
+    res.redirect(`/?access_token=${access_token}`);
+    // client.userinfo(access_token)
+    //     .then(function(userinfo) {
+    //         console.log('userinfo %j', userinfo);
+    //     });
+});
+
 app.post('/api/sign_out', async (req, res) => {
-    if (!req.session.siwe) {
+    if (!req.session.siwe && access_token === "") {
         res.status(401).json({ message: 'You have to first sign_in' });
         return;
     }
+    access_token = "";
+    address = "";
 
     req.session.destroy(() => {
         res.status(205).send();
@@ -171,7 +233,7 @@ app.post('/api/sign_out', async (req, res) => {
 });
 
 app.put('/api/save', async (req, res) => {
-    if (!req.session.siwe) {
+    if (!req.session.siwe && access_token == "") {
         res.status(401).json({ message: 'You have to first sign_in' });
         return;
     }
@@ -183,7 +245,13 @@ app.put('/api/save', async (req, res) => {
         }
     });
 
-    updateText(req.body.text, req.session.siwe.address);
+    let address_;
+    if (req.session.siwe) {
+        address_ = req.session.siwe.address;
+    } else {
+        address_ = address;
+    }
+    updateText(req.body.text, address_);
     res.status(204).send().end();
 });
 
