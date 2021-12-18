@@ -1,7 +1,3 @@
----
-SPDX-License-Identifier: Apache License 2.0 OR MIT
----
-
 ![Sign-In with Ethereum logo](https://login.xyz/favicon.png "Sign-In with Ethereum logo")
 
 Sign-In with Ethereum describes how Ethereum accounts authenticate with 
@@ -53,4 +49,3 @@ EIPs, and fits within product roadmaps.
 
 ## Specification
 Specification can be found at the [EIP-4361 GitHub page](https://github.com/ethereum/EIPs/blob/9a9c5d0abdaf5ce5c5dd6dc88c6d8db1b130e95b/EIPS/eip-4361.md).
-
