@@ -48,4 +48,4 @@ user interviews with a focus on currently-in-production uses, related prior
 EIPs, and fits within product roadmaps.
 
 ## Specification
-Specification can be found at the [EIP-4361 GitHub page](https://github.com/ethereum/EIPs/blob/9a9c5d0abdaf5ce5c5dd6dc88c6d8db1b130e95b/EIPS/eip-4361.md).
+Specification can be found at [EIP-4361](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4361.md).
