@@ -1,4 +1,4 @@
-import { apgApi, apgLib } from 'apg-js';
+import { apgApi, apgLib } from 'apg-js/dist/apg-api-bundle.js';
 
 const GRAMMAR = `
 sign-in-with-ethereum =
