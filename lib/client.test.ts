@@ -26,7 +26,7 @@ describe(`Round Trip`, () => {
 	let wallet = Wallet.createRandom();
 	test.concurrent.each(Object.entries(parsingPositive))('Generates a Successfully Verifying message: %s', async (_, test) => {
 		const msg = new SiweMessage(test.fields);
-		msg.address = wallet.address.toLowerCase();
+		msg.address = wallet.address;
 		msg.signature = await wallet.signMessage(msg.toMessage());
 		await expect(msg.validate()).resolves.not.toThrow();
 	});

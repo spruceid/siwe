@@ -223,7 +223,7 @@ export class SiweMessage {
 					this.signature
 				);
 
-				if (addr.toLowerCase() !== this.address.toLowerCase()) {
+				if (addr !== this.address) {
 					try {
 						//EIP-1271
 						const isValidSignature =
@@ -240,11 +240,18 @@ export class SiweMessage {
 				const parsedMessage = new SiweMessage(message);
 
 				if (
-					parsedMessage.expirationTime &&
-					new Date().getTime() >=
-					new Date(parsedMessage.expirationTime).getTime()
+					parsedMessage.expirationTime
 				) {
-					throw new Error(ErrorTypes.EXPIRED_MESSAGE);
+					const exp = new Date(parsedMessage.expirationTime).getTime();
+					if (isNaN(exp)) {
+						throw new Error(`${ErrorTypes.MALFORMED_SESSION} invalid expiration date.`)
+					}
+					if (
+						new Date().getTime() >=
+						exp
+					) {
+						throw new Error(ErrorTypes.EXPIRED_MESSAGE);
+					}
 				}
 				resolve(parsedMessage);
 			} catch (e) {
