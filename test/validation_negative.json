@@ -1,38 +1,50 @@
 {
     "expired message": {
         "domain": "login.xyz",
-        "address": "0xe2f03cb7a54ddd886da9b0d227bfcb2d61429699",
+        "address": "0x6Da01670d8fc844e736095918bbE11fE8D564163",
         "statement": "Sign-In With Ethereum Example Statement",
         "uri": "https://login.xyz",
         "version": "1",
         "nonce": "lx2nx4so",
-        "issuedAt": "2021-11-12T17:39:37.051Z",
+        "issuedAt": "2022-01-05T14:27:30.883Z",
         "chainId": "1",
-        "expirationTime": "2021-11-12T17:40:37.047Z",
-        "signature": "0xf53178acf8bd56e50a2f0d40e8021de14f4c1190b93b2e13020566ad01c5a7ba6a215949e16cb8178ea745a15c9034f440d47df3af8a50c8aa9c43f326b883281c"
+        "expirationTime": "2021-01-05T00:00:00Z",
+        "signature": "0x5e6834e82ec12532e3954882610b26ef83c16d25a38caccc6a009a488b6ad1237318ec6cd2fd83c19f49d0cb0848c70e9a5a4bf550ce5d69bc1b023b9f6b7f601b"
     },
     "malformed signature": {
         "domain": "login.xyz",
-        "address": "0xe2f03cb7a54ddd886da9b0d227bfcb2d61429699",
+        "address": "0x6Da01670d8fc844e736095918bbE11fE8D564163",
         "statement": "Sign-In With Ethereum Example Statement",
         "uri": "https://login.xyz",
         "version": "1",
-        "nonce": "lx2nx4so",
-        "issuedAt": "2021-11-12T17:39:37.051Z",
+        "nonce": "rmplqh1gf",
+        "issuedAt": "2022-01-05T14:31:43.954Z",
         "chainId": "1",
-        "expirationTime": "2021-11-12T17:40:37.047Z",
-        "signature": "0xf53178af8bd56e50a2f0d40e8021de14f4c1190b93b2e13020566ad01c5a7ba6a215949e16cb8178ea745a15c9034f440d47df3af8a50c8aa9c43f326b883281c"
+        "expirationTime": "2022-01-07T14:31:43.952Z",
+        "signature": "0xf2e8420fc1b722bf4941f5a0464f98172a758ceda5039f622e425fb69fd19b20e444bba7c9a8a8d7e2b5e453553efe7c9460be5d211abe473fc146d51bb04d0cb1b"
     },
     "wrong signature": {
         "domain": "login.xyz",
-        "address": "0xe2f03cb7a54ddd886da9b0d227bfcb2d61429699",
+        "address": "0x6Da01670d8fc844e736095918bbE11fE8D564163",
         "statement": "Sign-In With Ethereum Example Statement",
         "uri": "https://login.xyz",
         "version": "1",
-        "nonce": "lx2nx4so",
-        "issuedAt": "2021-11-12T17:39:37.051Z",
+        "nonce": "rmplqh1gf",
+        "issuedAt": "2022-01-05T14:31:43.954Z",
         "chainId": "1",
-        "expirationTime": "2021-11-12T17:40:37.047Z",
-        "signature": "0x795110331a07a4d475419fbdb346feb4c0579dcc8228989964474e07d98dbf425f38776cd6ca037f58288acc7b15e720c9cecac988479177fb70592f2391aaff1b"
+        "expirationTime": "2022-01-07T14:31:43.952Z",
+        "signature": "0x31df81dc02344c9156e6f71da46e2db624b38f8f806290d670d46492b834b2e7575cbce9f48169356cfb577b910d8e30732fcf23c1ac0021d08b945ed7ee118e1b"
+    },
+    "invalid expiration time": {
+        "domain": "login.xyz",
+        "address": "0x6Da01670d8fc844e736095918bbE11fE8D564163",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "o8zxjgmp",
+        "issuedAt": "2022-01-05T14:50:55.688Z",
+        "chainId": "1",
+        "expirationTime": "2020-02-32T00:00:00.000Z",
+        "signature": "0x8b457a36dad94cb9c07cfcad08664c988d795b35762f1316438b9590c27f4a5e028e923066a49908c88a1e2fba299c1e6d6d8206181339343e0ef53be01d078f1c"
     }
 }
