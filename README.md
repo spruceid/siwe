@@ -48,4 +48,10 @@ user interviews with a focus on currently-in-production uses, related prior
 EIPs, and fits within product roadmaps.
 
 ## Specification
-Specification can be found at [EIP-4361](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4361.md).
+Specification can be found [here](https://eips.ethereum.org/EIPS/eip-4361).
+
+## Disclaimer 
+
+Our TypeScript library for Sign-In with Ethereum has not yet undergone a formal security 
+audit. We welcome continued feedback on the usability, architecture, and security 
+of this implementation.
