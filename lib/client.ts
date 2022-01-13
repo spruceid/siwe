@@ -1,5 +1,4 @@
 
-import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
 import { ParsedMessage as ABNFParsedMessage } from './abnf';
@@ -291,17 +290,70 @@ export const checkContractWalletSignature = async (
 	}
 };
 
+// Get ourselves a cryptographically secure random number generator
+// Largely inspired by this gist which brings together many of the 
+// disparate concerns in the space: https://gist.github.com/dchest/751fd00ee417c947c252
+const getRandomBytes = (
+	(typeof self !== 'undefined' && (self.crypto || self.msCrypto))
+	? function() { // Browsers
+		const crypto = (self.crypto || self.msCrypto), QUOTA = 65536;
+		return function(n) {
+			const a = new Uint8Array(n);
+			for (let i = 0; i < n; i += QUOTA) {
+				crypto.getRandomValues(a.subarray(i, i + Math.min(n - i, QUOTA)));
+			}
+			return a;
+		};
+	}
+	: function() { // Node
+		return require("crypto").randomBytes;
+	}
+)();
+
+const makeGenerator = function(charset) {
+	if (charset.length < 2) {
+		throw new Error('charset must have at least 2 characters');
+	}
+
+	const generate = function(length) {
+		if (!length) return generate.entropy(128);
+		let out = '';
+		const charsLen = charset.length;
+		const maxByte = 256 - (256 % charsLen);
+		while (length > 0) {
+			let buf = getRandomBytes(Math.ceil(length * 256 / maxByte));
+			for (var i = 0; i < buf.length && length > 0; i++) {
+				let randomByte = buf[i];
+				if (randomByte < maxByte) {
+					out += charset.charAt(randomByte % charsLen);
+					length--;
+				}
+			}
+		}
+		return out;
+	};
+
+	generate.entropy = function(bits) { 
+		return generate(Math.ceil(bits / (Math.log(charset.length) / Math.LN2)));
+	};
+
+	generate.charset = charset;
+
+	return generate;
+};
+
+const numbers = '0123456789', letters = 'abcdefghijklmnopqrstuvwxyz';
+const alphanumerics = numbers + letters + letters.toUpperCase();
+const alphanumGenerator = makeGenerator(alphanumerics);
+
 /**
  * This method leverages a native CSPRNG with support for both browser and Node.js
  * environments in order generate a cryptographically secure nonce for use in the
  * SiweMessage in order to prevent replay attacks.
  * 
- * 96 bits has been chosen as a number to sufficiently balance size and security considerations
- * relative to the lifespan of it's usage.
- * 
- * @returns cryptographically generated random nonce with 96 bits of entropy encoded with
+ * @returns cryptographically generated random nonce with over 64 bits of entropy encoded with
  * an alphanumeric character set.
  */
 export const generateNonce = (): string => {
-	return randomStringForEntropy(96);
+	return alphanumGenerator(11);
 }
