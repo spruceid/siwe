@@ -12,25 +12,30 @@ import Helmet from 'helmet';
 import Morgan from 'morgan';
 import Path from 'path';
 import FileStore from 'session-file-store';
-import { Issuer, generators } from 'openid-client';
+import { Issuer, generators, BaseClient, TokenSet } from 'openid-client';
 import { ErrorTypes, SiweMessage, generateNonce } from 'siwe';
 const FileStoreStore = FileStore(Session);
 
+let oidc_client: BaseClient = null;
+
 const get_oidc_client = async () => {
-    const siweOidcIssuer = await Issuer.discover('https://siwe-oidc.spruceid.xyz');
-    return new siweOidcIssuer.Client({
-        client_id: '0a74e3d6-e63d-480e-bd60-601ae03b392f',
-        client_secret: '434f1c4c-c8d1-4e82-868d-a359f0fb1b84',
-        redirect_uris: [`http://localhost:${PORT}/oidc/cb`],
-        response_types: ['code'],
-        // id_token_signed_response_alg (default "RS256")
-        // token_endpoint_auth_method (default "client_secret_basic")
-    });
+    if (oidc_client === null) {
+        const issuer = await Issuer.discover('https://oidc.login.xyz');
+        // @ts-ignore
+        oidc_client = await issuer.Client.register({
+            redirect_uris: [`http://localhost:${PORT}/oidc/cb`],
+            response_types: ['code'],
+            // id_token_signed_response_alg (default "RS256")
+            // token_endpoint_auth_method (default "client_secret_basic")
+        });
+    }
+    return oidc_client;
 }
 let state = "";
 let nonce = "";
 let access_token = "";
 let address = "";
+const code_verifier = generators.codeVerifier();
 
 
 config();
@@ -187,13 +192,12 @@ app.get('/oidc/sign_in', async (req, res) => {
     const client = await get_oidc_client();
     state = generators.state();
     nonce = generators.nonce();
-    // const code_verifier = generators.codeVerifier();
-    // const code_challenge = generators.codeChallenge(code_verifier);
+    const code_challenge = generators.codeChallenge(code_verifier);
     const url = client.authorizationUrl({
         scope: 'openid',
         // resource: 'https://my.api.example.com/resource/32178',
-        // code_challenge,
-        // code_challenge_method: 'S256',
+        code_challenge,
+        code_challenge_method: 'S256',
         state,
         nonce,
     });
@@ -203,8 +207,8 @@ app.get('/oidc/sign_in', async (req, res) => {
 app.get('/oidc/cb', async (req, res) => {
     const client = await get_oidc_client();
     const params = client.callbackParams(req);
-    await client.callback('https://client.example.com/callback', params, { state, nonce }) // , { code_verifier })
-        .then(function(tokenSet) {
+    await client.callback(`http://localhost:${PORT}/oidc/cb`, params, { state, nonce, code_verifier })
+        .then(function(tokenSet: TokenSet) {
             const claims = tokenSet.claims();
             console.log('received and validated tokens %j', tokenSet);
             console.log('validated ID Token claims %j', claims);
