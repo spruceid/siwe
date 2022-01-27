@@ -20,7 +20,7 @@ export enum ErrorTypes {
  * Possible signature types that this library supports.
  *
  * This enum will be removed in future releases. And signature type will be
- * infered from version.
+ * inferred from version.
  */
 export enum SignatureType {
 	/**EIP-191 signature scheme */
