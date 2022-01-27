@@ -12,7 +12,7 @@ import Helmet from 'helmet';
 import Morgan from 'morgan';
 import Path from 'path';
 import FileStore from 'session-file-store';
-import { ErrorTypes, SiweMessage, generateNonce } from 'siwe';
+import { ErrorTypes, generateNonce, SiweMessage } from 'siwe';
 const FileStoreStore = FileStore(Session);
 
 config();
@@ -90,7 +90,7 @@ app.get('/api/me', async (req, res) => {
 
 app.post('/api/sign_in', async (req, res) => {
     try {
-        const { ens } = req.body;
+        const { ens, signature } = req.body;
         if (!req.body.message) {
             res.status(422).json({ message: 'Expected signMessage object as body.' });
             return;
@@ -114,7 +114,7 @@ app.post('/api/sign_in', async (req, res) => {
 
         await infuraProvider.ready;
 
-        const fields: SiweMessage = await message.validate(infuraProvider);
+        const fields: SiweMessage = await message.validate(signature, infuraProvider);
 
         if (fields.nonce !== req.session.nonce) {
             res.status(422).json({
