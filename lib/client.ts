@@ -1,4 +1,3 @@
-
 import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
@@ -17,8 +16,11 @@ export enum ErrorTypes {
 	MALFORMED_SESSION = 'Malformed session.',
 }
 
-/**
+/**@deprecated
  * Possible signature types that this library supports.
+ *
+ * This enum will be removed in future releases. And signature type will be
+ * inferred from version.
  */
 export enum SignatureType {
 	/**EIP-191 signature scheme */
@@ -60,9 +62,19 @@ export class SiweMessage {
 	 * resolved as part of authentication by the relying party. They are
 	 * expressed as RFC 3986 URIs separated by `\n- `. */
 	resources?: Array<string>;
-	/**Signature of the message signed by the wallet. */
+	/**@deprecated
+	 * Signature of the message signed by the wallet.
+	 *
+	 * This field will be removed in future releases, an additional parameter
+	 * was added to the validate function were the signature goes to validate
+	 * the message.
+	 */
 	signature?: string;
-	/**Type of sign message to be generated. */
+	/**@deprecated Type of sign message to be generated.
+	 *
+	 * This field will be removed in future releases and will rely on the
+	 * message version
+	 */
 	type?: SignatureType;
 
 	/**
@@ -119,7 +131,7 @@ export class SiweMessage {
 			this.nonce = generateNonce();
 		}
 
-		const chainField = `Chain ID: ` + this.chainId || "1";
+		const chainField = `Chain ID: ` + this.chainId || '1';
 
 		const nonceField = `Nonce: ${this.nonce}`;
 
@@ -164,16 +176,33 @@ export class SiweMessage {
 		return [prefix, suffix].join('\n\n');
 	}
 
-	/**
+	/** @deprecated
+	 * signMessage method is deprecated, use prepareMessage instead.
+	 *
 	 * This method parses all the fields in the object and creates a sign
 	 * message according with the type defined.
 	 * @returns {string} Returns a message ready to be signed according with the
 	 * type defined in the object.
 	 */
 	signMessage(): string {
+		console &&
+			console.warn &&
+			console.warn(
+				'signMessage method is deprecated, use prepareMessage instead.'
+			);
+		return this.prepareMessage();
+	}
+
+	/**
+	 * This method parses all the fields in the object and creates a sign
+	 * message according with the type defined.
+	 * @returns {string} Returns a message ready to be signed according with the
+	 * type defined in the object.
+	 */
+	prepareMessage(): string {
 		let message: string;
-		switch (this.type) {
-			case SignatureType.PERSONAL_SIGNATURE: {
+		switch (this.version) {
+			case '1': {
 				message = this.toMessage();
 				break;
 			}
@@ -195,17 +224,18 @@ export class SiweMessage {
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
 	async validate(
+		signature: string = this.signature,
 		provider?: ethers.providers.Provider | any
 	): Promise<SiweMessage> {
 		return new Promise<SiweMessage>(async (resolve, reject) => {
-			const message = this.signMessage();
+			const message = this.prepareMessage();
 			try {
 				let missing: Array<string> = [];
 				if (!message) {
 					missing.push('`message`');
 				}
 
-				if (!this.signature) {
+				if (!signature) {
 					missing.push('`signature`');
 				}
 				if (!this.address) {
@@ -213,15 +243,13 @@ export class SiweMessage {
 				}
 				if (missing.length > 0) {
 					throw new Error(
-						`${ErrorTypes.MALFORMED_SESSION
+						`${
+							ErrorTypes.MALFORMED_SESSION
 						} missing: ${missing.join(', ')}.`
 					);
 				}
 
-				const addr = ethers.utils.verifyMessage(
-					message,
-					this.signature
-				);
+				const addr = ethers.utils.verifyMessage(message, signature);
 
 				if (addr !== this.address) {
 					try {
@@ -239,17 +267,16 @@ export class SiweMessage {
 				}
 				const parsedMessage = new SiweMessage(message);
 
-				if (
-					parsedMessage.expirationTime
-				) {
-					const exp = new Date(parsedMessage.expirationTime).getTime();
+				if (parsedMessage.expirationTime) {
+					const exp = new Date(
+						parsedMessage.expirationTime
+					).getTime();
 					if (isNaN(exp)) {
-						throw new Error(`${ErrorTypes.MALFORMED_SESSION} invalid expiration date.`)
+						throw new Error(
+							`${ErrorTypes.MALFORMED_SESSION} invalid expiration date.`
+						);
 					}
-					if (
-						new Date().getTime() >=
-						exp
-					) {
+					if (new Date().getTime() >= exp) {
 						throw new Error(ErrorTypes.EXPIRED_MESSAGE);
 					}
 				}
@@ -295,13 +322,13 @@ export const checkContractWalletSignature = async (
  * This method leverages a native CSPRNG with support for both browser and Node.js
  * environments in order generate a cryptographically secure nonce for use in the
  * SiweMessage in order to prevent replay attacks.
- * 
+ *
  * 96 bits has been chosen as a number to sufficiently balance size and security considerations
  * relative to the lifespan of it's usage.
- * 
+ *
  * @returns cryptographically generated random nonce with 96 bits of entropy encoded with
  * an alphanumeric character set.
  */
 export const generateNonce = (): string => {
 	return randomStringForEntropy(96);
-}
+};

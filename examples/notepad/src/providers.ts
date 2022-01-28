@@ -1,7 +1,7 @@
 import WalletConnect from '@walletconnect/web3-provider';
 import { ethers } from 'ethers';
 import Mousetrap from 'mousetrap';
-import { SignatureType, SiweMessage } from 'siwe';
+import { SiweMessage } from 'siwe';
 
 declare global {
     interface Window {
@@ -88,15 +88,13 @@ const signIn = async (connector: Providers) => {
         uri: document.location.origin,
         version: '1',
         statement: 'SIWE Notepad Example',
-        type: SignatureType.PERSONAL_SIGNATURE,
         nonce,
     });
 
     /**
      * Generates the message to be signed and uses the provider to ask for a signature
      */
-    const signature = await provider.getSigner().signMessage(message.signMessage());
-    message.signature = signature;
+    const signature = await provider.getSigner().signMessage(message.prepareMessage());
 
     /**
      * Calls our sign_in endpoint to validate the message, if successful it will
@@ -104,7 +102,7 @@ const signIn = async (connector: Providers) => {
      */
     fetch(`/api/sign_in`, {
         method: 'POST',
-        body: JSON.stringify({ message, ens }),
+        body: JSON.stringify({ message, ens, signature }),
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
     }).then(async (res) => {
