@@ -81,6 +81,7 @@ const signIn = async (connector: Providers) => {
     /**
      * Creates the message object
      */
+    const expiration = new Date(Date.now() + 36000000);
     const message = new SiweMessage({
         domain: document.location.host,
         address,
@@ -89,12 +90,15 @@ const signIn = async (connector: Providers) => {
         version: '1',
         statement: 'SIWE Notepad Example',
         nonce,
+        expirationTime: expiration.toISOString()
     });
 
     /**
      * Generates the message to be signed and uses the provider to ask for a signature
      */
     const signature = await provider.getSigner().signMessage(message.prepareMessage());
+    console.log(message.prepareMessage());
+    console.log(signature);
 
     /**
      * Calls our sign_in endpoint to validate the message, if successful it will

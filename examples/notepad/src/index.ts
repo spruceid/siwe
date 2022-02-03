@@ -97,7 +97,8 @@ app.post('/api/sign_in', async (req, res) => {
         }
 
         const message = new SiweMessage(req.body.message);
-
+        console.log(message);
+        console.log(signature);
         const infuraProvider = new providers.JsonRpcProvider(
             {
                 allowGzip: true,
