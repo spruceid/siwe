@@ -149,7 +149,7 @@ export class ParsedMessage {
 	statement: string | null;
 	uri: string;
 	version: string;
-	chainId: string;
+	chainId: number;
 	nonce: string;
 	issuedAt: string;
 	expirationTime: string | null;
@@ -267,11 +267,11 @@ export class ParsedMessage {
 		) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.chainId = apgLib.utils.charsToString(
+				data.chainId = parseInt(apgLib.utils.charsToString(
 					chars,
 					phraseIndex,
 					phraseLength
-				);
+				));
 			}
 			return ret;
 		};
