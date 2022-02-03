@@ -90,7 +90,8 @@ const signIn = async (connector: Providers) => {
         version: '1',
         statement: 'SIWE Notepad Example',
         nonce,
-        expirationTime: expiration.toISOString()
+        expirationTime: expiration.toISOString(),
+        resources: ["http://localhost:4361/me"]
     });
 
     /**
