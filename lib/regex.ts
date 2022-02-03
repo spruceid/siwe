@@ -20,7 +20,7 @@ const MESSAGE = `^${DOMAIN}${ADDRESS}${STATEMENT}${URI_LINE}${VERSION}${CHAIN_ID
 export class ParsedMessage {
 	domain: string;
 	address: string;
-	statement: string;
+	statement: string | null;
 	uri: string;
 	version: string;
 	chainId: string;

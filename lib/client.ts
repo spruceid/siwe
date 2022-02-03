@@ -168,12 +168,11 @@ export class SiweMessage {
 		}
 
 		let suffix = suffixArray.join('\n');
-
+		prefix = [prefix, this.statement].join('\n\n');
 		if (this.statement) {
-			prefix = [prefix, this.statement].join('\n\n');
+			prefix += '\n'
 		}
-
-		return [prefix, suffix].join('\n\n');
+		return [prefix, suffix].join('\n');
 	}
 
 	/** @deprecated
