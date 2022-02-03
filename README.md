@@ -9,22 +9,14 @@ Ethereum-based authentication, and provide wallet vendors a consistent
 machine-readable message format to achieve improved user experiences and 
 consent management.
 
-## [Quickstart Example](./examples/notepad)
-To try it out locally, there is an example that uses Sign-In With Ethereum to
-create a notepad that persists to a server after a user authenticates with
-their Ethereum address.
+## Quickstart Examples
+To try it out locally, check out these examples:
 
-![Sign-In with Ethereum Notepad](./examples/notepad/notepad.png "Sign-In with Ethereum Notepad")
-
-To use the example, run the following commands:
-```bash
-git clone https://github.com/spruceid/siwe
-cd siwe/examples/notepad
-npm install
-npm run dev
-```
-
-See the example README.md for more details.
+- [Node](https://github.com/spruceid/siwe-quickstart/tree/main/00_print)
+- [Frontend](https://github.com/spruceid/siwe-quickstart/tree/main/01_frontend)
+- [Backend](https://github.com/spruceid/siwe-quickstart/tree/main/02_backend)
+- [End to end](https://github.com/spruceid/siwe-quickstart/tree/main/03_complete_app)
+- [Sign-In with Ethereum Notepad](https://github.com/spruceid/siwe-notepad)
 
 ## Motivation
 When signing in to popular non-blockchain services today, users will typically 
