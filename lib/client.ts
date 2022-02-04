@@ -100,6 +100,9 @@ export class SiweMessage {
 			this.resources = parsedMessage.resources;
 		} else {
 			Object.assign(this, param);
+			if (typeof this.chainId === 'string') {
+				this.chainId = parseInt(this.chainId)
+			}
 		}
 	}
 
