@@ -84,7 +84,7 @@ const signIn = async (connector: Providers) => {
     const message = new SiweMessage({
         domain: document.location.host,
         address,
-        chainId: `${await provider.getNetwork().then(({ chainId }) => chainId)}`,
+        chainId: await provider.getNetwork().then(({ chainId }) => chainId),
         uri: document.location.origin,
         version: '1',
         statement: 'SIWE Notepad Example',
