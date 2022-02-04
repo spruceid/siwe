@@ -26,7 +26,7 @@ address = "0x" 40*40HEXDIG
     ; checksum encoding specified in EIP-55
     ; where applicable (EOAs).
 
-statement = *( reserved / unreserved / " " )
+statement = 1*( reserved / unreserved / " " )
     ; The purpose is to exclude LF (line breaks).
 
 version = "1"
@@ -146,7 +146,7 @@ HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
 export class ParsedMessage {
 	domain: string;
 	address: string;
-	statement: string;
+	statement: string | null;
 	uri: string;
 	version: string;
 	chainId: string;
