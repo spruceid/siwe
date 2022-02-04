@@ -109,7 +109,7 @@ app.post('/api/sign_in', async (req, res) => {
                     'Content-Type': 'application/json',
                 },
             },
-            message.chainId,
+            Number.parseInt(message.chainId),
         );
 
         await infuraProvider.ready;
@@ -205,8 +205,8 @@ const getText = (address: string) => {
     }
 };
 
-const getInfuraUrl = (chainId: number) => {
-    switch (chainId) {
+const getInfuraUrl = (chainId: string) => {
+    switch (Number.parseInt(chainId)) {
         case 1:
             return 'https://mainnet.infura.io/v3';
         case 3:
