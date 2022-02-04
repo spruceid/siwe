@@ -43,7 +43,7 @@ export class SiweMessage {
 	version: string;
 	/**EIP-155 Chain ID to which the session is bound, and the network where
 	 * Contract Accounts must be resolved. */
-	chainId: string;
+	chainId: number;
 	/**Randomized token used to prevent replay attacks, at least 8 alphanumeric
 	 * characters. */
 	nonce: string;
@@ -100,6 +100,9 @@ export class SiweMessage {
 			this.resources = parsedMessage.resources;
 		} else {
 			Object.assign(this, param);
+			if (typeof this.chainId === 'string') {
+				this.chainId = parseInt(this.chainId)
+			}
 		}
 	}
 
@@ -242,8 +245,7 @@ export class SiweMessage {
 				}
 				if (missing.length > 0) {
 					throw new Error(
-						`${
-							ErrorTypes.MALFORMED_SESSION
+						`${ErrorTypes.MALFORMED_SESSION
 						} missing: ${missing.join(', ')}.`
 					);
 				}

@@ -23,7 +23,7 @@ export class ParsedMessage {
 	statement: string | null;
 	uri: string;
 	version: string;
-	chainId: string;
+	chainId: number;
 	nonce: string;
 	issuedAt: string;
 	expirationTime: string | null;
@@ -46,7 +46,7 @@ export class ParsedMessage {
 		this.uri = match?.groups?.uri;
 		this.version = match?.groups?.version;
 		this.nonce = match?.groups?.nonce;
-		this.chainId = match?.groups?.chainId;
+		this.chainId = parseInt(match?.groups?.chainId);
 		this.issuedAt = match?.groups?.issuedAt;
 		this.expirationTime = match?.groups?.expirationTime;
 		this.notBefore = match?.groups?.notBefore;
