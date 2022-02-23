@@ -1,6 +1,6 @@
 {
   "name": "siwe",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Sign-In with Ethereum",
   "main": "dist/siwe.js",
   "types": "dist/siwe.d.ts",
