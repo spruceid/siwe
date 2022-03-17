@@ -104,6 +104,10 @@ export class SiweMessage {
 				this.chainId = parseInt(this.chainId)
 			}
 		}
+
+		if (this.address !== utils.getAddress(this.address)) {
+			throw new Error('Address not in EIP 55 format');
+		}
 	}
 
 	/**
@@ -127,7 +131,7 @@ export class SiweMessage {
 	toMessage(): string {
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
 		const uriField = `URI: ${this.uri}`;
-		let prefix = [header, this.address].join('\n');
+		let prefix = [header, utils.getAddress(this.address)].join('\n');
 		const versionField = `Version: ${this.version}`;
 
 		if (!this.nonce) {
