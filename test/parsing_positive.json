@@ -7,7 +7,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z",
       "resources": [
@@ -24,7 +24,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
@@ -37,7 +37,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24Z"
     }
@@ -50,7 +50,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
@@ -63,7 +63,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
@@ -76,7 +76,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
@@ -89,7 +89,7 @@
       "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
@@ -101,7 +101,7 @@
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "uri": "https://service.org/login",
       "version": "1",
-      "chainId": "1",
+      "chainId": 1,
       "nonce": "32891757",
       "issuedAt": "2021-09-30T16:25:24.000Z"
     }
