@@ -1,3 +1,4 @@
+// this test should be run after builds
 const { ABNFParsedMessage } = require("../dist/siwe"); 
 const { RegExpParsedMessage } = require("../dist/siwe"); 
 const parsingPositive = require('../test/parsing_positive.json');
