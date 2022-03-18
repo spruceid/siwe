@@ -1,8 +1,8 @@
 // this test should be run after builds
 const { ABNFParsedMessage } = require("../dist/siwe"); 
 const { RegExpParsedMessage } = require("../dist/siwe"); 
-const parsingPositive = require('../test/parsing_positive.json');
-const parsingNegative = require('../test/parsing_negative.json');
+const parsingPositive = require('./parsing_positive.json');
+const parsingNegative = require('./parsing_negative.json');
 
 describe(`ABNF Client`, () => {
     test.concurrent.each(Object.entries(parsingPositive))('Parses message successfully: %s', (test_name, test) => {
