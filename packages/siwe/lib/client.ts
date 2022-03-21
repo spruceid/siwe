@@ -1,7 +1,7 @@
 import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
-import { ABNFParsedMessage, RegExpParsedMessage } from 'siwe-parser';
+import { ParsedMessage, ParsedMessageRegExp } from 'siwe-parser';
 
 /**
  * Possible message error types.
@@ -84,7 +84,7 @@ export class SiweMessage {
 	 */
 	constructor(param: string | Partial<SiweMessage>) {
 		if (typeof param === 'string') {
-			const parsedMessage = new ABNFParsedMessage(param);
+			const parsedMessage = new ParsedMessage(param);
 			this.domain = parsedMessage.domain;
 			this.address = parsedMessage.address;
 			this.statement = parsedMessage.statement;
@@ -111,7 +111,7 @@ export class SiweMessage {
 	 * @returns {RegExpExecArray} The matching groups for the message
 	 */
 	regexFromMessage(message: string): RegExpExecArray {
-		const parsedMessage = new RegExpParsedMessage(message);
+		const parsedMessage = new ParsedMessageRegExp(message);
 		return parsedMessage.match;
 	}
 
