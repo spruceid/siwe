@@ -1,5 +1,5 @@
-var parsingPositive: object = require('../test/parsing_positive.json');
-var parsingNegative: object = require('../test/parsing_negative.json');
+var parsingPositive: object = require('../../../test/parsing_positive.json');
+var parsingNegative: object = require('../../../test/parsing_negative.json');
 
 //
 for (const client of ['abnf', 'regex'].values()) {

@@ -1,6 +1,6 @@
-var parsingPositive: object = require('../test/parsing_positive.json');
-var validationPositive: object = require('../test/validation_positive.json');
-var validationNegative: object = require('../test/validation_negative.json');
+var parsingPositive: object = require('../../../test/parsing_positive.json');
+var validationPositive: object = require('../../../test/validation_positive.json');
+var validationNegative: object = require('../../../test/validation_negative.json');
 import { Wallet } from 'ethers';
 import { SiweMessage } from './client';
 

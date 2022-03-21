@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "jest",
+    "build": "tsc",
     "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs lib/siwe.ts"
   },
   "author": "Spruce Systems Inc.",
