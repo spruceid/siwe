@@ -27,6 +27,7 @@
   "dependencies": {
     "@stablelib/random": "^1.0.1",
     "apg-js": "^4.1.1",
-    "ethers": "^5.5.1"
+    "ethers": "^5.5.1",
+    "siwe-parser": "../siwe-parser"
   }
 }

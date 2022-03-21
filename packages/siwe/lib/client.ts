@@ -1,8 +1,7 @@
 import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
-import { ParsedMessage as ABNFParsedMessage } from './abnf';
-import { ParsedMessage as RegExpParsedMessage } from './regex';
+import { ABNFParsedMessage, RegExpParsedMessage } from 'siwe-parser';
 
 /**
  * Possible message error types.

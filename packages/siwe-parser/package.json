@@ -2,8 +2,8 @@
   "name": "siwe-parser",
   "version": "1.0.0",
   "description": "Sign-In with Ethereum",
-  "main": "dist/siwe.js",
-  "types": "dist/siwe.d.ts",
+  "main": "dist/parsers.js",
+  "types": "dist/parsers.d.ts",
   "directories": {
     "lib": "lib"
   },
