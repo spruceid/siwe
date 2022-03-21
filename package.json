@@ -8,7 +8,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "postinstall": "lerna bootstrap",
+    "postinstall": "lerna exec npm install && npm link",
     "build": "lerna run build",
     "test": "jest",
     "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs packages/siwe/lib/siwe.ts"
