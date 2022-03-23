@@ -1,6 +1,7 @@
 {
   "packages": [
-    "packages/*"
+    "packages/siwe",
+    "packages/siwe-parser"
   ],
   "npmClient": "npm",
   "command": {
