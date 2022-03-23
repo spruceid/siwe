@@ -5,7 +5,7 @@
   "npmClient": "npm",
   "command": {
     "publish": {
-      "registry": "https://npm.pkg.github.com"
+      "registry": "http://localhost:4873"
     }
   },
   "version": "1.1.2"
