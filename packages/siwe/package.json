@@ -13,6 +13,13 @@
   },
   "author": "Spruce Systems Inc.",
   "license": "Apache-2.0",
+  "keywords": [
+    "ethereum",
+    "sign-in",
+    "sign-in-with-ethereum",
+    "siwe"
+  ],
+  "homepage": "https://github.com/spruceid/siwe",
   "dependencies": {
     "@stablelib/random": "^1.0.1",
     "apg-js": "^4.1.1",
