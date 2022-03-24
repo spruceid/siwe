@@ -21,9 +21,9 @@
   ],
   "homepage": "https://github.com/spruceid/siwe",
   "dependencies": {
+    "@spruceid/siwe-parser": "file:../siwe-parser",
     "@stablelib/random": "^1.0.1",
-    "apg-js": "^4.1.1",
-    "siwe-parser": "file:../siwe-parser"
+    "apg-js": "^4.1.1"
   },
   "peerDependencies": {
     "ethers": "5.5.1"
