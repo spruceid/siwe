@@ -47,3 +47,9 @@ Specification can be found [here](https://eips.ethereum.org/EIPS/eip-4361).
 Our TypeScript library for Sign-In with Ethereum has not yet undergone a formal security 
 audit. We welcome continued feedback on the usability, architecture, and security 
 of this implementation.
+
+## Mono Repo Install and Build
+Run `npm install` to install dependencies, then `npm bootstrap` to link the dependencies
+in their respective packages. Afteward run `npm run build` to build the library.
+Development can occur on the `package/*` level with tests being run on each package itself.
+
