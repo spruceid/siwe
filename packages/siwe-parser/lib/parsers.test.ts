@@ -26,7 +26,6 @@ for (const client of ['abnf', 'regex'].values()) {
 
 
 describe("Parsers import works", () => {
-
 	let ParsedMessage = require('./parsers').ParsedMessage;
 	beforeEach(async () => ParsedMessage = (await import('./parsers')).ParsedMessage);
 
