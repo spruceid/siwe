@@ -7,6 +7,6 @@
     "esModuleInterop": true
   },
   "include": [
-    "lib/**/*"
+    "lib/*"
   ]
 }
