@@ -1,7 +1,7 @@
+import { ABNFParsedMessage, RegExpParsedMessage } from '@spruceid/siwe-parser';
 import { randomStringForEntropy } from '@stablelib/random';
 // TODO: Figure out how to get types from this lib:
 import { Contract, ethers, utils } from 'ethers';
-import { ParsedMessage, ParsedMessageRegExp } from '@spruceid/siwe-parser';
 
 /**
  * Possible message error types.
@@ -84,7 +84,7 @@ export class SiweMessage {
 	 */
 	constructor(param: string | Partial<SiweMessage>) {
 		if (typeof param === 'string') {
-			const parsedMessage = new ParsedMessage(param);
+			const parsedMessage = new ABNFParsedMessage(param);
 			this.domain = parsedMessage.domain;
 			this.address = parsedMessage.address;
 			this.statement = parsedMessage.statement;
@@ -111,7 +111,7 @@ export class SiweMessage {
 	 * @returns {RegExpExecArray} The matching groups for the message
 	 */
 	regexFromMessage(message: string): RegExpExecArray {
-		const parsedMessage = new ParsedMessageRegExp(message);
+		const parsedMessage = new RegExpParsedMessage(message);
 		return parsedMessage.match;
 	}
 
