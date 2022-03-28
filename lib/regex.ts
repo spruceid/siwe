@@ -1,3 +1,5 @@
+import { isEIP55Address } from "./util";
+
 const DOMAIN =
 	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
 const ADDRESS = '\\n(?<address>0x[a-zA-Z0-9]{40})\\n\\n';
@@ -42,6 +44,11 @@ export class ParsedMessage {
 		this.match = match;
 		this.domain = match?.groups?.domain;
 		this.address = match?.groups?.address;
+
+		if (!isEIP55Address(this.address)) {
+			throw new Error("Address is not in EIP-55 format.")
+		}
+
 		this.statement = match?.groups?.statement;
 		this.uri = match?.groups?.uri;
 		this.version = match?.groups?.version;

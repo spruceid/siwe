@@ -1,5 +1,6 @@
 import apgApi from 'apg-js/src/apg-api/api';
 import apgLib from 'apg-js/src/apg-lib/node-exports';
+import { isEIP55Address } from './util';
 
 const GRAMMAR = `
 sign-in-with-ethereum =
@@ -172,7 +173,7 @@ export class ParsedMessage {
 		parser.ast = new apgLib.ast();
 		const id = apgLib.ids;
 
-		const domain = function(
+		const domain = function (
 			state,
 			chars,
 			phraseIndex,
@@ -190,7 +191,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.domain = domain;
-		const address = function(
+		const address = function (
 			state,
 			chars,
 			phraseIndex,
@@ -208,7 +209,8 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.address = address;
-		const statement = function(
+
+		const statement = function (
 			state,
 			chars,
 			phraseIndex,
@@ -226,7 +228,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.statement = statement;
-		const uri = function(state, chars, phraseIndex, phraseLength, data) {
+		const uri = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
 				if (!data.uri) {
@@ -240,7 +242,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.uri = uri;
-		const version = function(
+		const version = function (
 			state,
 			chars,
 			phraseIndex,
@@ -258,7 +260,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.version = version;
-		const chainId = function(
+		const chainId = function (
 			state,
 			chars,
 			phraseIndex,
@@ -276,7 +278,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks['chain-id'] = chainId;
-		const nonce = function(state, chars, phraseIndex, phraseLength, data) {
+		const nonce = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
 				data.nonce = apgLib.utils.charsToString(
@@ -288,7 +290,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks.nonce = nonce;
-		const issuedAt = function(
+		const issuedAt = function (
 			state,
 			chars,
 			phraseIndex,
@@ -306,7 +308,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks['issued-at'] = issuedAt;
-		const expirationTime = function(
+		const expirationTime = function (
 			state,
 			chars,
 			phraseIndex,
@@ -324,7 +326,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks['expiration-time'] = expirationTime;
-		const notBefore = function(
+		const notBefore = function (
 			state,
 			chars,
 			phraseIndex,
@@ -342,7 +344,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks['not-before'] = notBefore;
-		const requestId = function(
+		const requestId = function (
 			state,
 			chars,
 			phraseIndex,
@@ -360,7 +362,7 @@ export class ParsedMessage {
 			return ret;
 		};
 		parser.ast.callbacks['request-id'] = requestId;
-		const resources = function(
+		const resources = function (
 			state,
 			chars,
 			phraseIndex,
@@ -384,8 +386,13 @@ export class ParsedMessage {
 		}
 		const elements = {};
 		parser.ast.translate(elements);
+
 		for (const [key, value] of Object.entries(elements)) {
 			this[key] = value;
+		}
+
+		if (!isEIP55Address(this.address)) {
+			throw new Error("Address is not in EIP-55 format.")
 		}
 	}
 }
