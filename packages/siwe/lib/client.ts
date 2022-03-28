@@ -255,7 +255,7 @@ export class SiweMessage {
 					try {
 						//EIP-1271
 						const isValidSignature =
-							await checkContractWalletSignature(this, provider);
+							await checkContractWalletSignature(this, signature, provider);
 						if (!isValidSignature) {
 							throw new Error(
 								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.address}`
@@ -297,6 +297,7 @@ export class SiweMessage {
  */
 export const checkContractWalletSignature = async (
 	message: SiweMessage,
+	signature: string,
 	provider?: any
 ): Promise<boolean> => {
 	if (!provider) {
@@ -311,7 +312,7 @@ export const checkContractWalletSignature = async (
 		const hashMessage = utils.hashMessage(message.signMessage());
 		return await walletContract.isValidSignature(
 			hashMessage,
-			message.signature
+			signature
 		);
 	} catch (e) {
 		throw e;
