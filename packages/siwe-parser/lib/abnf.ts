@@ -1,6 +1,6 @@
 import apgApi from 'apg-js/src/apg-api/api';
 import apgLib from 'apg-js/src/apg-lib/node-exports';
-import { isEIP55Address } from './util';
+import { isEIP55Address } from './utils';
 
 const GRAMMAR = `
 sign-in-with-ethereum =

@@ -11,6 +11,7 @@ import type { SiweMessage } from './client';
  */
 export const checkContractWalletSignature = async (
 	message: SiweMessage,
+	signature: string,
 	provider?: any
 ): Promise<boolean> => {
 	if (!provider) {
@@ -22,10 +23,11 @@ export const checkContractWalletSignature = async (
 	];
 	try {
 		const walletContract = new Contract(message.address, abi, provider);
-		const hashMessage = utils.hashMessage(message.signMessage());
+		const hashMessage = utils.hashMessage(message.prepareMessage());
+		console.log('\n\n\n\nHIII')
 		return await walletContract.isValidSignature(
 			hashMessage,
-			message.signature
+			signature,
 		);
 	} catch (e) {
 		throw e;
@@ -46,12 +48,3 @@ export const checkContractWalletSignature = async (
 export const generateNonce = (): string => {
 	return randomStringForEntropy(96);
 };
-
-/**
- * This method is supposed to check if an address is conforming to EIP-55.
- * @param address Address to be checked if conforms with EIP-55.
- * @returns Either the return is or not in the EIP-55 format.
- */
-export const isEIP55Address = (address: string) => {
-	return address === utils.getAddress(address)
-}

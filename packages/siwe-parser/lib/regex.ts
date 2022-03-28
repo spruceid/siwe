@@ -1,4 +1,4 @@
-import { isEIP55Address } from "./util";
+import { validate } from "./utils";
 
 const DOMAIN =
 	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
@@ -45,9 +45,6 @@ export class ParsedMessage {
 		this.domain = match?.groups?.domain;
 		this.address = match?.groups?.address;
 
-		if (!isEIP55Address(this.address)) {
-			throw new Error("Address is not in EIP-55 format.")
-		}
 
 		this.statement = match?.groups?.statement;
 		this.uri = match?.groups?.uri;
@@ -59,5 +56,7 @@ export class ParsedMessage {
 		this.notBefore = match?.groups?.notBefore;
 		this.requestId = match?.groups?.requestId;
 		this.resources = match?.groups?.resources?.split('\n- ').slice(1);
+
+		validate(this);
 	}
 }

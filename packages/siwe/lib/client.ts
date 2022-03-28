@@ -1,6 +1,6 @@
 import { ABNFParsedMessage, RegExpParsedMessage } from '@spruceid/siwe-parser';
-// TODO: Figure out how to get types from this lib:
-import { ethers } from 'ethers';
+import { providers, utils } from 'ethers';
+import { checkContractWalletSignature, generateNonce } from './utils';
 
 /**
  * Possible message error types.
@@ -225,7 +225,7 @@ export class SiweMessage {
 	 */
 	async validate(
 		signature: string = this.signature,
-		provider?: ethers.providers.Provider | any
+		provider?: providers.Provider | any
 	): Promise<SiweMessage> {
 		return new Promise<SiweMessage>(async (resolve, reject) => {
 			const message = this.prepareMessage();
@@ -250,7 +250,7 @@ export class SiweMessage {
 
 				let addr;
 				try {
-					addr = ethers.utils.verifyMessage(message, signature);
+					addr = utils.verifyMessage(message, signature);
 
 				} catch (_) { } finally {
 					if (addr !== this.address) {
