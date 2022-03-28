@@ -8,6 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install
-      run: npm install
+      run: |
+        npm install
+        npm run bootstrap
     - name: Run tests
       run: npm run test
