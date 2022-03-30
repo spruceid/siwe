@@ -1,4 +1,4 @@
-import { validate } from "./utils";
+import { isEIP55Address } from "./utils";
 
 const DOMAIN =
 	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
@@ -19,7 +19,7 @@ const RESOURCES = `(\\nResources:(?<resources>(\\n- ${URI}?)+))?`;
 
 const MESSAGE = `^${DOMAIN}${ADDRESS}${STATEMENT}${URI_LINE}${VERSION}${CHAIN_ID}${NONCE}${ISSUED_AT}${EXPIRATION_TIME}${NOT_BEFORE}${REQUEST_ID}${RESOURCES}$`;
 
-export class ParsedMessage {
+export class RegExpParsedMessage {
 	domain: string;
 	address: string;
 	statement: string | null;
@@ -38,13 +38,22 @@ export class ParsedMessage {
 		const REGEX = new RegExp(MESSAGE, 'g');
 
 		let match = REGEX.exec(msg);
+		console.log(`exec: ${match}\n`, `\nmatch: ${msg.match(REGEX)}\n`, `\ntest: ${REGEX.test(msg)}\n`);
 		if (!match) {
 			throw new Error('Message did not match the regular expression.');
 		}
 		this.match = match;
 		this.domain = match?.groups?.domain;
+
 		this.address = match?.groups?.address;
 
+		if (this.domain.length === 0) {
+			throw new Error('Domain cannot be empty.');
+		}
+
+		if (!isEIP55Address(this.address)) {
+			throw new Error('Address not conformant to EIP-55.');
+		}
 
 		this.statement = match?.groups?.statement;
 		this.uri = match?.groups?.uri;
@@ -56,7 +65,5 @@ export class ParsedMessage {
 		this.notBefore = match?.groups?.notBefore;
 		this.requestId = match?.groups?.requestId;
 		this.resources = match?.groups?.resources?.split('\n- ').slice(1);
-
-		validate(this);
 	}
 }

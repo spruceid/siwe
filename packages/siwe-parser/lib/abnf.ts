@@ -144,7 +144,7 @@ DIGIT          =  %x30-39
 HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
 `;
 
-export class ParsedMessage {
+export class ABNFParsedMessage {
 	domain: string;
 	address: string;
 	statement: string | null;
@@ -391,8 +391,12 @@ export class ParsedMessage {
 			this[key] = value;
 		}
 
+		if (this.domain.length === 0) {
+			throw new Error('Domain cannot be empty.');
+		}
+
 		if (!isEIP55Address(this.address)) {
-			throw new Error("Address is not in EIP-55 format.")
+			throw new Error('Address not conformant to EIP-55.');
 		}
 	}
 }

@@ -24,11 +24,14 @@ export const checkContractWalletSignature = async (
 	try {
 		const walletContract = new Contract(message.address, abi, provider);
 		const hashMessage = utils.hashMessage(message.prepareMessage());
-		console.log('\n\n\n\nHIII')
-		return await walletContract.isValidSignature(
+		const isValidSignature = await walletContract.isValidSignature(
 			hashMessage,
 			signature,
 		);
+		if (!isValidSignature) {
+			throw new Error("Invalid signature.");
+		}
+		return true;
 	} catch (e) {
 		throw e;
 	}

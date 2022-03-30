@@ -21,7 +21,7 @@ describe(`Message Validation`, () => {
 		async (_, test_fields) => {
 			const msg = new SiweMessage(test_fields);
 			await expect(
-				msg.validate(test_fields.signature)
+				msg.verify({ signature: test_fields.signature })
 			).resolves.not.toThrow();
 		}
 	);
@@ -29,7 +29,7 @@ describe(`Message Validation`, () => {
 		'Fails to validate message: %s',
 		async (_, test_fields) => {
 			const msg = new SiweMessage(test_fields);
-			await expect(msg.validate(test_fields.signature)).rejects.toThrow();
+			await expect(msg.verify({ signature: test_fields.signature })).rejects.toThrow();
 		}
 	);
 });
@@ -42,7 +42,7 @@ describe(`Round Trip`, () => {
 			const msg = new SiweMessage(test.fields);
 			msg.address = wallet.address;
 			const signature = await wallet.signMessage(msg.toMessage());
-			await expect(msg.validate(signature)).resolves.not.toThrow();
+			await expect(msg.verify({ signature })).resolves.not.toThrow();
 		}
 	);
 });
