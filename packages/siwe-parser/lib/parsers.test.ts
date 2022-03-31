@@ -1,5 +1,5 @@
-var parsingPositive: object = require('../../../test/parsing_positive.json');
-var parsingNegative: object = require('../../../test/parsing_negative.json');
+const parsingPositive: Object = require('../../../test/parsing_positive.json');
+const parsingNegative: Object = require('../../../test/parsing_negative.json');
 
 //
 for (const client of ['abnf', 'regex'].values()) {
@@ -26,7 +26,7 @@ for (const client of ['abnf', 'regex'].values()) {
 
 
 describe("Parsers import works", () => {
-	
+
 	let ParsedMessage = require('./parsers').ParsedMessage;
 	beforeEach(async () => ParsedMessage = (await import('./parsers')).ParsedMessage);
 
