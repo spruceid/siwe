@@ -249,22 +249,27 @@ export class SiweMessage {
 					);
 				}
 
-				const addr = ethers.utils.verifyMessage(message, signature);
+				let addr;
+				try {
+					addr = ethers.utils.verifyMessage(message, signature);
 
-				if (addr !== this.address) {
-					try {
-						//EIP-1271
-						const isValidSignature =
-							await checkContractWalletSignature(this, provider);
-						if (!isValidSignature) {
-							throw new Error(
-								`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.address}`
-							);
+				} catch (_) { } finally {
+					if (addr !== this.address) {
+						try {
+							//EIP-1271
+							const isValidSignature =
+								await checkContractWalletSignature(this, signature, provider);
+							if (!isValidSignature) {
+								throw new Error(
+									`${ErrorTypes.INVALID_SIGNATURE}: ${addr} !== ${this.address}`
+								);
+							}
+						} catch (e) {
+							throw e;
 						}
-					} catch (e) {
-						throw e;
 					}
 				}
+
 				const parsedMessage = new SiweMessage(message);
 
 				if (parsedMessage.expirationTime) {
@@ -297,6 +302,7 @@ export class SiweMessage {
  */
 export const checkContractWalletSignature = async (
 	message: SiweMessage,
+	signature: string,
 	provider?: any
 ): Promise<boolean> => {
 	if (!provider) {
@@ -311,7 +317,7 @@ export const checkContractWalletSignature = async (
 		const hashMessage = utils.hashMessage(message.signMessage());
 		return await walletContract.isValidSignature(
 			hashMessage,
-			message.signature
+			signature,
 		);
 	} catch (e) {
 		throw e;
