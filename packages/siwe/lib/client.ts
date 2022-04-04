@@ -247,23 +247,31 @@ export class SiweMessage {
 			}
 
 			/** Recover address from signature */
-			const addr = utils.verifyMessage(EIP4361Message, signature);
-
-			/** Match signature with message's address */
-			if (addr !== this.address) {
-				try {
-					/** Try resolving EIP-1271 if address doesn't match */
-					await checkContractWalletSignature(this, signature, provider);
-				} catch (e) {
-					resolve({
-						success: false,
-						data: this,
-						error: new SiweError(
-							SiweErrorType.INVALID_SIGNATURE,
-							addr,
-							`Resolved address to be ${this.address}`,
-						),
-					})
+			let addr;
+			try {
+				addr = utils.verifyMessage(EIP4361Message, signature);
+			} catch (_) { } finally {
+				/** Match signature with message's address */
+				if (addr !== this.address) {
+					let isValid = false;
+					try {
+						/** Try resolving EIP-1271 if address doesn't match */
+						isValid = await checkContractWalletSignature(this, signature, provider);
+					} catch (_) {
+						isValid = false;
+					} finally {
+						if (!isValid) {
+							resolve({
+								success: false,
+								data: this,
+								error: new SiweError(
+									SiweErrorType.INVALID_SIGNATURE,
+									addr,
+									`Resolved address to be ${this.address}`,
+								),
+							});
+						}
+					}
 				}
 			}
 

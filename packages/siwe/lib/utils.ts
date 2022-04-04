@@ -31,7 +31,7 @@ export const checkContractWalletSignature = async (
 		if (!isValidSignature) {
 			throw new Error("Invalid signature.");
 		}
-		return true;
+		return isValidSignature;
 	} catch (e) {
 		throw e;
 	}

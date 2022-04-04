@@ -1,9 +1,11 @@
 const parsingPositive: Object = require('../../../test/parsing_positive.json');
+const parsingNegative: Object = require('../../../test/parsing_negative.json');
 const validationPositive: Object = require('../../../test/validation_positive.json');
 const validationNegative: Object = require('../../../test/validation_negative.json');
 
 import { Wallet } from 'ethers';
 import { SiweMessage } from './client';
+import { SiweErrorType } from './types';
 
 describe(`Message Generation`, () => {
 	test.concurrent.each(Object.entries(parsingPositive))(
@@ -11,6 +13,17 @@ describe(`Message Generation`, () => {
 		(_, test) => {
 			const msg = new SiweMessage(test.fields);
 			expect(msg.toMessage()).toBe(test.message);
+		}
+	);
+
+	test.concurrent.each(Object.entries(parsingNegative))(
+		'Fails to generate message: %s',
+		(_, test) => {
+			try {
+				new SiweMessage(test.fields);
+			} catch (error) {
+				expect(Object.values(SiweErrorType).includes(error));
+			}
 		}
 	);
 });
@@ -21,15 +34,19 @@ describe(`Message Validation`, () => {
 		async (_, test_fields) => {
 			const msg = new SiweMessage(test_fields);
 			await expect(
-				msg.verify({ signature: test_fields.signature })
-			).resolves.not.toThrow();
+				msg.verify({ signature: test_fields.signature, time: test_fields.issuedAt }).then(({ success }) => success)
+			).resolves.toBeTruthy();
 		}
 	);
 	test.concurrent.each(Object.entries(validationNegative))(
-		'Fails to validate message: %s',
+		'Fails to verify message: %s',
 		async (_, test_fields) => {
-			const msg = new SiweMessage(test_fields);
-			await expect(msg.verify({ signature: test_fields.signature })).rejects.toThrow();
+			try {
+				const msg = new SiweMessage(test_fields);
+				await expect(msg.verify({ signature: test_fields.signature, time: test_fields.issuedAt }).then(({success}) => success)).resolves.toBeFalsy();
+			} catch (error) {
+				expect(Object.values(SiweErrorType).includes(error));
+			}
 		}
 	);
 });
@@ -42,7 +59,7 @@ describe(`Round Trip`, () => {
 			const msg = new SiweMessage(test.fields);
 			msg.address = wallet.address;
 			const signature = await wallet.signMessage(msg.toMessage());
-			await expect(msg.verify({ signature })).resolves.not.toThrow();
+			await expect(msg.verify({ signature }).then(({success}) => success)).resolves.toBeTruthy();
 		}
 	);
 });
