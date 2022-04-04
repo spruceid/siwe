@@ -1,10 +1,11 @@
 import { isEIP55Address } from "./utils";
+import * as uri from 'valid-url';
 
 const DOMAIN =
 	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
 const ADDRESS = '\\n(?<address>0x[a-zA-Z0-9]{40})\\n\\n';
 const STATEMENT = '((?<statement>[^\\n]+)\\n)?';
-const URI = '(([^:?#]+):)?(([^?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))';
+const URI = '(([^:?#]+):)?(([^?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?';
 const URI_LINE = `\\nURI: (?<uri>${URI}?)`;
 const VERSION = '\\nVersion: (?<version>1)';
 const CHAIN_ID = '\\nChain ID: (?<chainId>[0-9]+)';
@@ -38,18 +39,17 @@ export class RegExpParsedMessage {
 		const REGEX = new RegExp(MESSAGE, 'g');
 
 		let match = REGEX.exec(msg);
-		console.log(`exec: ${match}\n`, `\nmatch: ${msg.match(REGEX)}\n`, `\ntest: ${REGEX.test(msg)}\n`);
 		if (!match) {
 			throw new Error('Message did not match the regular expression.');
 		}
 		this.match = match;
 		this.domain = match?.groups?.domain;
 
-		this.address = match?.groups?.address;
-
-		if (this.domain.length === 0) {
+		if (this.domain.length === 0 || this.domain.match(/[^#?]/)) {
 			throw new Error('Domain cannot be empty.');
 		}
+
+		this.address = match?.groups?.address;
 
 		if (!isEIP55Address(this.address)) {
 			throw new Error('Address not conformant to EIP-55.');
@@ -57,6 +57,11 @@ export class RegExpParsedMessage {
 
 		this.statement = match?.groups?.statement;
 		this.uri = match?.groups?.uri;
+
+		if (!uri.isUri(this.uri)) {
+			throw new Error('Invalid URI.');
+		}
+
 		this.version = match?.groups?.version;
 		this.nonce = match?.groups?.nonce;
 		this.chainId = parseInt(match?.groups?.chainId);
@@ -65,5 +70,13 @@ export class RegExpParsedMessage {
 		this.notBefore = match?.groups?.notBefore;
 		this.requestId = match?.groups?.requestId;
 		this.resources = match?.groups?.resources?.split('\n- ').slice(1);
+
+		if (this.resources?.length > 0) {
+			this.resources.forEach((r) => {
+				if (!uri.isUri(r)) {
+					throw new Error(`${r} is not a valid resource.`);
+				}
+			})
+		}
 	}
 }

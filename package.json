@@ -17,7 +17,6 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/jest": "^27.0.2",
-    "ethers": "^5.5.1",
     "jest": "^27.3.1",
     "lerna": "^4.0.0",
     "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",

@@ -1,7 +1,7 @@
 // TODO: Figure out how to get types from this lib:
 import { providers, utils } from 'ethers';
 import { ABNFParsedMessage, isEIP55Address, RegExpParsedMessage } from 'siwe-parser';
-import { parse as URI } from 'uri-js';
+import * as uri from 'valid-url';
 import { SiweError, SiweErrorType, SiweResponse, VerifyParams } from './types';
 import { checkContractWalletSignature, generateNonce } from './utils';
 
@@ -271,7 +271,7 @@ export class SiweMessage {
 	 */
 	validate() {
 		/** `domain` check. */
-		if (this.domain.length === 0 || URI(this.domain).error) {
+		if (this.domain.length === 0 || uri.isUri(this.domain)) {
 			throw new SiweError(SiweErrorType.INVALID_DOMAIN);
 		}
 
@@ -281,7 +281,7 @@ export class SiweMessage {
 		}
 
 		/** Check if the URI is valid. */
-		if (URI(this.domain).error) {
+		if (uri.isUri(this.domain)) {
 			throw new SiweError(SiweErrorType.INVALID_URI);
 		}
 
