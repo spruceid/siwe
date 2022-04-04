@@ -235,9 +235,19 @@ export class SiweMessage {
 					});
 				}
 			}
+			let EIP4361Message;
+			try {
+				EIP4361Message = this.prepareMessage();
+			} catch (e) {
+				resolve({
+					success: false,
+					data: this,
+					error: e,
+				});
+			}
 
 			/** Recover address from signature */
-			const addr = utils.verifyMessage(this.prepareMessage(), signature);
+			const addr = utils.verifyMessage(EIP4361Message, signature);
 
 			/** Match signature with message's address */
 			if (addr !== this.address) {

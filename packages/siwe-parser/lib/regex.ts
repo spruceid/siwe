@@ -1,5 +1,5 @@
-import { isEIP55Address } from "./utils";
 import * as uri from 'valid-url';
+import { isEIP55Address } from "./utils";
 
 const DOMAIN =
 	'(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:';
@@ -45,7 +45,7 @@ export class RegExpParsedMessage {
 		this.match = match;
 		this.domain = match?.groups?.domain;
 
-		if (this.domain.length === 0 || this.domain.match(/[^#?]/)) {
+		if (this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
 			throw new Error('Domain cannot be empty.');
 		}
 
