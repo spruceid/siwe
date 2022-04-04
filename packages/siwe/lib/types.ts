@@ -60,20 +60,20 @@ export enum SiweErrorType {
     /** `domain` is not a valid authority or is empty. */
     INVALID_DOMAIN = 'Invalid domain.',
 
-    /** `domain` don't match the domain provided for validation. */
-    DOMAIN_MISMATCH = 'Domain do not match provided domain for validation.',
+    /** `domain` don't match the domain provided for verification. */
+    DOMAIN_MISMATCH = 'Domain do not match provided domain for verification.',
 
-    /** `nonce` don't match the nonce provided for validation. */
-    NONCE_MISMATCH = 'Nonce do not match provided nonce for validation.',
+    /** `nonce` don't match the nonce provided for verification. */
+    NONCE_MISMATCH = 'Nonce do not match provided nonce for verification.',
 
     /** `address` does not conform to EIP-55 or is not a valid address. */
     INVALID_ADDRESS = 'Invalid address.',
 
     /** `uri` does not conform to RFC 3986. */
-    INVALID_URI = 'Invalid address.',
+    INVALID_URI = 'URI does not conform to RFC 3986.',
 
     /** `nonce` is smaller then 8 characters or is not alphanumeric */
-    INVALID_NONCE = 'Nonce size smaller then 8 characters or is not alphanumeric',
+    INVALID_NONCE = 'Nonce size smaller then 8 characters or is not alphanumeric.',
 
     /** `notBefore` is present and in the future. */
     NOT_YET_VALID_MESSAGE = 'Message is not valid yet.',
