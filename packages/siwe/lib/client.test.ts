@@ -1,7 +1,7 @@
 const parsingPositive: Object = require('../../../test/parsing_positive.json');
 const parsingNegative: Object = require('../../../test/parsing_negative.json');
-const validationPositive: Object = require('../../../test/validation_positive.json');
-const validationNegative: Object = require('../../../test/validation_negative.json');
+const verificationPositive: Object = require('../../../test/verification_positive.json');
+const verificationNegative: Object = require('../../../test/verification_negative.json');
 
 import { Wallet } from 'ethers';
 import { SiweMessage } from './client';
@@ -28,22 +28,32 @@ describe(`Message Generation`, () => {
 	);
 });
 
-describe(`Message Validation`, () => {
-	test.concurrent.each(Object.entries(validationPositive))(
-		'Validates message successfully: %s',
+describe(`Message verification`, () => {
+	test.concurrent.each(Object.entries(verificationPositive))(
+		'Verificates message successfully: %s',
 		async (_, test_fields) => {
 			const msg = new SiweMessage(test_fields);
 			await expect(
-				msg.verify({ signature: test_fields.signature, time: test_fields.issuedAt }).then(({ success }) => success)
+				msg.verify({
+					signature: test_fields.signature,
+					time: test_fields.time,
+					domain: test_fields.domainBinding,
+					nonce: test_fields.matchNonce,
+				}).then(({ success }) => success)
 			).resolves.toBeTruthy();
 		}
 	);
-	test.concurrent.each(Object.entries(validationNegative))(
+	test.concurrent.each(Object.entries(verificationNegative))(
 		'Fails to verify message: %s',
-		async (_, test_fields) => {
+		async (n, test_fields) => {
 			try {
 				const msg = new SiweMessage(test_fields);
-				await expect(msg.verify({ signature: test_fields.signature, time: test_fields.issuedAt }).then(({success}) => success)).resolves.toBeFalsy();
+				await expect(msg.verify({
+					signature: test_fields.signature,
+					time: test_fields.time || test_fields.issuedAt,
+					domain: test_fields.domainBinding,
+					nonce: test_fields.matchNonce,
+				}).then(({success}) => success)).resolves.toBeFalsy();
 			} catch (error) {
 				expect(Object.values(SiweErrorType).includes(error));
 			}

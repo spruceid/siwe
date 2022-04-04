@@ -332,7 +332,7 @@ export class SiweMessage {
 
 		/** `notBefore` conforms to ISO-8601 */
 		if (this.notBefore) {
-			if (ISO8601.test(this.notBefore)) {
+			if (!ISO8601.test(this.notBefore)) {
 				throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
 			}
 		}

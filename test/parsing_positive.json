@@ -105,5 +105,77 @@
             "nonce": "32891757",
             "issuedAt": "2021-09-30T16:25:24.000Z"
         }
+    },
+    "domain ipv6": {
+        "message": "[::cafe] wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://service.org/login\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "[::cafe]",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://service.org/login",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
+    },
+    "uri ipv6": {
+        "message": "service.org wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://[::cafe]\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "service.org",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://[::cafe]",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
+    },
+    "uri ipv4": {
+        "message": "service.org wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://127.0.0.1\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "service.org",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://127.0.0.1",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
+    },
+    "uri with port": {
+        "message": "service.org wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://127.0.0.1:4361\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "service.org",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://127.0.0.1:4361",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
+    },
+    "uri ipv4 query params and fragment": {
+        "message": "service.org wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://127.0.0.1/?query=one#begin\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "service.org",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://127.0.0.1/?query=one#begin",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
+    },
+    "chainId not 1": {
+        "message": "service.org wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\n\nURI: https://service.org/login\nVersion: 1\nChain ID: 4\nNonce: 32891757\nIssued At: 2021-09-30T16:25:24.000Z",
+        "fields": {
+            "domain": "service.org",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "uri": "https://service.org/login",
+            "version": "1",
+            "chainId": 4,
+            "nonce": "32891757",
+            "issuedAt": "2021-09-30T16:25:24.000Z"
+        }
     }
 }
