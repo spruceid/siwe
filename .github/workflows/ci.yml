@@ -15,5 +15,5 @@ jobs:
     - name: Run tests
       run: npm run test
       env:
-        INFURA_ID: ${{env.INFURA_ID}}
-        INFURA_SECRET: ${{env.INFURA_SECRET}}
+        INFURA_ID: ${{secrets.INFURA_ID}}
+        INFURA_SECRET: ${{secrets.INFURA_SECRET}}
