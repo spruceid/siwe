@@ -292,8 +292,8 @@ export class SiweMessage {
 	 */
 	validate() {
 		/** `domain` check. */
-		if (this.domain.length === 0 || uri.isUri(this.domain)) {
-			throw new SiweError(SiweErrorType.INVALID_DOMAIN);
+		if (this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
+			throw new SiweError(SiweErrorType.INVALID_DOMAIN, `${this.domain} to be a valid domain.`);
 		}
 
 		/** EIP-55 `address` check. */
@@ -306,8 +306,8 @@ export class SiweMessage {
 		}
 
 		/** Check if the URI is valid. */
-		if (uri.isUri(this.domain)) {
-			throw new SiweError(SiweErrorType.INVALID_URI);
+		if (!uri.isUri(this.uri)) {
+			throw new SiweError(SiweErrorType.INVALID_URI, `${this.uri} to be a valid uri.`);
 		}
 
 		/** Check if the version is 1. */
