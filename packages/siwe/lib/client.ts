@@ -1,9 +1,11 @@
 // TODO: Figure out how to get types from this lib:
-import { providers, utils } from 'ethers';
-import { ABNFParsedMessage, isEIP55Address, RegExpParsedMessage } from 'siwe-parser';
-import * as uri from 'valid-url';
-import { SiweError, SiweErrorType, SiweResponse, VerifyParams } from './types';
-import { checkContractWalletSignature, generateNonce } from './utils';
+import { providers, utils } from "ethers";
+import {
+	isEIP55Address, ParsedMessage, ParsedMessageRegExp
+} from "siwe-parser";
+import * as uri from "valid-url";
+import { SiweError, SiweErrorType, SiweResponse, VerifyParams } from "./types";
+import { checkContractWalletSignature, generateNonce } from "./utils";
 
 export class SiweMessage {
 	/**RFC 4501 dns authority that is requesting the signing. */
@@ -48,8 +50,8 @@ export class SiweMessage {
 	 * @param param {string | SiweMessage} Sign message as a string or an object.
 	 */
 	constructor(param: string | Partial<SiweMessage>) {
-		if (typeof param === 'string') {
-			const parsedMessage = new ABNFParsedMessage(param);
+		if (typeof param === "string") {
+			const parsedMessage = new ParsedMessage(param);
 			this.domain = parsedMessage.domain;
 			this.address = parsedMessage.address;
 			this.statement = parsedMessage.statement;
@@ -64,8 +66,8 @@ export class SiweMessage {
 			this.resources = parsedMessage.resources;
 		} else {
 			Object.assign(this, param);
-			if (typeof this.chainId === 'string') {
-				this.chainId = parseInt(this.chainId)
+			if (typeof this.chainId === "string") {
+				this.chainId = parseInt(this.chainId);
 			}
 		}
 		this.validate();
@@ -77,7 +79,7 @@ export class SiweMessage {
 	 * @returns {RegExpExecArray} The matching groups for the message
 	 */
 	regexFromMessage(message: string): RegExpExecArray {
-		const parsedMessage = new RegExpParsedMessage(message);
+		const parsedMessage = new ParsedMessageRegExp(message);
 		return parsedMessage.match;
 	}
 
@@ -95,14 +97,14 @@ export class SiweMessage {
 
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
 		const uriField = `URI: ${this.uri}`;
-		let prefix = [header, this.address].join('\n');
+		let prefix = [header, this.address].join("\n");
 		const versionField = `Version: ${this.version}`;
 
 		if (!this.nonce) {
 			this.nonce = generateNonce();
 		}
 
-		const chainField = `Chain ID: ` + this.chainId || '1';
+		const chainField = `Chain ID: ` + this.chainId || "1";
 
 		const nonceField = `Nonce: ${this.nonce}`;
 
@@ -111,9 +113,7 @@ export class SiweMessage {
 		if (this.issuedAt) {
 			Date.parse(this.issuedAt);
 		}
-		this.issuedAt = this.issuedAt
-			? this.issuedAt
-			: new Date().toISOString();
+		this.issuedAt = this.issuedAt ? this.issuedAt : new Date().toISOString();
 		suffixArray.push(`Issued At: ${this.issuedAt}`);
 
 		if (this.expirationTime) {
@@ -132,18 +132,16 @@ export class SiweMessage {
 
 		if (this.resources) {
 			suffixArray.push(
-				[`Resources:`, ...this.resources.map((x) => `- ${x}`)].join(
-					'\n'
-				)
+				[`Resources:`, ...this.resources.map((x) => `- ${x}`)].join("\n")
 			);
 		}
 
-		let suffix = suffixArray.join('\n');
-		prefix = [prefix, this.statement].join('\n\n');
+		let suffix = suffixArray.join("\n");
+		prefix = [prefix, this.statement].join("\n\n");
 		if (this.statement) {
-			prefix += '\n'
+			prefix += "\n";
 		}
-		return [prefix, suffix].join('\n');
+		return [prefix, suffix].join("\n");
 	}
 
 	/**
@@ -155,7 +153,7 @@ export class SiweMessage {
 	prepareMessage(): string {
 		let message: string;
 		switch (this.version) {
-			case '1': {
+			case "1": {
 				message = this.toMessage();
 				break;
 			}
@@ -173,7 +171,10 @@ export class SiweMessage {
 	 * @param params Parameters to verify the integrity of the message, signature is required.
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
-	async verify(params: VerifyParams, provider?: providers.Provider): Promise<SiweResponse> {
+	async verify(
+		params: VerifyParams,
+		provider?: providers.Provider
+	): Promise<SiweResponse> {
 		return new Promise<SiweResponse>(async (resolve) => {
 			const { signature, domain, nonce, time } = params;
 
@@ -185,8 +186,8 @@ export class SiweMessage {
 					error: new SiweError(
 						SiweErrorType.DOMAIN_MISMATCH,
 						domain,
-						this.domain,
-					)
+						this.domain
+					),
 				});
 			}
 
@@ -195,12 +196,8 @@ export class SiweMessage {
 				resolve({
 					success: false,
 					data: this,
-					error: new SiweError(
-						SiweErrorType.NONCE_MISMATCH,
-						nonce,
-						this.nonce,
-					)
-				})
+					error: new SiweError(SiweErrorType.NONCE_MISMATCH, nonce, this.nonce),
+				});
 			}
 
 			/** Check time or now */
@@ -213,9 +210,10 @@ export class SiweMessage {
 					resolve({
 						success: false,
 						data: this,
-						error: new SiweError(SiweErrorType.EXPIRED_MESSAGE,
+						error: new SiweError(
+							SiweErrorType.EXPIRED_MESSAGE,
 							`${checkTime.toISOString()} < ${expirationDate.toISOString()}`,
-							`${checkTime.toISOString()} >= ${expirationDate.toISOString()}`,
+							`${checkTime.toISOString()} >= ${expirationDate.toISOString()}`
 						),
 					});
 				}
@@ -228,9 +226,10 @@ export class SiweMessage {
 					resolve({
 						success: false,
 						data: this,
-						error: new SiweError(SiweErrorType.EXPIRED_MESSAGE,
+						error: new SiweError(
+							SiweErrorType.EXPIRED_MESSAGE,
 							`${checkTime.toISOString()} >= ${notBefore.toISOString()}`,
-							`${checkTime.toISOString()} < ${notBefore.toISOString()}`,
+							`${checkTime.toISOString()} < ${notBefore.toISOString()}`
 						),
 					});
 				}
@@ -250,13 +249,18 @@ export class SiweMessage {
 			let addr;
 			try {
 				addr = utils.verifyMessage(EIP4361Message, signature);
-			} catch (_) { } finally {
+			} catch (_) {
+			} finally {
 				/** Match signature with message's address */
 				if (addr !== this.address) {
 					let isValid = false;
 					try {
 						/** Try resolving EIP-1271 if address doesn't match */
-						isValid = await checkContractWalletSignature(this, signature, provider);
+						isValid = await checkContractWalletSignature(
+							this,
+							signature,
+							provider
+						);
 					} catch (_) {
 						isValid = false;
 					} finally {
@@ -267,7 +271,7 @@ export class SiweMessage {
 								error: new SiweError(
 									SiweErrorType.INVALID_SIGNATURE,
 									addr,
-									`Resolved address to be ${this.address}`,
+									`Resolved address to be ${this.address}`
 								),
 							});
 						}
@@ -282,7 +286,6 @@ export class SiweMessage {
 		});
 	}
 
-
 	/**
 	 * Validates the value of this object fields.
 	 * @throws Throws an {ErrorType} if a field is invalid.
@@ -295,7 +298,11 @@ export class SiweMessage {
 
 		/** EIP-55 `address` check. */
 		if (!isEIP55Address(this.address)) {
-			throw new SiweError(SiweErrorType.INVALID_ADDRESS, utils.getAddress(this.address), this.address);
+			throw new SiweError(
+				SiweErrorType.INVALID_ADDRESS,
+				utils.getAddress(this.address),
+				this.address
+			);
 		}
 
 		/** Check if the URI is valid. */
@@ -303,19 +310,27 @@ export class SiweMessage {
 			throw new SiweError(SiweErrorType.INVALID_URI);
 		}
 
-
 		/** Check if the version is 1. */
 		if (this.version !== "1") {
-			throw new SiweError(SiweErrorType.INVALID_MESSAGE_VERSION, "1", this.version);
+			throw new SiweError(
+				SiweErrorType.INVALID_MESSAGE_VERSION,
+				"1",
+				this.version
+			);
 		}
 
 		/** Check if the nonce is alphanumeric and bigger then 8 characters */
 		const nonce = this.nonce.match(/[a-zA-Z0-9]{8,}/);
 		if (!nonce || this.nonce.length < 8 || nonce[0] !== this.nonce) {
-			throw new SiweError(SiweErrorType.INVALID_NONCE, `Length > 8 (${nonce.length}). Alphanumeric.`, this.nonce);
+			throw new SiweError(
+				SiweErrorType.INVALID_NONCE,
+				`Length > 8 (${nonce.length}). Alphanumeric.`,
+				this.nonce
+			);
 		}
 
-		const ISO8601 = /([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))/
+		const ISO8601 =
+			/([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))/;
 		/** `issuedAt` conforms to ISO-8601 */
 		if (this.issuedAt) {
 			if (!ISO8601.test(this.issuedAt)) {

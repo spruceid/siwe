@@ -53,7 +53,7 @@ describe(`Message verification`, () => {
 					time: test_fields.time || test_fields.issuedAt,
 					domain: test_fields.domainBinding,
 					nonce: test_fields.matchNonce,
-				}).then(({success}) => success)).resolves.toBeFalsy();
+				}).then(({ success }) => success)).resolves.toBeFalsy();
 			} catch (error) {
 				expect(Object.values(SiweErrorType).includes(error));
 			}
@@ -69,7 +69,7 @@ describe(`Round Trip`, () => {
 			const msg = new SiweMessage(test.fields);
 			msg.address = wallet.address;
 			const signature = await wallet.signMessage(msg.toMessage());
-			await expect(msg.verify({ signature }).then(({success}) => success)).resolves.toBeTruthy();
+			await expect(msg.verify({ signature }).then(({ success }) => success)).resolves.toBeTruthy();
 		}
 	);
 });
