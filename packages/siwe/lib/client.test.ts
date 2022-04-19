@@ -81,7 +81,7 @@ describe(`EIP1271`, () => {
 		'Verificates message successfully: %s',
 		async (_, test_fields) => {
 			const msg = new SiweMessage(test_fields.message);
-			console.log(process.env.INFURA_ID)
+			console.log(`shouldbe:${process.env.INFURA_ID.substring(4)}`)
 			await expect(
 				msg.verify({
 					signature: test_fields.signature,
