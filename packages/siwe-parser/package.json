@@ -22,7 +22,12 @@
   "homepage": "https://github.com/spruceid/siwe",
   "license": "Apache-2.0",
   "dependencies": {
-    "apg-js": "^4.1.1"
+    "apg-js": "^4.1.1",
+    "uri-js": "^4.4.1",
+    "valid-url": "^1.0.9"
+  },
+  "peerDependencies": {
+    "keccak": "^3.0.2"
   },
   "repository": {
     "type": "git",
