@@ -2,8 +2,9 @@ const parsingPositive: Object = require('../../../test/parsing_positive.json');
 const parsingNegative: Object = require('../../../test/parsing_negative.json');
 const verificationPositive: Object = require('../../../test/verification_positive.json');
 const verificationNegative: Object = require('../../../test/verification_negative.json');
+const EIP1271: Object = require('../../../test/eip1271.json');
 
-import { Wallet } from 'ethers';
+import { providers, Wallet } from 'ethers';
 import { SiweMessage } from './client';
 import { SiweErrorType } from './types';
 
@@ -70,6 +71,24 @@ describe(`Round Trip`, () => {
 			msg.address = wallet.address;
 			const signature = await wallet.signMessage(msg.toMessage());
 			await expect(msg.verify({ signature }).then(({ success }) => success)).resolves.toBeTruthy();
+		}
+	);
+});
+
+
+describe(`EIP1271`, () => {
+	test.concurrent.each(Object.entries(EIP1271))(
+		'Verificates message successfully: %s',
+		async (_, test_fields) => {
+			const msg = new SiweMessage(test_fields.message);
+			await expect(
+				msg.verify({
+					signature: test_fields.signature,
+				}, new providers.InfuraProvider(1, {
+					projectId: process.env.INFURA_ID,
+					projectSecret: process.env.INFURA_SECRET,
+				})).then(({ success }) => success)
+			).resolves.toBeTruthy();
 		}
 	);
 });
