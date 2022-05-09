@@ -1,8 +1,8 @@
 // TODO: Figure out how to get types from this lib:
-import { providers, utils } from "ethers";
 import {
 	isEIP55Address, ParsedMessage, ParsedMessageRegExp
-} from "siwe-parser";
+} from "@spruceid/siwe-parser";
+import { providers, utils } from "ethers";
 import * as uri from "valid-url";
 import { SiweError, SiweErrorType, SiweResponse, VerifyParams } from "./types";
 import { checkContractWalletSignature, generateNonce } from "./utils";
