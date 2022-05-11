@@ -19,9 +19,9 @@ describe(`Message Generation`, () => {
 
 	test.concurrent.each(Object.entries(parsingNegative))(
 		'Fails to generate message: %s',
-		(_, test) => {
+		(n, test) => {
 			try {
-				new SiweMessage(test.fields);
+				new SiweMessage(test);
 			} catch (error) {
 				expect(Object.values(SiweErrorType).includes(error));
 			}
@@ -29,7 +29,7 @@ describe(`Message Generation`, () => {
 	);
 });
 
-describe(`Message verification`, () => {
+describe(`Message verification without suppressExceptions`, () => {
 	test.concurrent.each(Object.entries(verificationPositive))(
 		'Verificates message successfully: %s',
 		async (_, test_fields) => {
@@ -45,7 +45,7 @@ describe(`Message verification`, () => {
 		}
 	);
 	test.concurrent.each(Object.entries(verificationNegative))(
-		'Fails to verify message: %s',
+		'Fails to verify message: %s and rejects the promise',
 		async (n, test_fields) => {
 			try {
 				const msg = new SiweMessage(test_fields);
@@ -54,7 +54,26 @@ describe(`Message verification`, () => {
 					time: test_fields.time || test_fields.issuedAt,
 					domain: test_fields.domainBinding,
 					nonce: test_fields.matchNonce,
-				}).then(({ success }) => success)).resolves.toBeFalsy();
+				}).then(({ success }) => success)).rejects.toBeFalsy();
+			} catch (error) {
+				expect(Object.values(SiweErrorType).includes(error));
+			}
+		}
+	);
+});
+
+describe(`Message verification with suppressExceptions`, () => {
+	test.concurrent.each(Object.entries(verificationNegative))(
+		'Fails to verify message: %s but still resolves the promise',
+		async (n, test_fields) => {
+			try {
+				const msg = new SiweMessage(test_fields);
+				await expect(msg.verify({
+					signature: test_fields.signature,
+					time: test_fields.time || test_fields.issuedAt,
+					domain: test_fields.domainBinding,
+					nonce: test_fields.matchNonce,
+				}, { suppressExceptions: true }).then(({ success }) => success)).resolves.toBeFalsy();
 			} catch (error) {
 				expect(Object.values(SiweErrorType).includes(error));
 			}
@@ -75,6 +94,18 @@ describe(`Round Trip`, () => {
 	);
 });
 
+describe(`Round Trip`, () => {
+	let wallet = Wallet.createRandom();
+	test.concurrent.each(Object.entries(parsingPositive))(
+		'Generates a Successfully Verifying message: %s',
+		async (_, test) => {
+			const msg = new SiweMessage(test.fields);
+			msg.address = wallet.address;
+			const signature = await wallet.signMessage(msg.toMessage());
+			await expect(msg.verify({ signature }).then(({ success }) => success)).resolves.toBeTruthy();
+		}
+	);
+});
 
 describe(`EIP1271`, () => {
 	test.concurrent.each(Object.entries(EIP1271))(
@@ -84,10 +115,13 @@ describe(`EIP1271`, () => {
 			await expect(
 				msg.verify({
 					signature: test_fields.signature,
-				}, new providers.InfuraProvider(1, {
-					projectId: process.env.INFURA_ID,
-					projectSecret: process.env.INFURA_SECRET,
-				})).then(({ success }) => success)
+				}, {
+					provider: new providers.InfuraProvider(1, {
+						projectId: process.env.INFURA_ID,
+						projectSecret: process.env.INFURA_SECRET,
+					},
+					)
+				}).then(({ success }) => success)
 			).resolves.toBeTruthy();
 		}
 	);
@@ -111,4 +145,68 @@ describe(`Unit`, () => {
 		});
 		(msg as any).validateMessage('0xdc35c7f8ba2720df052e0092556456127f00f7707eaa8e3bbff7e56774e7f2e05a093cfc9e02964c33d86e8e066e221b7d153d27e5a2e97ccd5ca7d3f2ce06cb1b');
 	}).toThrow());
+
+	test('Should not throw if params are valid.', async () => {
+		let wallet = Wallet.createRandom();
+		let msg = new SiweMessage({
+			address: wallet.address,
+			domain: "login.xyz",
+			statement: "Sign-In With Ethereum Example Statement",
+			uri: "https://login.xyz",
+			version: "1",
+			nonce: "bTyXgcQxn2htgkjJn",
+			issuedAt: "2022-01-27T17:09:38.578Z",
+			chainId: 1,
+			expirationTime: "2100-01-07T14:31:43.952Z"
+		});
+		const signature = await wallet.signMessage(msg.toMessage());
+		const result = await (msg as any).verify({ signature });
+		expect(result.success).toBeTruthy();
+	});
+
+	test('Should throw if params are invalid.', async () => {
+		let wallet = Wallet.createRandom();
+		let msg = new SiweMessage({
+			address: wallet.address,
+			domain: "login.xyz",
+			statement: "Sign-In With Ethereum Example Statement",
+			uri: "https://login.xyz",
+			version: "1",
+			nonce: "bTyXgcQxn2htgkjJn",
+			issuedAt: "2022-01-27T17:09:38.578Z",
+			chainId: 1,
+			expirationTime: "2100-01-07T14:31:43.952Z"
+		});
+		const signature = await wallet.signMessage(msg.toMessage());
+		let result;
+		try {
+			result = await (msg as any).verify({ signature, invalidKey: 'should throw' });
+		} catch (e) {
+			expect(e.success).toBeFalsy();
+			expect(e.error).toEqual(new Error('invalidKey is not a valid key for VerifyParams.'));
+		}
+	});
+
+	test('Should throw if opts are invalid.', async () => {
+		let wallet = Wallet.createRandom();
+		let msg = new SiweMessage({
+			address: wallet.address,
+			domain: "login.xyz",
+			statement: "Sign-In With Ethereum Example Statement",
+			uri: "https://login.xyz",
+			version: "1",
+			nonce: "bTyXgcQxn2htgkjJn",
+			issuedAt: "2022-01-27T17:09:38.578Z",
+			chainId: 1,
+			expirationTime: "2100-01-07T14:31:43.952Z"
+		});
+		const signature = await wallet.signMessage(msg.toMessage());
+		let result;
+		try {
+			result = await (msg as any).verify({ signature }, { suppressExceptions: true, invalidKey: 'should throw' });
+		} catch (e) {
+			expect(e.success).toBeFalsy();
+			expect(e.error).toEqual(new Error('invalidKey is not a valid key for VerifyOpts.'));
+		}
+	});
 });

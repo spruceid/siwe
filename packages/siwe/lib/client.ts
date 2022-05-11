@@ -4,7 +4,7 @@ import {
 } from "@spruceid/siwe-parser";
 import { providers, utils } from "ethers";
 import * as uri from "valid-url";
-import { SiweError, SiweErrorType, SiweResponse, VerifyParams } from "./types";
+import { SiweError, SiweErrorType, SiweResponse, VerifyOpts, VerifyOptsKeys, VerifyParams, VerifyParamsKeys } from "./types";
 import { checkContractWalletSignature, generateNonce } from "./utils";
 
 export class SiweMessage {
@@ -167,20 +167,66 @@ export class SiweMessage {
 	}
 
 	/**
+	 * @deprecated
+	 * Validates the integrity of the object by matching it's signature.
+	 * @param signature Signature to match the address in the message.
+	 * @param provider Ethers provider to be used for EIP-1271 validation
+	 */
+	async validate(
+		signature: string,
+		provider?: providers.Provider
+	) {
+		console.warn("validate() has been deprecated, please update your code to use verify(). validate() may be removed in future versions.");
+		return this.verify({ signature }, { provider, suppressExceptions: false });
+	}
+
+	/**
 	 * Validates the integrity of the object by matching it's signature.
 	 * @param params Parameters to verify the integrity of the message, signature is required.
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
 	async verify(
 		params: VerifyParams,
-		provider?: providers.Provider
+		opts: VerifyOpts = { suppressExceptions: false },
 	): Promise<SiweResponse> {
-		return new Promise<SiweResponse>(async (resolve) => {
+		return new Promise<SiweResponse>(async (resolve, reject) => {
+
+			Object.keys(params).forEach((key: keyof VerifyParams) => {
+				if (!VerifyParamsKeys.includes(key)) {
+					reject({
+						success: false,
+						data: this,
+						error: new Error(`${key} is not a valid key for VerifyParams.`),
+					});
+				}
+			});
+
+			Object.keys(opts).forEach((key: keyof VerifyOpts) => {
+				if (!VerifyOptsKeys.includes(key)) {
+					reject({
+						success: false,
+						data: this,
+						error: new Error(`${key} is not a valid key for VerifyOpts.`),
+					});
+				}
+			});
+
+			const assert = (result) => {
+				if (opts.suppressExceptions) {
+					resolve(result);
+				} else {
+					reject(result);
+				}
+			};
+
 			const { signature, domain, nonce, time } = params;
 
 			/** Domain binding */
 			if (domain && domain !== this.domain) {
-				resolve({
+				if (opts.suppressExceptions) {
+
+				}
+				assert({
 					success: false,
 					data: this,
 					error: new SiweError(
@@ -193,7 +239,7 @@ export class SiweMessage {
 
 			/** Nonce binding */
 			if (nonce && nonce !== this.nonce) {
-				resolve({
+				assert({
 					success: false,
 					data: this,
 					error: new SiweError(SiweErrorType.NONCE_MISMATCH, nonce, this.nonce),
@@ -207,7 +253,7 @@ export class SiweMessage {
 			if (this.expirationTime) {
 				const expirationDate = new Date(this.expirationTime);
 				if (checkTime.getTime() >= expirationDate.getTime()) {
-					resolve({
+					assert({
 						success: false,
 						data: this,
 						error: new SiweError(
@@ -223,11 +269,11 @@ export class SiweMessage {
 			if (this.notBefore) {
 				const notBefore = new Date(this.notBefore);
 				if (checkTime.getTime() < notBefore.getTime()) {
-					resolve({
+					assert({
 						success: false,
 						data: this,
 						error: new SiweError(
-							SiweErrorType.EXPIRED_MESSAGE,
+							SiweErrorType.NOT_YET_VALID_MESSAGE,
 							`${checkTime.toISOString()} >= ${notBefore.toISOString()}`,
 							`${checkTime.toISOString()} < ${notBefore.toISOString()}`
 						),
@@ -238,7 +284,7 @@ export class SiweMessage {
 			try {
 				EIP4361Message = this.prepareMessage();
 			} catch (e) {
-				resolve({
+				assert({
 					success: false,
 					data: this,
 					error: e,
@@ -259,13 +305,13 @@ export class SiweMessage {
 						isValid = await checkContractWalletSignature(
 							this,
 							signature,
-							provider
+							opts.provider
 						);
 					} catch (_) {
 						isValid = false;
 					} finally {
 						if (!isValid) {
-							resolve({
+							assert({
 								success: false,
 								data: this,
 								error: new SiweError(
@@ -297,7 +343,7 @@ export class SiweMessage {
 		}
 
 		/** `domain` check. */
-		if (this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
+		if (!this.domain || this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
 			throw new SiweError(SiweErrorType.INVALID_DOMAIN, `${this.domain} to be a valid domain.`);
 		}
 
