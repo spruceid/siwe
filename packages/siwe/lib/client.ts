@@ -167,7 +167,7 @@ export class SiweMessage {
 	}
 
 	/**
-	 * Validates the integrity of the object by matching it's signature.
+	 * Validates the integrity of the object by matching its signature.
 	 * @param params Parameters to verify the integrity of the message, signature is required.
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
