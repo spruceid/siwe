@@ -70,6 +70,7 @@ export class SiweMessage {
 				this.chainId = parseInt(this.chainId);
 			}
 		}
+		this.nonce = this.nonce || generateNonce();
 		this.validateMessage();
 	}
 
