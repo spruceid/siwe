@@ -70,7 +70,7 @@ export class SiweMessage {
 				this.chainId = parseInt(this.chainId);
 			}
 		}
-		this.validate();
+		this.validateMessage();
 	}
 
 	/**
@@ -93,7 +93,7 @@ export class SiweMessage {
 	 */
 	toMessage(): string {
 		/** Validates all fields of the object */
-		this.validate();
+		this.validateMessage();
 
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
 		const uriField = `URI: ${this.uri}`;
@@ -167,7 +167,7 @@ export class SiweMessage {
 	}
 
 	/**
-	 * Validates the integrity of the object by matching it's signature.
+	 * Validates the integrity of the object by matching its signature.
 	 * @param params Parameters to verify the integrity of the message, signature is required.
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
@@ -290,7 +290,12 @@ export class SiweMessage {
 	 * Validates the value of this object fields.
 	 * @throws Throws an {ErrorType} if a field is invalid.
 	 */
-	validate() {
+	private validateMessage(...args) {
+		/** Checks if the user might be using the function to verify instead of validate. */
+		if (args.length > 0) {
+			throw new SiweError(SiweErrorType.UNABLE_TO_PARSE, `Unexpected argument in the validateMessage function.`);
+		}
+
 		/** `domain` check. */
 		if (this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
 			throw new SiweError(SiweErrorType.INVALID_DOMAIN, `${this.domain} to be a valid domain.`);
@@ -320,7 +325,7 @@ export class SiweMessage {
 		}
 
 		/** Check if the nonce is alphanumeric and bigger then 8 characters */
-		const nonce = this.nonce.match(/[a-zA-Z0-9]{8,}/);
+		const nonce = this?.nonce?.match(/[a-zA-Z0-9]{8,}/);
 		if (!nonce || this.nonce.length < 8 || nonce[0] !== this.nonce) {
 			throw new SiweError(
 				SiweErrorType.INVALID_NONCE,
