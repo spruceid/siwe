@@ -325,7 +325,7 @@ export class SiweMessage {
 		}
 
 		/** Check if the nonce is alphanumeric and bigger then 8 characters */
-		const nonce = this.nonce.match(/[a-zA-Z0-9]{8,}/);
+		const nonce = this?.nonce?.match(/[a-zA-Z0-9]{8,}/);
 		if (!nonce || this.nonce.length < 8 || nonce[0] !== this.nonce) {
 			throw new SiweError(
 				SiweErrorType.INVALID_NONCE,
