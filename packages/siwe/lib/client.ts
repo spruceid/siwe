@@ -70,7 +70,7 @@ export class SiweMessage {
 				this.chainId = parseInt(this.chainId);
 			}
 		}
-		this.validate();
+		this.validateMessage();
 	}
 
 	/**
@@ -93,7 +93,7 @@ export class SiweMessage {
 	 */
 	toMessage(): string {
 		/** Validates all fields of the object */
-		this.validate();
+		this.validateMessage();
 
 		const header = `${this.domain} wants you to sign in with your Ethereum account:`;
 		const uriField = `URI: ${this.uri}`;
@@ -290,7 +290,12 @@ export class SiweMessage {
 	 * Validates the value of this object fields.
 	 * @throws Throws an {ErrorType} if a field is invalid.
 	 */
-	validate() {
+	private validateMessage(...args) {
+		/** Checks if the user might be using the function to verify instead of validate. */
+		if (args.length > 0) {
+			throw new SiweError(SiweErrorType.UNABLE_TO_PARSE, `Unexpected argument in the validateMessage function.`);
+		}
+
 		/** `domain` check. */
 		if (this.domain.length === 0 || !/[^#?]*/.test(this.domain)) {
 			throw new SiweError(SiweErrorType.INVALID_DOMAIN, `${this.domain} to be a valid domain.`);
