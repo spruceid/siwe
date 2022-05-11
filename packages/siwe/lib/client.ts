@@ -224,9 +224,6 @@ export class SiweMessage {
 
 			/** Domain binding */
 			if (domain && domain !== this.domain) {
-				if (opts.suppressExceptions) {
-
-				}
 				assert({
 					success: false,
 					data: this,
