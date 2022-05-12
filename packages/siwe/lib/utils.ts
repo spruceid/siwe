@@ -21,20 +21,13 @@ export const checkContractWalletSignature = async (
   const abi = [
     'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
   ];
-  try {
-    const walletContract = new Contract(message.address, abi, provider);
-    const hashMessage = utils.hashMessage(message.prepareMessage());
-    const isValidSignature = await walletContract.isValidSignature(
-      hashMessage,
-      signature
-    );
-    if (!isValidSignature) {
-      throw new Error('Invalid signature.');
-    }
-    return isValidSignature;
-  } catch (e) {
-    throw e;
-  }
+  const walletContract = new Contract(message.address, abi, provider);
+  const hashMessage = utils.hashMessage(message.prepareMessage());
+  const isValidSignature = await walletContract.isValidSignature(
+    hashMessage,
+    signature
+  );
+  return isValidSignature;
 };
 
 /**
