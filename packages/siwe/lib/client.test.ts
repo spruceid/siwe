@@ -1,5 +1,6 @@
 const parsingPositive: Object = require('../../../test/parsing_positive.json');
 const parsingNegative: Object = require('../../../test/parsing_negative.json');
+const parsingNegativeObjects: Object = require('../../../test/parsing_negative_objects.json');
 const verificationPositive: Object = require('../../../test/verification_positive.json');
 const verificationNegative: Object = require('../../../test/verification_negative.json');
 const EIP1271: Object = require('../../../test/eip1271.json');
@@ -18,6 +19,17 @@ describe(`Message Generation`, () => {
 	);
 
 	test.concurrent.each(Object.entries(parsingNegative))(
+		'Fails to generate message: %s',
+		(n, test) => {
+			try {
+				new SiweMessage(test);
+			} catch (error) {
+				expect(Object.values(SiweErrorType).includes(error));
+			}
+		}
+	);
+
+	test.concurrent.each(Object.entries(parsingNegativeObjects))(
 		'Fails to generate message: %s',
 		(n, test) => {
 			try {
