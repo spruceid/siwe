@@ -1,5 +1,5 @@
 import { randomStringForEntropy } from '@stablelib/random';
-import { Contract, utils } from 'ethers';
+import { Contract, providers, Signer, utils } from 'ethers';
 import type { SiweMessage } from './client';
 
 /**
@@ -12,7 +12,7 @@ import type { SiweMessage } from './client';
 export const checkContractWalletSignature = async (
   message: SiweMessage,
   signature: string,
-  provider?: any
+  provider?: providers.Provider | Signer
 ): Promise<boolean> => {
   if (!provider) {
     return false;
