@@ -1,9 +1,10 @@
-const parsingPositive: Object = require('../../../test/parsing_positive.json');
-const parsingNegative: Object = require('../../../test/parsing_negative.json');
-const parsingNegativeObjects: Object = require('../../../test/parsing_negative_objects.json');
-const verificationPositive: Object = require('../../../test/verification_positive.json');
-const verificationNegative: Object = require('../../../test/verification_negative.json');
-const EIP1271: Object = require('../../../test/eip1271.json');
+/* eslint @typescript-eslint/no-explicit-any: 0 */
+import parsingPositive = require('../../../test/parsing_positive.json');
+import parsingNegative = require('../../../test/parsing_negative.json');
+import parsingNegativeObjects = require('../../../test/parsing_negative_objects.json');
+import verificationPositive = require('../../../test/verification_positive.json');
+import verificationNegative = require('../../../test/verification_negative.json');
+import EIP1271 = require('../../../test/eip1271.json');
 
 import { providers, Wallet } from 'ethers';
 import { SiweMessage } from './client';
@@ -33,7 +34,7 @@ describe(`Message Generation`, () => {
     'Fails to generate message: %s',
     (n, test) => {
       try {
-        new SiweMessage(test);
+        new SiweMessage(test as any);
       } catch (error) {
         expect(Object.values(SiweErrorType).includes(error));
       }
@@ -50,9 +51,9 @@ describe(`Message verification without suppressExceptions`, () => {
         msg
           .verify({
             signature: test_fields.signature,
-            time: test_fields.time,
-            domain: test_fields.domainBinding,
-            nonce: test_fields.matchNonce,
+            time: (test_fields as any).time || test_fields.issuedAt,
+            domain: (test_fields as any).domainBinding,
+            nonce: (test_fields as any).matchNonce,
           })
           .then(({ success }) => success)
       ).resolves.toBeTruthy();
@@ -67,9 +68,9 @@ describe(`Message verification without suppressExceptions`, () => {
           msg
             .verify({
               signature: test_fields.signature,
-              time: test_fields.time || test_fields.issuedAt,
-              domain: test_fields.domainBinding,
-              nonce: test_fields.matchNonce,
+              time: (test_fields as any).time || test_fields.issuedAt,
+              domain: (test_fields as any).domainBinding,
+              nonce: (test_fields as any).matchNonce,
             })
             .then(({ success }) => success)
         ).rejects.toBeFalsy();
@@ -91,9 +92,9 @@ describe(`Message verification with suppressExceptions`, () => {
             .verify(
               {
                 signature: test_fields.signature,
-                time: test_fields.time || test_fields.issuedAt,
-                domain: test_fields.domainBinding,
-                nonce: test_fields.matchNonce,
+                time: (test_fields as any).time || test_fields.issuedAt,
+                domain: (test_fields as any).domainBinding,
+                nonce: (test_fields as any).matchNonce,
               },
               { suppressExceptions: true }
             )
@@ -107,7 +108,7 @@ describe(`Message verification with suppressExceptions`, () => {
 });
 
 describe(`Round Trip`, () => {
-  let wallet = Wallet.createRandom();
+  const wallet = Wallet.createRandom();
   test.concurrent.each(Object.entries(parsingPositive))(
     'Generates a Successfully Verifying message: %s',
     async (_, test) => {
@@ -122,7 +123,7 @@ describe(`Round Trip`, () => {
 });
 
 describe(`Round Trip`, () => {
-  let wallet = Wallet.createRandom();
+  const wallet = Wallet.createRandom();
   test.concurrent.each(Object.entries(parsingPositive))(
     'Generates a Successfully Verifying message: %s',
     async (_, test) => {
@@ -184,8 +185,8 @@ describe(`Unit`, () => {
     }).toThrow());
 
   test('Should not throw if params are valid.', async () => {
-    let wallet = Wallet.createRandom();
-    let msg = new SiweMessage({
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
       address: wallet.address,
       domain: 'login.xyz',
       statement: 'Sign-In With Ethereum Example Statement',
@@ -202,8 +203,8 @@ describe(`Unit`, () => {
   });
 
   test('Should throw if params are invalid.', async () => {
-    let wallet = Wallet.createRandom();
-    let msg = new SiweMessage({
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
       address: wallet.address,
       domain: 'login.xyz',
       statement: 'Sign-In With Ethereum Example Statement',
@@ -215,9 +216,8 @@ describe(`Unit`, () => {
       expirationTime: '2100-01-07T14:31:43.952Z',
     });
     const signature = await wallet.signMessage(msg.toMessage());
-    let result;
     try {
-      result = await (msg as any).verify({
+      await (msg as any).verify({
         signature,
         invalidKey: 'should throw',
       });
@@ -230,8 +230,8 @@ describe(`Unit`, () => {
   });
 
   test('Should throw if opts are invalid.', async () => {
-    let wallet = Wallet.createRandom();
-    let msg = new SiweMessage({
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
       address: wallet.address,
       domain: 'login.xyz',
       statement: 'Sign-In With Ethereum Example Statement',
@@ -243,9 +243,8 @@ describe(`Unit`, () => {
       expirationTime: '2100-01-07T14:31:43.952Z',
     });
     const signature = await wallet.signMessage(msg.toMessage());
-    let result;
     try {
-      result = await (msg as any).verify(
+      await (msg as any).verify(
         { signature },
         { suppressExceptions: true, invalidKey: 'should throw' }
       );
