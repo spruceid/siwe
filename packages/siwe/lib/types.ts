@@ -18,7 +18,7 @@ export interface VerifyParams {
 export const VerifyParamsKeys: Array<keyof VerifyParams> = ["signature", "domain", "nonce", "time"];
 
 export interface VerifyOpts {
-    /** Ethers provider to be used for EIP-1271 validation */
+    /** ethers provider to be used for EIP-1271 validation */
     provider?: providers.Provider;
 
     /** If the library should reject promises on errors, defaults to false */
