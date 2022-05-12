@@ -146,7 +146,7 @@ export class SiweMessage {
 	}
 
 	/**
-	 * This method parses all the fields in the object and creates a sign
+	 * This method parses all the fields in the object and creates a messaging for signing
 	 * message according with the type defined.
 	 * @returns {string} Returns a message ready to be signed according with the
 	 * type defined in the object.
@@ -169,7 +169,7 @@ export class SiweMessage {
 
 	/**
 	 * @deprecated
-	 * Validates the integrity of the object by matching it's signature.
+	 * Verifies the integrity of the object by matching its signature.
 	 * @param signature Signature to match the address in the message.
 	 * @param provider Ethers provider to be used for EIP-1271 validation
 	 */
@@ -182,7 +182,7 @@ export class SiweMessage {
 	}
 
 	/**
-	 * Verifies the integrity of the object by matching it's signature.
+	 * Verifies the integrity of the object by matching its signature.
 	 * @param params Parameters to verify the integrity of the message, signature is required.
 	 * @returns {Promise<SiweMessage>} This object if valid.
 	 */
@@ -331,7 +331,7 @@ export class SiweMessage {
 	}
 
 	/**
-	 * Validates the value of this object fields.
+	 * Validates the values of this object fields.
 	 * @throws Throws an {ErrorType} if a field is invalid.
 	 */
 	private validateMessage(...args) {
