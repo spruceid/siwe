@@ -147,7 +147,7 @@ export class SiweMessage {
       );
     }
 
-    let suffix = suffixArray.join('\n');
+    const suffix = suffixArray.join('\n');
     prefix = [prefix, this.statement].join('\n\n');
     if (this.statement) {
       prefix += '\n';
@@ -199,7 +199,7 @@ export class SiweMessage {
     params: VerifyParams,
     opts: VerifyOpts = { suppressExceptions: false }
   ): Promise<SiweResponse> {
-    return new Promise<SiweResponse>(async (resolve, reject) => {
+    return new Promise<SiweResponse>((resolve, reject) => {
       Object.keys(params).forEach((key: keyof VerifyParams) => {
         if (!VerifyParamsKeys.includes(key)) {
           reject({
@@ -220,7 +220,7 @@ export class SiweMessage {
         }
       });
 
-      const assert = result => {
+      const fail = result => {
         if (opts.suppressExceptions) {
           resolve(result);
         } else {
@@ -232,7 +232,7 @@ export class SiweMessage {
 
       /** Domain binding */
       if (domain && domain !== this.domain) {
-        assert({
+        fail({
           success: false,
           data: this,
           error: new SiweError(
@@ -245,7 +245,7 @@ export class SiweMessage {
 
       /** Nonce binding */
       if (nonce && nonce !== this.nonce) {
-        assert({
+        fail({
           success: false,
           data: this,
           error: new SiweError(SiweErrorType.NONCE_MISMATCH, nonce, this.nonce),
@@ -259,7 +259,7 @@ export class SiweMessage {
       if (this.expirationTime) {
         const expirationDate = new Date(this.expirationTime);
         if (checkTime.getTime() >= expirationDate.getTime()) {
-          assert({
+          fail({
             success: false,
             data: this,
             error: new SiweError(
@@ -275,7 +275,7 @@ export class SiweMessage {
       if (this.notBefore) {
         const notBefore = new Date(this.notBefore);
         if (checkTime.getTime() < notBefore.getTime()) {
-          assert({
+          fail({
             success: false,
             data: this,
             error: new SiweError(
@@ -290,7 +290,7 @@ export class SiweMessage {
       try {
         EIP4361Message = this.prepareMessage();
       } catch (e) {
-        assert({
+        fail({
           success: false,
           data: this,
           error: e,
@@ -301,40 +301,43 @@ export class SiweMessage {
       let addr;
       try {
         addr = utils.verifyMessage(EIP4361Message, signature);
-      } catch (_) {
+      } catch (e) {
+        console.error(e);
       } finally {
         /** Match signature with message's address */
         if (addr !== this.address) {
-          let isValid = false;
-          try {
-            /** Try resolving EIP-1271 if address doesn't match */
-            isValid = await checkContractWalletSignature(
-              this,
-              signature,
-              opts.provider
-            );
-          } catch (_) {
-            isValid = false;
-          } finally {
-            if (!isValid) {
-              assert({
+          checkContractWalletSignature(this, signature, opts.provider)
+            .then(isValid => {
+              if (!isValid) {
+                fail({
+                  success: false,
+                  data: this,
+                  error: new SiweError(
+                    SiweErrorType.INVALID_SIGNATURE,
+                    addr,
+                    `Resolved address to be ${this.address}`
+                  ),
+                });
+              }
+              resolve({
+                success: true,
+                data: this,
+              });
+            })
+            .catch(error => {
+              fail({
                 success: false,
                 data: this,
-                error: new SiweError(
-                  SiweErrorType.INVALID_SIGNATURE,
-                  addr,
-                  `Resolved address to be ${this.address}`
-                ),
+                error,
               });
-            }
-          }
+            });
+        } else {
+          resolve({
+            success: true,
+            data: this,
+          });
         }
       }
-
-      resolve({
-        success: true,
-        data: this,
-      });
     });
   }
 
@@ -400,7 +403,7 @@ export class SiweMessage {
     }
 
     const ISO8601 =
-      /([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))/;
+      /([0-9]+)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))/;
     /** `issuedAt` conforms to ISO-8601 */
     if (this.issuedAt) {
       if (!ISO8601.test(this.issuedAt)) {
