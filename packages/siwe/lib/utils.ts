@@ -10,31 +10,31 @@ import type { SiweMessage } from './client';
  * the signature is valid for given address.
  */
 export const checkContractWalletSignature = async (
-	message: SiweMessage,
-	signature: string,
-	provider?: any
+  message: SiweMessage,
+  signature: string,
+  provider?: any
 ): Promise<boolean> => {
-	if (!provider) {
-		return false;
-	}
+  if (!provider) {
+    return false;
+  }
 
-	const abi = [
-		'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
-	];
-	try {
-		const walletContract = new Contract(message.address, abi, provider);
-		const hashMessage = utils.hashMessage(message.prepareMessage());
-		const isValidSignature = await walletContract.isValidSignature(
-			hashMessage,
-			signature,
-		);
-		if (!isValidSignature) {
-			throw new Error("Invalid signature.");
-		}
-		return isValidSignature;
-	} catch (e) {
-		throw e;
-	}
+  const abi = [
+    'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
+  ];
+  try {
+    const walletContract = new Contract(message.address, abi, provider);
+    const hashMessage = utils.hashMessage(message.prepareMessage());
+    const isValidSignature = await walletContract.isValidSignature(
+      hashMessage,
+      signature
+    );
+    if (!isValidSignature) {
+      throw new Error('Invalid signature.');
+    }
+    return isValidSignature;
+  } catch (e) {
+    throw e;
+  }
 };
 
 /**
@@ -49,5 +49,5 @@ export const checkContractWalletSignature = async (
  * an alphanumeric character set.
  */
 export const generateNonce = (): string => {
-	return randomStringForEntropy(96);
+  return randomStringForEntropy(96);
 };
