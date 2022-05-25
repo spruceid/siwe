@@ -187,7 +187,11 @@ export class SiweMessage {
     console.warn(
       'validate() has been deprecated, please update your code to use verify(). validate() may be removed in future versions.'
     );
-    return this.verify({ signature }, { provider, suppressExceptions: false });
+    return this.verify({ signature }, { provider, suppressExceptions: false })
+      .then(({ data }) => data)
+      .catch(({ error }) => {
+        throw error;
+      });
   }
 
   /**
