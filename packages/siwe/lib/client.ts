@@ -5,7 +5,7 @@ import {
 import { providers, utils } from "ethers";
 import * as uri from "valid-url";
 import { SiweError, SiweErrorType, SiweResponse, VerifyOpts, VerifyOptsKeys, VerifyParams, VerifyParamsKeys } from "./types";
-import { checkContractWalletSignature, generateNonce } from "./utils";
+import { addressIsDelegateOf, checkContractWalletSignature, generateNonce } from "./utils";
 
 export class SiweMessage {
 	/**RFC 4501 dns authority that is requesting the signing. */
@@ -297,27 +297,45 @@ export class SiweMessage {
 			} finally {
 				/** Match signature with message's address */
 				if (addr !== this.address) {
-					let isValid = false;
-					try {
-						/** Try resolving EIP-1271 if address doesn't match */
-						isValid = await checkContractWalletSignature(
-							this,
-							signature,
-							opts.provider
-						);
-					} catch (_) {
-						isValid = false;
-					} finally {
-						if (!isValid) {
+
+					/** Message's address doesn't with signature's but the address is correct */
+					if (opts.delegationHistory && opts.delegationHistory.walletAddress === addr) {
+						const isDelegate = await addressIsDelegateOf(addr, this.address, opts.delegationHistory.contractAddress, opts.provider);
+						console.log(isDelegate);
+						if (!isDelegate) {
 							assert({
 								success: false,
 								data: this,
 								error: new SiweError(
-									SiweErrorType.INVALID_SIGNATURE,
-									addr,
-									`Resolved address to be ${this.address}`
-								),
-							});
+									SiweErrorType.ADDRESS_IS_NOT_DELEGATE,
+									`${addr} to be delegate of ${this.address}.`,
+									`${addr} not found in delegee list of ${this.address}.`,
+								)
+							})
+						}
+					} else {
+						let isValid = false;
+						try {
+							/** Try resolving EIP-1271 if address doesn't match */
+							isValid = await checkContractWalletSignature(
+								this,
+								signature,
+								opts.provider
+							);
+						} catch (_) {
+							isValid = false;
+						} finally {
+							if (!isValid) {
+								assert({
+									success: false,
+									data: this,
+									error: new SiweError(
+										SiweErrorType.INVALID_SIGNATURE,
+										`Resolved address to be ${this.address}`,
+										addr,
+									),
+								});
+							}
 						}
 					}
 				}
