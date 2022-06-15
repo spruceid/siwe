@@ -4,7 +4,6 @@
   "description": "Sign-In with Ethereum",
   "main": "dist/siwe.js",
   "types": "dist/siwe.d.ts",
-  "private": "true",
   "directories": {
     "lib": "lib"
   },
