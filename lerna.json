@@ -9,7 +9,8 @@
     "publish": {
       "conventionalCommits": true,
       "registry": "https://npm.pkg.github.com",
-      "allowBranch": "feat/delegate-history"
+      "allowBranch": "feat/delegate-history",
+      "access": "restricted"
     }
   }
 }
