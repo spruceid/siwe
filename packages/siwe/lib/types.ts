@@ -24,19 +24,11 @@ export interface VerifyOpts {
     /** If the library should reject promises on errors, defaults to false */
     suppressExceptions?: boolean;
 
-    /** Enables lookup for Gnosis delegation history */
-    delegationHistory?: GnosisDelegationHistory;
+    /** Function to be called when the message cannot be validated. */
+    failureCallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage) => Promise<SiweResponse>;
 }
 
-export const VerifyOptsKeys: Array<keyof VerifyOpts> = ["provider", "suppressExceptions", "delegationHistory"];
-
-export interface GnosisDelegationHistory {
-    /** Address of the DelegationHistory address */
-    contractAddress: string;
-
-    /** Address retrieved by the wallet */
-    walletAddress: string;
-}
+export const VerifyOptsKeys: Array<keyof VerifyOpts> = ["provider", "suppressExceptions", "failureCallback"];
 
 /** 
  * Returned on verifications.
@@ -64,7 +56,7 @@ export class SiweError {
     }
 
     /** Type of the error. */
-    type: SiweErrorType;
+    type: SiweErrorType | string;
 
     /** Expected value or condition to pass. */
     expected?: string;
@@ -112,7 +104,4 @@ export enum SiweErrorType {
 
     /** Thrown when some required field is missing. */
     UNABLE_TO_PARSE = 'Unable to parse the message.',
-
-    /** Thrown when the address is not registered as a delegate of delegee */
-    ADDRESS_IS_NOT_DELEGATE = 'Given address is not registered at delegee list.'
 }
