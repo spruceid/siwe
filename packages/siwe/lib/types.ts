@@ -49,7 +49,7 @@ export interface SiweResponse {
  */
 export class SiweError {
 
-    constructor(type: SiweErrorType, expected?: string, received?: string) {
+    constructor(type: SiweErrorType | string, expected?: string, received?: string) {
         this.type = type;
         this.expected = expected;
         this.received = received;
