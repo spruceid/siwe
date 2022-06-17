@@ -51,33 +51,3 @@ export const checkContractWalletSignature = async (
 export const generateNonce = (): string => {
   return randomStringForEntropy(96);
 };
-
-export const addressIsDelegateOf = async (
-  delegateAddress: string,
-  delegatorAddress: string,
-  contractAddress: string,
-  provider: any
-): Promise<boolean> => {
-  if (!provider) {
-    return false;
-  }
-
-  const abi = [
-    "event SetDelegate(address indexed delegator, bytes32 indexed id, address indexed delegate)",
-    "event ClearDelegate(address indexed delegator, bytes32 indexed id, address indexed delegate)",
-  ];
-  
-  try {
-		const delegationHistory = new Contract(contractAddress, abi, provider);
-		const setDelegateFilter = delegationHistory.filters.SetDelegate(delegatorAddress, null, delegateAddress);
-		const clearDelegateFilter = delegationHistory.filters.ClearDelegate(delegatorAddress, null, delegateAddress);
-		
-		const events = await Promise.all([
-			delegationHistory.queryFilter(setDelegateFilter),
-			delegationHistory.queryFilter(clearDelegateFilter)
-		]).then(e => e.flat().sort((a, b) => a.blockNumber - b.blockNumber));
-    return events.pop().event === "SetDelegate";
-  } catch (e) {
-    throw e;
-  }
-};

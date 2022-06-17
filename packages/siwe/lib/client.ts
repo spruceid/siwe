@@ -5,7 +5,7 @@ import {
 import { providers, utils } from "ethers";
 import * as uri from "valid-url";
 import { SiweError, SiweErrorType, SiweResponse, VerifyOpts, VerifyOptsKeys, VerifyParams, VerifyParamsKeys } from "./types";
-import { addressIsDelegateOf, checkContractWalletSignature, generateNonce } from "./utils";
+import { checkContractWalletSignature, generateNonce } from "./utils";
 
 export class SiweMessage {
 	/**RFC 4501 dns authority that is requesting the signing. */
@@ -297,22 +297,9 @@ export class SiweMessage {
 			} finally {
 				/** Match signature with message's address */
 				if (addr !== this.address) {
-
-					/** Message's address doesn't with signature's but the address is correct */
-					if (opts.delegationHistory && opts.delegationHistory.walletAddress === addr) {
-						const isDelegate = await addressIsDelegateOf(addr, this.address, opts.delegationHistory.contractAddress, opts.provider);
-						console.log(isDelegate);
-						if (!isDelegate) {
-							assert({
-								success: false,
-								data: this,
-								error: new SiweError(
-									SiweErrorType.ADDRESS_IS_NOT_DELEGATE,
-									`${addr} to be delegate of ${this.address}.`,
-									`${addr} not found in delegee list of ${this.address}.`,
-								)
-							})
-						}
+					/** Checks and call for failureCallback before trying EIP-1271 resolution */
+					if (opts.failureCallback) {
+							assert(await opts.failureCallback(params, opts, this))
 					} else {
 						let isValid = false;
 						try {
