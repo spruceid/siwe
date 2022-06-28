@@ -254,7 +254,7 @@ export class SiweMessage {
 					addr = ethers.utils.verifyMessage(message, signature);
 
 				} catch (_) { } finally {
-					if (addr !== this.address) {
+					if (addr?.toLowerCase() !== this.address?.toLowerCase()) {
 						try {
 							//EIP-1271
 							const isValidSignature =

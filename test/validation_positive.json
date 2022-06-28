@@ -10,5 +10,17 @@
         "chainId": 1,
         "expirationTime": "2100-01-07T14:31:43.952Z",
         "signature": "0xdc35c7f8ba2720df052e0092556456127f00f7707eaa8e3bbff7e56774e7f2e05a093cfc9e02964c33d86e8e066e221b7d153d27e5a2e97ccd5ca7d3f2ce06cb1b"
+    },
+    "example message with address in lowercase": {
+        "domain": "login.xyz",
+        "address": "0xc480517ae075820a1fb1853b90d2fe7b5ff07bbe",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "bTyXgcQxn2htgkjJn",
+        "issuedAt": "2022-01-27T17:09:38.578Z",
+        "chainId": 1,
+        "expirationTime": "2100-01-07T14:31:43.952Z",
+        "signature": "0x9b6a2583400c279b2e0b32d80e222c0bd9a5b0deec965fbb9c3503426916ddd86959bc280e10f1a6314997b06449ec00488bbe1b9389f95611f13149389ae9fa1c"
     }
 }
