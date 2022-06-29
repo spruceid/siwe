@@ -297,27 +297,35 @@ export class SiweMessage {
 			} finally {
 				/** Match signature with message's address */
 				if (addr !== this.address) {
-					let isValid = false;
-					try {
-						/** Try resolving EIP-1271 if address doesn't match */
-						isValid = await checkContractWalletSignature(
-							this,
-							signature,
-							opts.provider
-						);
-					} catch (_) {
-						isValid = false;
-					} finally {
-						if (!isValid) {
-							assert({
-								success: false,
-								data: this,
-								error: new SiweError(
-									SiweErrorType.INVALID_SIGNATURE,
-									addr,
-									`Resolved address to be ${this.address}`
-								),
-							});
+					/** Checks and call for failureCallback before trying EIP-1271 resolution */
+					if (opts.failureCallback) {
+							const result = await opts.failureCallback(params, opts, this);
+							if(!result.success) {
+								assert(result)
+							} 
+					} else {
+						let isValid = false;
+						try {
+							/** Try resolving EIP-1271 if address doesn't match */
+							isValid = await checkContractWalletSignature(
+								this,
+								signature,
+								opts.provider
+							);
+						} catch (_) {
+							isValid = false;
+						} finally {
+							if (!isValid) {
+								assert({
+									success: false,
+									data: this,
+									error: new SiweError(
+										SiweErrorType.INVALID_SIGNATURE,
+										`Resolved address to be ${this.address}`,
+										addr,
+									),
+								});
+							}
 						}
 					}
 				}

@@ -23,9 +23,12 @@ export interface VerifyOpts {
 
     /** If the library should reject promises on errors, defaults to false */
     suppressExceptions?: boolean;
+
+    /** Function to be called when the message cannot be validated. */
+    failureCallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage) => Promise<SiweResponse>;
 }
 
-export const VerifyOptsKeys: Array<keyof VerifyOpts> = ["provider", "suppressExceptions"];
+export const VerifyOptsKeys: Array<keyof VerifyOpts> = ["provider", "suppressExceptions", "failureCallback"];
 
 /** 
  * Returned on verifications.
@@ -46,14 +49,14 @@ export interface SiweResponse {
  */
 export class SiweError {
 
-    constructor(type: SiweErrorType, expected?: string, received?: string) {
+    constructor(type: SiweErrorType | string, expected?: string, received?: string) {
         this.type = type;
         this.expected = expected;
         this.received = received;
     }
 
     /** Type of the error. */
-    type: SiweErrorType;
+    type: SiweErrorType | string;
 
     /** Expected value or condition to pass. */
     expected?: string;
