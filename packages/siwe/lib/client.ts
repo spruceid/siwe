@@ -300,10 +300,9 @@ export class SiweMessage {
 					/** Checks and call for failureCallback before trying EIP-1271 resolution */
 					if (opts.failureCallback) {
 							const result = await opts.failureCallback(params, opts, this);
-							if(result.success) {
-								resolve(result);
+							if(!result.success) {
+								assert(result)
 							} 
-							assert(result)
 					} else {
 						let isValid = false;
 						try {
