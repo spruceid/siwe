@@ -299,7 +299,11 @@ export class SiweMessage {
 				if (addr !== this.address) {
 					/** Checks and call for failureCallback before trying EIP-1271 resolution */
 					if (opts.failureCallback) {
-							assert(await opts.failureCallback(params, opts, this))
+							const result = await opts.failureCallback(params, opts, this);
+							if(result.success) {
+								resolve(result);
+							} 
+							assert(result)
 					} else {
 						let isValid = false;
 						try {
