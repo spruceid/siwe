@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/siwe",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Sign-In with Ethereum",
   "main": "dist/siwe.js",
   "types": "dist/siwe.d.ts",
@@ -39,5 +39,5 @@
   "bugs": {
     "url": "https://github.com/spruceid/siwe/issues"
   },
-  "gitHead": "5e014ad304e815d97e8746884f161ed4ec7e0eef"
+  "gitHead": "bc4aa24c292773333c29775cca50c34aafaec332"
 }
