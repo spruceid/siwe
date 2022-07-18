@@ -74,18 +74,6 @@
         "expirationTime": "2022-01-07T14:31:43.952Z",
         "signature": "0x31df81dc02344c9156e6f71da46e2db624b38f8f806290d670d46492b834b2e7575cbce9f48169356cfb577b910d8e30732fcf23c1ac0021d08b945ed7ee118e1b"
     },
-    "invalid expiration time": {
-        "domain": "login.xyz",
-        "address": "0x6Da01670d8fc844e736095918bbE11fE8D564163",
-        "statement": "Sign-In With Ethereum Example Statement",
-        "uri": "https://login.xyz",
-        "version": "1",
-        "nonce": "o8zxjgmp",
-        "issuedAt": "2022-01-05T14:50:55.688Z",
-        "chainId": 1,
-        "expirationTime": "2020-02-32T00:00:00.000Z",
-        "signature": "0x8b457a36dad94cb9c07cfcad08664c988d795b35762f1316438b9590c27f4a5e028e923066a49908c88a1e2fba299c1e6d6d8206181339343e0ef53be01d078f1c"
-    },
     "not yet valid": {
         "domain": "login.xyz",
         "address": "0xE6D3Aa1F561A215E5eb1f02Ba8705385F03fCaFB",

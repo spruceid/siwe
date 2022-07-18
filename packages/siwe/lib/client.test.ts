@@ -59,8 +59,8 @@ describe(`Message verification without suppressExceptions`, () => {
 	test.concurrent.each(Object.entries(verificationNegative))(
 		'Fails to verify message: %s and rejects the promise',
 		async (n, test_fields) => {
+			const msg = new SiweMessage(test_fields);
 			try {
-				const msg = new SiweMessage(test_fields);
 				await expect(msg.verify({
 					signature: test_fields.signature,
 					time: test_fields.time || test_fields.issuedAt,
@@ -78,8 +78,8 @@ describe(`Message verification with suppressExceptions`, () => {
 	test.concurrent.each(Object.entries(verificationNegative))(
 		'Fails to verify message: %s but still resolves the promise',
 		async (n, test_fields) => {
+			const msg = new SiweMessage(test_fields);
 			try {
-				const msg = new SiweMessage(test_fields);
 				await expect(msg.verify({
 					signature: test_fields.signature,
 					time: test_fields.time || test_fields.issuedAt,
