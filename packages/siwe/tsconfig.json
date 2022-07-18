@@ -4,8 +4,7 @@
     "target": "es2015",
     "declaration": true,
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "resolveJsonModule": true
+    "esModuleInterop": true
   },
   "include": ["lib/*"]
 }

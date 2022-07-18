@@ -1,10 +1,10 @@
 /* eslint @typescript-eslint/no-explicit-any: 0 */
-import parsingPositive = require('../../../test/parsing_positive.json');
-import parsingNegative = require('../../../test/parsing_negative.json');
-import parsingNegativeObjects = require('../../../test/parsing_negative_objects.json');
-import verificationPositive = require('../../../test/verification_positive.json');
-import verificationNegative = require('../../../test/verification_negative.json');
-import EIP1271 = require('../../../test/eip1271.json');
+const parsingPositive = require('../../../test/parsing_positive.json');
+const parsingNegative = require('../../../test/parsing_negative.json');
+const parsingNegativeObjects = require('../../../test/parsing_negative_objects.json');
+const verificationPositive = require('../../../test/verification_positive.json');
+const verificationNegative = require('../../../test/verification_negative.json');
+const EIP1271 = require('../../../test/eip1271.json');
 
 import { providers, Wallet } from 'ethers';
 import { SiweMessage } from './client';
@@ -13,7 +13,7 @@ import { SiweErrorType } from './types';
 describe(`Message Generation`, () => {
   test.concurrent.each(Object.entries(parsingPositive))(
     'Generates message successfully: %s',
-    (_, test) => {
+    (_, test: any) => {
       const msg = new SiweMessage(test.fields);
       expect(msg.toMessage()).toBe(test.message);
     }
@@ -45,7 +45,7 @@ describe(`Message Generation`, () => {
 describe(`Message verification without suppressExceptions`, () => {
   test.concurrent.each(Object.entries(verificationPositive))(
     'Verificates message successfully: %s',
-    async (_, test_fields) => {
+    async (_, test_fields: any) => {
       const msg = new SiweMessage(test_fields);
       await expect(
         msg
@@ -69,7 +69,7 @@ describe(`Message verification without suppressExceptions`, () => {
   );
   test.concurrent.each(Object.entries(verificationNegative))(
     'Fails to verify message: %s and rejects the promise',
-    async (n, test_fields) => {
+    async (n, test_fields: any) => {
       try {
         const msg = new SiweMessage(test_fields);
         await expect(
@@ -92,7 +92,7 @@ describe(`Message verification without suppressExceptions`, () => {
 describe(`Message verification with suppressExceptions`, () => {
   test.concurrent.each(Object.entries(verificationNegative))(
     'Fails to verify message: %s but still resolves the promise',
-    async (n, test_fields) => {
+    async (n, test_fields: any) => {
       try {
         const msg = new SiweMessage(test_fields);
         await expect(
@@ -119,7 +119,7 @@ describe(`Round Trip`, () => {
   const wallet = Wallet.createRandom();
   test.concurrent.each(Object.entries(parsingPositive))(
     'Generates a Successfully Verifying message: %s',
-    async (_, test) => {
+    async (_, test: any) => {
       const msg = new SiweMessage(test.fields);
       msg.address = wallet.address;
       const signature = await wallet.signMessage(msg.toMessage());
@@ -134,7 +134,7 @@ describe(`Round Trip`, () => {
   const wallet = Wallet.createRandom();
   test.concurrent.each(Object.entries(parsingPositive))(
     'Generates a Successfully Verifying message: %s',
-    async (_, test) => {
+    async (_, test: any) => {
       const msg = new SiweMessage(test.fields);
       msg.address = wallet.address;
       const signature = await wallet.signMessage(msg.toMessage());
@@ -148,7 +148,7 @@ describe(`Round Trip`, () => {
 describe(`EIP1271`, () => {
   test.concurrent.each(Object.entries(EIP1271))(
     'Verificates message successfully: %s',
-    async (_, test_fields) => {
+    async (_, test_fields: any) => {
       const msg = new SiweMessage(test_fields.message);
       await expect(
         msg
