@@ -190,5 +190,18 @@
             "nonce": "32891757",
             "issuedAt": "2021-09-30T16:25:24.000Z"
         }
+    },
+    "recovery byte starting at 0": {
+        "message": "www.tally.xyz wants you to sign in with your Ethereum account:\n0xc95EB884FE852e241D409234bfC7045CB9E31BD7\n\nSign in with Ethereum to Tally\n\nURI: https://tally.xyz\nVersion: 1\nChain ID: 1\nNonce: 15050747\nIssued At: 2022-06-30T14:08:51.382Z",
+        "fields": {
+            "domain": "www.tally.xyz",
+            "address": "0xc95EB884FE852e241D409234bfC7045CB9E31BD7",
+            "statement": "Sign in with Ethereum to Tally",
+            "uri": "https://tally.xyz",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "15050747",
+            "issuedAt": "2022-06-30T14:08:51.382Z"
+        }
     }
 }

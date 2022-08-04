@@ -36,5 +36,16 @@
         "expirationTime": "2021-01-05T00:00:00Z",
         "signature": "0x7337bc2826c7678cd6bc84f5b3b236efc969b0451f9feca2328b1d3401b030c113f19bdba359ba3f52762c66e9147311fa95fe598a1a4ec9bb383a7b4e3874241b",
         "time": "2020-01-05T00:00:00Z"
-    }
+    },
+	"recovery byte starting at 0": {
+		"domain": "www.tally.xyz",
+		"address": "0xc95EB884FE852e241D409234bfC7045CB9E31BD7",
+		"statement": "Sign in with Ethereum to Tally",
+		"uri": "https://tally.xyz",
+		"version": "1",
+		"chainId": 1,
+		"nonce": "15050747",
+		"issuedAt": "2022-06-30T14:08:51.382Z",
+		"signature": "0x8c46b6eb8505939892d8e9b075f89f8277321b17b993151f37810cdda38cce6f4a85909d2b53e6a14629c74c0ac38bf4becde78ee5b2529812bf6cceaf7b2a2501"
+	}
 }
