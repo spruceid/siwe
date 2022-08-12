@@ -80,10 +80,10 @@ export enum SiweErrorType {
   INVALID_DOMAIN = 'Invalid domain.',
 
   /** `domain` don't match the domain provided for verification. */
-  DOMAIN_MISMATCH = 'Domain do not match provided domain for verification.',
+  DOMAIN_MISMATCH = 'Domain does not match provided domain for verification.',
 
   /** `nonce` don't match the nonce provided for verification. */
-  NONCE_MISMATCH = 'Nonce do not match provided nonce for verification.',
+  NONCE_MISMATCH = 'Nonce does not match provided nonce for verification.',
 
   /** `address` does not conform to EIP-55 or is not a valid address. */
   INVALID_ADDRESS = 'Invalid address.',
@@ -98,7 +98,7 @@ export enum SiweErrorType {
   NOT_YET_VALID_MESSAGE = 'Message is not valid yet.',
 
   /** Signature doesn't match the address of the message. */
-  INVALID_SIGNATURE = 'Signature do not match address of the message.',
+  INVALID_SIGNATURE = 'Signature does not match address of the message.',
 
   /** `expirationTime`, `notBefore` or `issuedAt` not complient to ISO-8601. */
   INVALID_TIME_FORMAT = 'Invalid time format.',
