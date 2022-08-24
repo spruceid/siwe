@@ -144,6 +144,22 @@ DIGIT          =  %x30-39
 HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
 `;
 
+class GrammarApi {
+	static grammarObj = this.generateApi();
+
+	static generateApi() {
+		const api = new apgApi(GRAMMAR);
+		api.generate();
+		if (api.errors.length) {
+			console.error(api.errorsToAscii());
+			console.error(api.linesToAscii());
+			console.log(api.displayAttributeErrors());
+			throw new Error(`ABNF grammar has errors`);
+		}
+		return api.toObject();
+	}
+}
+
 export class ParsedMessage {
 	domain: string;
 	address: string;
@@ -159,16 +175,6 @@ export class ParsedMessage {
 	resources: Array<string> | null;
 
 	constructor(msg: string) {
-		const api = new apgApi(GRAMMAR);
-		api.generate();
-		if (api.errors.length) {
-			console.error(api.errorsToAscii());
-			console.error(api.linesToAscii());
-			console.log(api.displayAttributeErrors());
-			throw new Error(`ABNF grammar has errors`);
-		}
-
-		const grammarObj = api.toObject();
 		const parser = new apgLib.parser();
 		parser.ast = new apgLib.ast();
 		const id = apgLib.ids;
@@ -324,7 +330,7 @@ export class ParsedMessage {
 		};
 		parser.ast.callbacks.resources = resources;
 
-		const result = parser.parse(grammarObj, "sign-in-with-ethereum", msg);
+		const result = parser.parse(GrammarApi.grammarObj, "sign-in-with-ethereum", msg);
 		if (!result.success) {
 			throw new Error(`Invalid message: ${JSON.stringify(result)}`);
 		}
