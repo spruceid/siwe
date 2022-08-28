@@ -26,9 +26,6 @@
     "uri-js": "^4.4.1",
     "valid-url": "^1.0.9"
   },
-  "peerDependencies": {
-    "keccak": "^3.0.2"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/spruceid/siwe.git"
