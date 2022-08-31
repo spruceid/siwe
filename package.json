@@ -22,7 +22,7 @@
     "lerna": "^4.0.0",
     "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",
     "ts-jest": "^27.0.7",
-    "typedoc": "^0.22.7",
+    "typedoc": "^0.23.12",
     "typedoc-plugin-extras": "^2.2.1",
     "typescript": "^4.4.4"
   },
