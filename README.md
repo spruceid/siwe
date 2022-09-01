@@ -52,4 +52,3 @@ of this implementation.
 Run `npm install` to install dependencies, then `npm bootstrap` to link the dependencies
 in their respective packages. Afteward run `npm run build` to build the library.
 Development can occur on the `package/*` level with tests being run on each package itself.
-
