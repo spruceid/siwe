@@ -56,14 +56,14 @@ export interface SiweResponse {
  * Interface used to return errors in SiweResponses.
  */
 export class SiweError {
-  constructor(type: SiweErrorType, expected?: string, received?: string) {
+  constructor(type: SiweErrorType | string, expected?: string, received?: string) {
     this.type = type;
     this.expected = expected;
     this.received = received;
   }
 
-  /** Type of the error. */
-  type: SiweErrorType;
+    /** Type of the error. */
+    type: SiweErrorType | string;
 
   /** Expected value or condition to pass. */
   expected?: string;
