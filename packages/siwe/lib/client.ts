@@ -310,10 +310,10 @@ export class SiweMessage {
       } finally {
         /** Match signature with message's address */
         if (addr !== this.address) {
-          checkContractWalletSignature(this, signature, opts.provider)
+          const EIP1271Promise = checkContractWalletSignature(this, signature, opts.provider)
             .then(isValid => {
               if (!isValid) {
-                fail({
+                return {
                   success: false,
                   data: this,
                   error: new SiweError(
@@ -321,20 +321,40 @@ export class SiweMessage {
                     addr,
                     `Resolved address to be ${this.address}`
                   ),
-                });
+                };
               }
-              resolve({
+              return {
                 success: true,
                 data: this,
-              });
+              };
             })
             .catch(error => {
-              fail({
+              return {
                 success: false,
                 data: this,
                 error,
-              });
+              };
             });
+
+          Promise.all([
+            EIP1271Promise,
+            opts?.verificationFallback?.(params, opts, this, EIP1271Promise)?.then(res => res)?.catch((res: SiweResponse) => res)
+          ]).then(([EIP1271Response, fallbackResponse]) => {
+            if (fallbackResponse) {
+              if (fallbackResponse.success) {
+                resolve(fallbackResponse);
+              } else {
+                fail(fallbackResponse);
+              }
+            } else {
+              if (EIP1271Response.success) {
+                resolve(EIP1271Response);
+              }
+              else {
+                fail(EIP1271Response);
+              }
+            }
+          });
         } else {
           resolve({
             success: true,

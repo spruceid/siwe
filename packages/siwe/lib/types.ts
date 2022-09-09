@@ -28,6 +28,9 @@ export interface VerifyOpts {
 
   /** If the library should reject promises on errors, defaults to false */
   suppressExceptions?: boolean;
+
+  /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
+  verificationFallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage, EIP1271Promise: Promise<SiweResponse>) => Promise<SiweResponse>;
 }
 
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
