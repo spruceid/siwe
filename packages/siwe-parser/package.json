@@ -27,7 +27,7 @@
     "valid-url": "^1.0.9"
   },
   "peerDependencies": {
-    "keccak": "^3.0.2"
+    "@noble/hashes": "^1.1.2"
   },
   "repository": {
     "type": "git",
