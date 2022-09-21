@@ -9,6 +9,8 @@ Ethereum-based authentication, and provide wallet vendors a consistent
 machine-readable message format to achieve improved user experiences and 
 consent management.
 
+test
+
 ## Quickstart Examples
 To try it out locally, check out these examples:
 
