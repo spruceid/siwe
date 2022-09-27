@@ -157,10 +157,7 @@ describe(`EIP1271`, () => {
               signature: test_fields.signature,
             },
             {
-              provider: new providers.InfuraProvider(1, {
-                projectId: process.env.INFURA_ID,
-                projectSecret: process.env.INFURA_SECRET,
-              }),
+              provider: new providers.CloudflareProvider(1),
             }
           )
           .then(({ success }) => success)

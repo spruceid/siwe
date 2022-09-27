@@ -1,21 +1,12 @@
 name: ci
 
-on: [push, pull_request_target]
+on: [push, pull_request]
 
-env:
-  INFURA_ID: ${{ secrets.INFURA_ID }}
-  INFURA_SECRET: ${{ secrets.INFURA_SECRET }}
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      if: ${{ github.event_name != 'pull_request_target' }}
-    - uses: actions/checkout@v2
-      if: ${{ github.event_name == 'pull_request_target' }}
-      with:
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
     - name: Install
       run: |
         npm install
