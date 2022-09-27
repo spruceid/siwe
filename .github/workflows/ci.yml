@@ -2,9 +2,6 @@ name: ci
 
 on: [push, pull_request]
 
-env:
-  INFURA_ID: ${{ secrets.INFURA_ID }}
-  INFURA_SECRET: ${{ secrets.INFURA_SECRET }}
 jobs:
   build:
     runs-on: ubuntu-latest
