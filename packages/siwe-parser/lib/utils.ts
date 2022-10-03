@@ -6,7 +6,7 @@ import { bytesToHex } from '@noble/hashes/utils';
  * @returns Either the return is or not in the EIP-55 format.
  */
 export const isEIP55Address = (address: string) => {
-    if(address.length < 42) {
+    if(address.length != 42) {
         return false;
     }
 
