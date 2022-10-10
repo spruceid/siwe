@@ -2,6 +2,9 @@ import { randomStringForEntropy } from '@stablelib/random';
 import { Contract, providers, Signer, utils } from 'ethers';
 import type { SiweMessage } from './client';
 
+const EIP1271_ABI = ["function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)"];
+const EIP1271_MAGICVALUE = "0x1626ba7e";
+
 /**
  * This method calls the EIP-1271 method for Smart Contract wallets
  * @param message The EIP-4361 parsed message
@@ -18,16 +21,13 @@ export const checkContractWalletSignature = async (
     return false;
   }
 
-  const abi = [
-    'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
-  ];
-  const walletContract = new Contract(message.address, abi, provider);
+  const walletContract = new Contract(message.address, EIP1271_ABI, provider);
   const hashMessage = utils.hashMessage(message.prepareMessage());
-  const isValidSignature = await walletContract.isValidSignature(
+  const res = await walletContract.isValidSignature(
     hashMessage,
     signature
   );
-  return isValidSignature;
+  return res == EIP1271_MAGICVALUE;
 };
 
 /**
@@ -42,5 +42,19 @@ export const checkContractWalletSignature = async (
  * an alphanumeric character set.
  */
 export const generateNonce = (): string => {
-  return randomStringForEntropy(96);
+  const nonce = randomStringForEntropy(96);
+  if (!nonce || nonce.length < 8) {
+    throw new Error('Error during nonce creation.');
+  }
+  return nonce;
 };
+
+export const checkInvalidKeys = <T>(obj: T, keys: Array<keyof T>) : Array<keyof T> => {
+  const invalidKeys: Array<keyof T> = [];
+  Object.keys(obj).forEach(key => {
+    if (!keys.includes(key as keyof T)) {
+      invalidKeys.push(key as keyof T);
+    }
+  });
+  return invalidKeys;
+}
