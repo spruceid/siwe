@@ -29,13 +29,6 @@
   "peerDependencies": {
     "@noble/hashes": "^1.1.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/spruceid/private-packages.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "bugs": {
     "url": "https://github.com/spruceid/siwe/issues"
   }
