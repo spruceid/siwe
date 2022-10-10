@@ -43,7 +43,7 @@ export const checkContractWalletSignature = async (
  */
 export const generateNonce = (): string => {
   const nonce = randomStringForEntropy(96);
-  if (nonce.length < 8 || !nonce) {
+  if (!nonce || nonce.length < 8) {
     throw new Error('Error during nonce creation.');
   }
   return nonce;
