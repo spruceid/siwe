@@ -2,7 +2,6 @@
 import {
   isEIP55Address,
   ParsedMessage,
-  ParsedMessageRegExp,
 } from '@spruceid/siwe-parser';
 import { providers, utils } from 'ethers';
 import * as uri from 'valid-url';
@@ -82,16 +81,6 @@ export class SiweMessage {
     }
     this.nonce = this.nonce || generateNonce();
     this.validateMessage();
-  }
-
-  /**
-   * Given a sign message (EIP-4361) returns the correct matching groups.
-   * @param message {string}
-   * @returns {RegExpExecArray} The matching groups for the message
-   */
-  regexFromMessage(message: string): RegExpExecArray {
-    const parsedMessage = new ParsedMessageRegExp(message);
-    return parsedMessage.match;
   }
 
   /**
