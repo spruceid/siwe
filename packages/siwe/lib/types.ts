@@ -36,6 +36,7 @@ export interface VerifyOpts {
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
   'provider',
   'suppressExceptions',
+  'verificationFallback',
 ];
 
 /**
