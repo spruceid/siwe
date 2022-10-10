@@ -1,5 +1,5 @@
 import * as uri from "valid-url";
-import { isEIP55Address } from "./utils";
+import { isEIP55Address, parseIntegerNumber } from "./utils";
 
 const DOMAIN =
 	"(?<domain>([^?#]*)) wants you to sign in with your Ethereum account:";
@@ -64,7 +64,7 @@ export class ParsedMessage {
 
 		this.version = match?.groups?.version;
 		this.nonce = match?.groups?.nonce;
-		this.chainId = parseInt(match?.groups?.chainId);
+		this.chainId = parseIntegerNumber(match?.groups?.chainId);
 		this.issuedAt = match?.groups?.issuedAt;
 		this.expirationTime = match?.groups?.expirationTime;
 		this.notBefore = match?.groups?.notBefore;
