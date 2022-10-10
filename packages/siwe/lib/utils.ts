@@ -2,6 +2,9 @@ import { randomStringForEntropy } from '@stablelib/random';
 import { Contract, providers, Signer, utils } from 'ethers';
 import type { SiweMessage } from './client';
 
+const EIP1271_ABI = ["function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)"];
+const EIP1271_MAGICVALUE = "0x1626ba7e";
+
 /**
  * This method calls the EIP-1271 method for Smart Contract wallets
  * @param message The EIP-4361 parsed message
@@ -18,16 +21,13 @@ export const checkContractWalletSignature = async (
     return false;
   }
 
-  const abi = [
-    'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bool)',
-  ];
-  const walletContract = new Contract(message.address, abi, provider);
+  const walletContract = new Contract(message.address, EIP1271_ABI, provider);
   const hashMessage = utils.hashMessage(message.prepareMessage());
-  const isValidSignature = await walletContract.isValidSignature(
+  const res = await walletContract.isValidSignature(
     hashMessage,
     signature
   );
-  return isValidSignature;
+  return res == EIP1271_MAGICVALUE;
 };
 
 /**
