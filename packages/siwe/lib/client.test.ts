@@ -157,10 +157,7 @@ describe(`EIP1271`, () => {
               signature: test_fields.signature,
             },
             {
-              provider: new providers.InfuraProvider(1, {
-                projectId: process.env.INFURA_ID,
-                projectSecret: process.env.INFURA_SECRET,
-              }),
+              provider: new providers.CloudflareProvider(1),
             }
           )
           .then(({ success }) => success)
@@ -232,7 +229,7 @@ describe(`Unit`, () => {
     } catch (e) {
       expect(e.success).toBeFalsy();
       expect(e.error).toEqual(
-        new Error('invalidKey is not a valid key for VerifyParams.')
+        new Error('invalidKey is/are not valid key(s) for VerifyParams.')
       );
     }
   });
@@ -259,7 +256,7 @@ describe(`Unit`, () => {
     } catch (e) {
       expect(e.success).toBeFalsy();
       expect(e.error).toEqual(
-        new Error('invalidKey is not a valid key for VerifyOpts.')
+        new Error('invalidKey is/are not valid key(s) for VerifyOpts.')
       );
     }
   });

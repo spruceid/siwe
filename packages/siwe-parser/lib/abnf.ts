@@ -1,6 +1,6 @@
 import apgApi from "apg-js/src/apg-api/api";
 import apgLib from "apg-js/src/apg-lib/node-exports";
-import { isEIP55Address } from "./utils";
+import { isEIP55Address, parseIntegerNumber } from "./utils";
 
 const GRAMMAR = `
 sign-in-with-ethereum =
@@ -245,7 +245,7 @@ export class ParsedMessage {
 		const chainId = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;
 			if (state === id.SEM_PRE) {
-				data.chainId = parseInt(
+				data.chainId = parseIntegerNumber(
 					apgLib.utils.charsToString(chars, phraseIndex, phraseLength)
 				);
 			}
