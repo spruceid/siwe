@@ -42,7 +42,11 @@ export const checkContractWalletSignature = async (
  * an alphanumeric character set.
  */
 export const generateNonce = (): string => {
-  return randomStringForEntropy(96);
+  const nonce = randomStringForEntropy(96);
+  if (!nonce || nonce.length < 8) {
+    throw new Error('Error during nonce creation.');
+  }
+  return nonce;
 };
 
 export const checkInvalidKeys = <T>(obj: T, keys: Array<keyof T>) : Array<keyof T> => {
