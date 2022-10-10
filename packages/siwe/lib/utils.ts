@@ -44,3 +44,13 @@ export const checkContractWalletSignature = async (
 export const generateNonce = (): string => {
   return randomStringForEntropy(96);
 };
+
+export const checkInvalidKeys = <T>(obj: T, keys: Array<keyof T>) : Array<keyof T> => {
+  const invalidKeys: Array<keyof T> = [];
+  Object.keys(obj).forEach(key => {
+    if (!keys.includes(key as keyof T)) {
+      invalidKeys.push(key as keyof T);
+    }
+  });
+  return invalidKeys;
+}
