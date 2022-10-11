@@ -3,6 +3,7 @@ import {
   isEIP55Address,
   ParsedMessage,
   ParsedMessageRegExp,
+  parseIntegerNumber,
 } from '@spruceid/siwe-parser';
 import { providers, utils } from 'ethers';
 import * as uri from 'valid-url';
@@ -15,7 +16,7 @@ import {
   VerifyParams,
   VerifyParamsKeys,
 } from './types';
-import { checkContractWalletSignature, generateNonce, isValidISO8601Date } from './utils';
+import { checkContractWalletSignature, generateNonce, checkInvalidKeys, isValidISO8601Date } from './utils';
 
 export class SiweMessage {
   /**RFC 4501 dns authority that is requesting the signing. */
@@ -77,7 +78,7 @@ export class SiweMessage {
     } else {
       Object.assign(this, param);
       if (typeof this.chainId === 'string') {
-        this.chainId = parseInt(this.chainId);
+        this.chainId = parseIntegerNumber(this.chainId);
       }
     }
     this.nonce = this.nonce || generateNonce();
@@ -121,10 +122,7 @@ export class SiweMessage {
 
     const suffixArray = [uriField, versionField, chainField, nonceField];
 
-    if (this.issuedAt) {
-      Date.parse(this.issuedAt);
-    }
-    this.issuedAt = this.issuedAt ? this.issuedAt : new Date().toISOString();
+    this.issuedAt = this.issuedAt || new Date().toISOString();
     suffixArray.push(`Issued At: ${this.issuedAt}`);
 
     if (this.expirationTime) {
@@ -204,33 +202,31 @@ export class SiweMessage {
     opts: VerifyOpts = { suppressExceptions: false }
   ): Promise<SiweResponse> {
     return new Promise<SiweResponse>((resolve, reject) => {
-      Object.keys(params).forEach((key: keyof VerifyParams) => {
-        if (!VerifyParamsKeys.includes(key)) {
-          reject({
-            success: false,
-            data: this,
-            error: new Error(`${key} is not a valid key for VerifyParams.`),
-          });
-        }
-      });
-
-      Object.keys(opts).forEach((key: keyof VerifyOpts) => {
-        if (!VerifyOptsKeys.includes(key)) {
-          reject({
-            success: false,
-            data: this,
-            error: new Error(`${key} is not a valid key for VerifyOpts.`),
-          });
-        }
-      });
-
       const fail = result => {
         if (opts.suppressExceptions) {
-          resolve(result);
+          return resolve(result);
         } else {
-          reject(result);
+          return reject(result);
         }
       };
+
+      const invalidParams: Array<keyof VerifyParams> = checkInvalidKeys<VerifyParams>(params, VerifyParamsKeys);
+      if(invalidParams.length > 0) {
+        fail({
+          success: false,
+          data: this,
+          error: new Error(`${invalidParams.join(', ')} is/are not valid key(s) for VerifyParams.`),
+        })
+      }
+
+      const invalidOpts: Array<keyof VerifyOpts> = checkInvalidKeys<VerifyOpts>(opts, VerifyOptsKeys);
+      if(invalidParams.length > 0) {
+        fail({
+          success: false,
+          data: this,
+          error: new Error(`${invalidOpts.join(', ')} is/are not valid key(s) for VerifyOpts.`),
+        })
+      }
 
       const { signature, domain, nonce, time } = params;
 

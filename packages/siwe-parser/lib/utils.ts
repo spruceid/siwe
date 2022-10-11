@@ -6,6 +6,10 @@ import { bytesToHex } from '@noble/hashes/utils';
  * @returns Either the return is or not in the EIP-55 format.
  */
 export const isEIP55Address = (address: string) => {
+    if(address.length != 42) {
+        return false;
+    }
+
     const lowerAddress = `${address}`.toLowerCase().replace('0x', '');
     var hash = bytesToHex(keccak_256(lowerAddress));
     var ret = '0x';
@@ -19,3 +23,10 @@ export const isEIP55Address = (address: string) => {
     }
     return address === ret;
 }
+
+export const parseIntegerNumber = (number: string): number => {
+    const parsed = parseInt(number);
+    if(parsed === NaN) throw new Error("Invalid number.");
+    if(parsed === Infinity) throw new Error("Invalid number.");
+    return parsed;
+  }
