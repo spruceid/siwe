@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/siwe",
-  "version": "2.1.3",
+  "version": "2.0.5",
   "description": "Sign-In with Ethereum",
   "main": "dist/siwe.js",
   "types": "dist/siwe.d.ts",

@@ -4,13 +4,10 @@
     "packages/siwe-parser",
     "package/siwe-test-package"
   ],
-  "version": "independent",
   "npmClient": "npm",
   "command": {
     "publish": {
-      "conventionalCommits": true,
-      "registry": "https://npm.pkg.github.com",
-      "allowBranch": "feat/delegate-history"
+      "registry": "https://npm.pkg.github.com"
     }
   }
 }
