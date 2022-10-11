@@ -52,45 +52,31 @@ export const generateNonce = (): string => {
 /**
  * This method matches the given date string against the ISO-8601 regex and also
  * performs checks if it's a valid date.
- * @param date any string to be validated against ISO-8601
+ * @param inputDate any string to be validated against ISO-8601
  * @returns boolean indicating if the providade date is valid and conformant to ISO-8601
  */
-export const isValidISO8601Date = (date: string): boolean => {
-  const ISO8601 =
-    /^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
+export const isValidISO8601Date = (inputDate: string): boolean => {
+  const ISO8601 = /^(?<date>[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
 
-  /** Fails if it's not ISO-8601 */
-  if (!ISO8601.test(date)) {
+  /* Split groups and make sure inputDate is in ISO8601 format */
+  const inputMatch = ISO8601.exec(inputDate);
+
+  /* if inputMatch is null the date is not ISO-8601 */
+  if (!inputDate) {
     return false;
   }
 
-  /* Parses date and compare if the generated date matches the input */
-  const parsedDate = new Date(date).toISOString();
+  /* Creates a date object with input date to parse for invalid days e.g. Feb, 30 -> Mar, 01 */
+  const inputDateParsed = new Date(inputMatch.groups.date).toISOString();
 
-  /* Since milliseconds are optional and toISOString() adds .000 if none it's still needed to validate that case */
-  if (parsedDate !== date) {
-    /* Splits dateTime from milliseconds and timezone */
-    const [dateTime, milliseconds] = date.split(".");
-    const [parsedDateTime, parsedMilliseconds] = parsedDate.split(".");
+  /* Get groups from new parsed date to compare with the original input */
+  const parsedInputMatch = ISO8601.exec(inputDateParsed);
 
-    /* Removes timezone from milliseconds */
-    milliseconds?.replace(/(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))/, "");
-    parsedMilliseconds?.replace(/(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))/, "");
-
-    /* If milliseconds they should match */
-    if (milliseconds && (parsedMilliseconds !== milliseconds)) {
-      return false;
-    }
-
-    /* Date and time doesn't match */
-    if (dateTime !== parsedDateTime) {
-      return false;
-    }
-  }
-  return true;
+  /* Compare remaining fields */
+  return inputMatch.groups.date === parsedInputMatch.groups.date;
 }
 
-export const checkInvalidKeys = <T>(obj: T, keys: Array<keyof T>) : Array<keyof T> => {
+export const checkInvalidKeys = <T>(obj: T, keys: Array<keyof T>): Array<keyof T> => {
   const invalidKeys: Array<keyof T> = [];
   Object.keys(obj).forEach(key => {
     if (!keys.includes(key as keyof T)) {
