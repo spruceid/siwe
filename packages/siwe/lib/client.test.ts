@@ -229,7 +229,7 @@ describe(`Unit`, () => {
     } catch (e) {
       expect(e.success).toBeFalsy();
       expect(e.error).toEqual(
-        new Error('invalidKey is not a valid key for VerifyParams.')
+        new Error('invalidKey is/are not valid key(s) for VerifyParams.')
       );
     }
   });
@@ -256,7 +256,7 @@ describe(`Unit`, () => {
     } catch (e) {
       expect(e.success).toBeFalsy();
       expect(e.error).toEqual(
-        new Error('invalidKey is not a valid key for VerifyOpts.')
+        new Error('invalidKey is/are not valid key(s) for VerifyOpts.')
       );
     }
   });
