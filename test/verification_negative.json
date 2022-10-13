@@ -85,5 +85,41 @@
         "chainId": 1,
         "notBefore": "2100-01-07T14:31:43.952Z",
         "signature": "0xc2539ace78f13c7eb8c0852d38d269a6f97bebd9f7872097d2e3137b541f8bf50176062a46eeea83086bd2721423fb5755a932ff6ccc046ed482d14e4576042f1c"
+    },
+    "invalid issuedAt": {
+        "domain": "login.xyz",
+        "address": "0xA0aEF081D1ACE5F830532d7D77Ea4c8EE0EaBCF9",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "bTyXgcQxn2htgkjJn",
+        "issuedAt": "2022-02-31T17:09:38.578Z",
+        "chainId": 1,
+        "signature": "0x9e837df8b56f6e0cac9b4dce52074c352a4143932b442b973963ed2f7b9987146c8e546e5662867198ec0ae9bdb2e87ffaee528375dac7bf003883714ff732701b"
+    },
+    "invalid notBefore": {
+        "domain": "login.xyz",
+        "address": "0xA2ce2B71d77983918C8388c47576ad77E339B2F9",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "bTyXgcQxn2htgkjJn",
+        "issuedAt": "2022-01-30T17:09:38.578Z",
+        "chainId": 1,
+        "notBefore": "2025-02-31T17:09:38.578Z",
+        "expirationTime": "2100-01-07T14:31:43.952Z",
+        "signature": "0xa741355d0cfa938f45e9137d3b1f362e06961d2f35e01bad794b1f35d7d3e4fc5fd610d28d1b1236fdc305ec05c62b83cade54b49e221adf62e116b0c3a96f531b"
+    },
+    "invalid expirationTime": {
+        "domain": "login.xyz",
+        "address": "0xeE5A13CfAC109487d56F9186241009Dd9A7b4Ad4",
+        "statement": "Sign-In With Ethereum Example Statement",
+        "uri": "https://login.xyz",
+        "version": "1",
+        "nonce": "bTyXgcQxn2htgkjJn",
+        "issuedAt": "2022-01-30T17:09:38.578Z",
+        "chainId": 1,
+        "expirationTime": "2100-02-31T14:31:43.952Z",
+        "signature": "0x5cbe6e6735e7b5818da08890363d6154edf73593db692b64adaea9c1186712a72244971284377d2fed8286b69dafc3cf964cb4e05a8e8d07c1a6f4ede8d9470e1c"
     }
 }
