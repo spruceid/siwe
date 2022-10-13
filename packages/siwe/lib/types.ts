@@ -28,11 +28,15 @@ export interface VerifyOpts {
 
   /** If the library should reject promises on errors, defaults to false */
   suppressExceptions?: boolean;
+
+  /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
+  verificationFallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage, EIP1271Promise: Promise<SiweResponse>) => Promise<SiweResponse>;
 }
 
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
   'provider',
   'suppressExceptions',
+  'verificationFallback',
 ];
 
 /**
@@ -53,14 +57,14 @@ export interface SiweResponse {
  * Interface used to return errors in SiweResponses.
  */
 export class SiweError {
-  constructor(type: SiweErrorType, expected?: string, received?: string) {
+  constructor(type: SiweErrorType | string, expected?: string, received?: string) {
     this.type = type;
     this.expected = expected;
     this.received = received;
   }
 
-  /** Type of the error. */
-  type: SiweErrorType;
+    /** Type of the error. */
+    type: SiweErrorType | string;
 
   /** Expected value or condition to pass. */
   expected?: string;

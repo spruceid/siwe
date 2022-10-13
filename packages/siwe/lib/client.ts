@@ -292,40 +292,59 @@ export class SiweMessage {
         addr = utils.verifyMessage(EIP4361Message, signature);
       } catch (e) {
         console.error(e);
-      } finally {
-        /** Match signature with message's address */
-        if (addr !== this.address) {
-          checkContractWalletSignature(this, signature, opts.provider)
-            .then(isValid => {
-              if (!isValid) {
-                fail({
-                  success: false,
-                  data: this,
-                  error: new SiweError(
-                    SiweErrorType.INVALID_SIGNATURE,
-                    addr,
-                    `Resolved address to be ${this.address}`
-                  ),
-                });
-              }
-              resolve({
-                success: true,
-                data: this,
-              });
-            })
-            .catch(error => {
-              fail({
+      }
+      /** Match signature with message's address */
+      if (addr === this.address) {
+        return resolve({
+          success: true,
+          data: this,
+        });
+      } else {
+        const EIP1271Promise = checkContractWalletSignature(this, signature, opts.provider)
+          .then(isValid => {
+            if (!isValid) {
+              return {
                 success: false,
                 data: this,
-                error,
-              });
-            });
-        } else {
-          resolve({
-            success: true,
-            data: this,
+                error: new SiweError(
+                  SiweErrorType.INVALID_SIGNATURE,
+                  addr,
+                  `Resolved address to be ${this.address}`
+                ),
+              };
+            }
+            return {
+              success: true,
+              data: this,
+            };
+          })
+          .catch(error => {
+            return {
+              success: false,
+              data: this,
+              error,
+            };
           });
-        }
+
+        Promise.all([
+          EIP1271Promise,
+          opts?.verificationFallback?.(params, opts, this, EIP1271Promise)?.then(res => res)?.catch((res: SiweResponse) => res)
+        ]).then(([EIP1271Response, fallbackResponse]) => {
+          if (fallbackResponse) {
+            if (fallbackResponse.success) {
+              return resolve(fallbackResponse);
+            } else {
+              fail(fallbackResponse);
+            }
+          } else {
+            if (EIP1271Response.success) {
+              return resolve(EIP1271Response);
+            }
+            else {
+              fail(EIP1271Response);
+            }
+          }
+        });
       }
     });
   }
