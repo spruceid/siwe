@@ -15,7 +15,7 @@ import {
   VerifyParams,
   VerifyParamsKeys,
 } from './types';
-import { checkContractWalletSignature, checkInvalidKeys, generateNonce } from './utils';
+import { checkContractWalletSignature, generateNonce, checkInvalidKeys, isValidISO8601Date } from './utils';
 
 export class SiweMessage {
   /**RFC 4501 dns authority that is requesting the signing. */
@@ -410,25 +410,21 @@ export class SiweMessage {
       );
     }
 
-    const ISO8601 =
-      /^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
-    /** `issuedAt` conforms to ISO-8601 */
-    if (this.issuedAt) {
-      if (!ISO8601.test(this.issuedAt)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
-      }
+    /** `issuedAt` conforms to ISO-8601 and is a valid date. */
+    if (!isValidISO8601Date(this.issuedAt)) {
+      throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
     }
 
-    /** `expirationTime` conforms to ISO-8601 */
+    /** `expirationTime` conforms to ISO-8601 and is a valid date. */
     if (this.expirationTime) {
-      if (!ISO8601.test(this.expirationTime)) {
+      if (!isValidISO8601Date(this.expirationTime)) {
         throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
       }
     }
 
-    /** `notBefore` conforms to ISO-8601 */
+    /** `notBefore` conforms to ISO-8601 and is a valid date. */
     if (this.notBefore) {
-      if (!ISO8601.test(this.notBefore)) {
+      if (!isValidISO8601Date(this.notBefore)) {
         throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
       }
     }
