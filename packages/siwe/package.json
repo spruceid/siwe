@@ -28,6 +28,13 @@
     "uri-js": "^4.4.1",
     "valid-url": "^1.0.9"
   },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.6.2"
+  },
   "peerDependencies": {
     "ethers": "^5.5.1"
   },
