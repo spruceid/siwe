@@ -24,9 +24,7 @@
   "dependencies": {
     "apg-js": "^4.1.1",
     "uri-js": "^4.4.1",
-    "valid-url": "^1.0.9"
-  },
-  "peerDependencies": {
+    "valid-url": "^1.0.9",
     "@noble/hashes": "^1.1.2"
   },
   "repository": {
