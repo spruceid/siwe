@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/siwe-parser",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Parse Messages that conform to EIP-4361: Sign-In with Ethereum (SIWE)",
   "main": "dist/parsers.js",
   "types": "dist/parsers.d.ts",
