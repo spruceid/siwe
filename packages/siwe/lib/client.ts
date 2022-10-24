@@ -38,7 +38,7 @@ export class SiweMessage {
    * characters. */
   nonce: string;
   /**ISO 8601 datetime string of the current time. */
-  issuedAt: string;
+  issuedAt?: string;
   /**ISO 8601 datetime string that, if present, indicates when the signed
    * authentication message is no longer valid. */
   expirationTime?: string;
@@ -112,6 +112,7 @@ export class SiweMessage {
     const suffixArray = [uriField, versionField, chainField, nonceField];
 
     this.issuedAt = this.issuedAt || new Date().toISOString();
+
     suffixArray.push(`Issued At: ${this.issuedAt}`);
 
     if (this.expirationTime) {
@@ -411,8 +412,10 @@ export class SiweMessage {
     }
 
     /** `issuedAt` conforms to ISO-8601 and is a valid date. */
-    if (!isValidISO8601Date(this.issuedAt)) {
-      throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+    if(this.issuedAt) {
+      if (!isValidISO8601Date(this.issuedAt)) {
+        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+      }
     }
 
     /** `expirationTime` conforms to ISO-8601 and is a valid date. */
