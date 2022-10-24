@@ -81,7 +81,6 @@ export class SiweMessage {
       }
     }
     this.nonce = this.nonce || generateNonce();
-    this.issuedAt = this.issuedAt || new Date().toISOString();
     this.validateMessage();
   }
 
@@ -113,6 +112,8 @@ export class SiweMessage {
     const suffixArray = [uriField, versionField, chainField, nonceField];
 
     suffixArray.push(`Issued At: ${this.issuedAt}`);
+
+    this.issuedAt = this.issuedAt || new Date().toISOString();
 
     if (this.expirationTime) {
       const expiryField = `Expiration Time: ${this.expirationTime}`;
@@ -411,8 +412,10 @@ export class SiweMessage {
     }
 
     /** `issuedAt` conforms to ISO-8601 and is a valid date. */
-    if (!isValidISO8601Date(this.issuedAt)) {
-      throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+    if(this.issuedAt) {
+      if (!isValidISO8601Date(this.issuedAt)) {
+        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+      }
     }
 
     /** `expirationTime` conforms to ISO-8601 and is a valid date. */
