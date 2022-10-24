@@ -38,7 +38,7 @@ export class SiweMessage {
    * characters. */
   nonce: string;
   /**ISO 8601 datetime string of the current time. */
-  issuedAt: string;
+  issuedAt?: string;
   /**ISO 8601 datetime string that, if present, indicates when the signed
    * authentication message is no longer valid. */
   expirationTime?: string;
