@@ -81,6 +81,7 @@ export class SiweMessage {
       }
     }
     this.nonce = this.nonce || generateNonce();
+    this.issuedAt = this.issuedAt || new Date().toISOString();
     this.validateMessage();
   }
 
@@ -111,7 +112,6 @@ export class SiweMessage {
 
     const suffixArray = [uriField, versionField, chainField, nonceField];
 
-    this.issuedAt = this.issuedAt || new Date().toISOString();
     suffixArray.push(`Issued At: ${this.issuedAt}`);
 
     if (this.expirationTime) {
