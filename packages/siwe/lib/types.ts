@@ -25,33 +25,11 @@ export const VerifyParamsKeys: Array<keyof VerifyParams> = [
 export interface VerifyOpts {
   /** ethers provider to be used for EIP-1271 validation */
   provider?: providers.Provider;
-
-  /** If the library should reject promises on errors, defaults to false */
-  suppressExceptions?: boolean;
-
-  /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
-  verificationFallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage, EIP1271Promise: Promise<SiweResponse>) => Promise<SiweResponse>;
 }
 
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
-  'provider',
-  'suppressExceptions',
-  'verificationFallback',
+  'provider'
 ];
-
-/**
- * Returned on verifications.
- */
-export interface SiweResponse {
-  /** Boolean representing if the message was verified with success. */
-  success: boolean;
-
-  /** If present `success` MUST be false and will provide extra information on the failure reason. */
-  error?: SiweError;
-
-  /** Original message that was verified. */
-  data: SiweMessage;
-}
 
 /**
  * Interface used to return errors in SiweResponses.
@@ -63,8 +41,8 @@ export class SiweError {
     this.received = received;
   }
 
-    /** Type of the error. */
-    type: SiweErrorType | string;
+  /** Type of the error. */
+  type: SiweErrorType | string;
 
   /** Expected value or condition to pass. */
   expected?: string;
