@@ -243,7 +243,7 @@ export class SiweMessage {
   } 
 
   /**
-   * Verifies the integrity of the object by matching its signature, nonce, and domain.
+   * Verifies the integrity of the object by matching its signature
    * @param signature Message signature to verify
    * @returns {Promise<void>}
    */
