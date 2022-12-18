@@ -4,7 +4,7 @@ import {
   ParsedMessage,
   parseIntegerNumber,
 } from '@spruceid/siwe-parser';
-import { providers, utils } from 'ethers';
+import { providers, utils, Signer } from 'ethers';
 import * as uri from 'valid-url';
 import {
   SiweError,
@@ -165,8 +165,8 @@ export class SiweMessage {
   } 
 
   /**
-   * Verifies the integrity of the object by matching its signature.
-   * @param params Parameters to verify the integrity of the message, signature is required.
+   * Verifies the integrity of the object by matching its signature, nonce, and domain.
+   * @param params Parameters to verify the integrity of the message, signature/nonce/domain are required.
    * @returns {Promise<SiweMessage>} This object if valid.
    */
   async verify(
@@ -239,6 +239,18 @@ export class SiweMessage {
       }
     }
 
+    await this.verifySignature(signature, opts.provider);
+  } 
+
+  /**
+   * Verifies the integrity of the object by matching its signature, nonce, and domain.
+   * @param signature Message signature to verify
+   * @returns {Promise<void>}
+   */
+  async verifySignature(
+    signature: string,
+    provider?: providers.Provider | Signer
+  ): Promise<void> {
     let EIP4361Message = this.prepareMessage();
     
     /** Normalize signature before verifying */
@@ -254,7 +266,7 @@ export class SiweMessage {
       return;
     }
 
-    const isValid = await checkContractWalletSignature(this, normalizedSignature, opts.provider);
+    const isValid = await checkContractWalletSignature(this, normalizedSignature, provider);
 
     if (!isValid) {
       throw new SiweError(
