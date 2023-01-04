@@ -31,8 +31,12 @@ describe("Successfully fails with ABNF Client", () => {
 
 	test.concurrent.each(Object.entries(parsingNegative))(
 		"Fails to parse message: %s",
-		(test_name, test) => {
-			expect(() => new ParsedMessage(test)).toThrow();
+		(errorMessage, test) => {
+      if (errorMessage.indexOf('STRICT CHECK =') === 0) {
+        expect(() => new ParsedMessage(test)).toThrow(errorMessage.split('STRICT CHECK =')[1]);
+      } else {
+			  expect(() => new ParsedMessage(test)).toThrow('Invalid message');
+      }
 		}
 	);
 });
