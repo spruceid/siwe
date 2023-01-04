@@ -25,8 +25,20 @@ export const isEIP55Address = (address: string) => {
 }
 
 export const parseIntegerNumber = (number: string): number => {
-    const parsed = parseInt(number);
-    if(parsed === NaN) throw new Error("Invalid number.");
-    if(parsed === Infinity) throw new Error("Invalid number.");
-    return parsed;
+  const parsed = parseInt(number);
+  if(parsed === NaN) throw new Error("Invalid number.");
+  if(parsed === Infinity) throw new Error("Invalid number.");
+  return parsed;
+}
+
+export const containsRtlChar = (str : string): boolean => {           
+  const rtlChars = ['\u202e', '\u200f'];
+
+  for (let [, rtloChar] of rtlChars) {
+    if (str.indexOf(rtloChar) > -1) {
+      return true;
+    }
   }
+
+  return false;
+}
