@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "module": "CommonJS",
+    "target": "es2021",
     "declaration": true,
     "outDir": "./dist",
     "esModuleInterop": true
   },
-  "include": [
-    "lib/*"
-  ]
+  "include": ["lib/*"]
 }

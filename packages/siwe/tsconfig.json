@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "module": "CommonJS",
+    "target": "es2021",
+    "lib": ["es2021", "DOM"],
     "declaration": true,
     "outDir": "./dist",
     "esModuleInterop": true
