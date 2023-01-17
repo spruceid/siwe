@@ -1,0 +1,15 @@
+PASSED 
+Test Name:
+oidcc-discovery-endpoint-verification
+Variant:
+server_metadata=discovery, client_registration=static_client
+Test ID:
+iHmyjXZPG8Xg3HZ
+Created:
+Wed Jan 19 2022 08:40:01 GMT-0500 (hora estándar oriental)
+Description:
+CF worker oidc.login.xyz config cert
+Test Version:
+4.1.38
+Plan ID:
+SAmBjvtyfTDVn
