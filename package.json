@@ -1,16 +1,13 @@
 {
-  "name": "siwe",
-  "version": "2.0.5",
-  "description": "Sign-In with Ethereum",
-  "main": "dist/siwe.js",
-  "types": "dist/siwe.d.ts",
-  "directories": {
-    "lib": "lib"
-  },
+  "name": "siwe-root",
+  "private": true,
+  "workspaces": [
+    "packages/siwe-parser",
+    "packages/siwe"
+  ],
   "scripts": {
-    "bootstrap": "lerna bootstrap && lerna exec npm install",
     "build": "lerna run build",
-    "test": "jest",
+    "test": "lerna run test",
     "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs packages/siwe/lib/siwe.ts"
   },
   "author": "Spruce Systems Inc.",
@@ -19,15 +16,11 @@
     "@types/jest": "^27.0.2",
     "ethers": "^5.5.1",
     "jest": "^27.3.1",
-    "lerna": "^5.4.3",
+    "lerna": "^6.5.1",
     "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",
     "ts-jest": "^27.0.7",
     "typedoc": "^0.23.12",
     "typedoc-plugin-extras": "^2.2.1",
     "typescript": "^4.4.4"
-  },
-  "dependencies": {
-    "siwe": "file:packages/siwe",
-    "siwe-parser": "file:packages/siwe-parser"
   }
 }
