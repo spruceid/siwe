@@ -4,8 +4,10 @@ import {
   ParsedMessage,
   parseIntegerNumber,
 } from '@spruceid/siwe-parser';
-import { providers, utils } from 'ethers';
+import { providers } from 'ethers';
 import * as uri from 'valid-url';
+
+import { getAddress, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
@@ -290,7 +292,7 @@ export class SiweMessage {
       /** Recover address from signature */
       let addr;
       try {
-        addr = utils.verifyMessage(EIP4361Message, signature);
+        addr = verifyMessage(EIP4361Message, signature);
       } catch (e) {
         console.error(e);
       }
@@ -379,7 +381,7 @@ export class SiweMessage {
     if (!isEIP55Address(this.address)) {
       throw new SiweError(
         SiweErrorType.INVALID_ADDRESS,
-        utils.getAddress(this.address),
+        getAddress(this.address),
         this.address
       );
     }

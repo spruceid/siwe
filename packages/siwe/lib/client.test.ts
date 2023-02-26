@@ -6,7 +6,12 @@ const verificationPositive = require('../../../test/verification_positive.json')
 const verificationNegative = require('../../../test/verification_negative.json');
 const EIP1271 = require('../../../test/eip1271.json');
 
-import { providers, Wallet } from 'ethers';
+import {
+  providers,
+  // @ts-expect-error -- ethers v6 compatibility hack
+  InfuraProvider,
+  Wallet,
+} from 'ethers';
 import { SiweMessage } from './client';
 import { SiweErrorType } from './types';
 
@@ -44,7 +49,7 @@ describe(`Message Generation`, () => {
 
 describe(`Message verification without suppressExceptions`, () => {
   test.concurrent.each(Object.entries(verificationPositive))(
-    'Verificates message successfully: %s',
+    'Verifies message successfully: %s',
     async (_, test_fields: any) => {
       const msg = new SiweMessage(test_fields);
       await expect(
@@ -65,8 +70,11 @@ describe(`Message verification without suppressExceptions`, () => {
             return res === data;
           })
       ).resolves.toBeTruthy();
+
+      jest.useRealTimers();
     }
   );
+
   test.concurrent.each(Object.entries(verificationNegative))(
     'Fails to verify message: %s and rejects the promise',
     async (n, test_fields: any) => {
@@ -146,9 +154,16 @@ describe(`Round Trip`, () => {
 });
 
 describe(`EIP1271`, () => {
+  function getProviderCompat(networkId: number | string) {
+    return typeof providers?.InfuraProvider !== 'undefined'
+      ? new providers.InfuraProvider(networkId)
+      : new InfuraProvider(networkId);
+  }
+
   test.concurrent.each(Object.entries(EIP1271))(
-    'Verificates message successfully: %s',
+    'Verifies message successfully: %s',
     async (_, test_fields: any) => {
+      const provider = getProviderCompat(1);
       const msg = new SiweMessage(test_fields.message);
       await expect(
         msg
@@ -157,7 +172,7 @@ describe(`EIP1271`, () => {
               signature: test_fields.signature,
             },
             {
-              provider: new providers.CloudflareProvider(1),
+              provider,
             }
           )
           .then(({ success }) => success)

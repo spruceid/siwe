@@ -1,6 +1,8 @@
 import { randomStringForEntropy } from '@stablelib/random';
-import { Contract, providers, Signer, utils } from 'ethers';
+import { Contract, providers, Signer } from 'ethers';
+
 import type { SiweMessage } from './client';
+import { hashMessage } from './ethersCompat';
 
 const EIP1271_ABI = ["function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)"];
 const EIP1271_MAGICVALUE = "0x1626ba7e";
@@ -23,11 +25,8 @@ export const checkContractWalletSignature = async (
   }
 
   const walletContract = new Contract(message.address, EIP1271_ABI, provider);
-  const hashMessage = utils.hashMessage(message.prepareMessage());
-  const res = await walletContract.isValidSignature(
-    hashMessage,
-    signature
-  );
+  const hashedMessage = hashMessage(message.prepareMessage());
+  const res = await walletContract.isValidSignature(hashedMessage, signature);
   return res == EIP1271_MAGICVALUE;
 };
 
