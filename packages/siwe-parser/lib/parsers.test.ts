@@ -1,13 +1,10 @@
+import { ParsedMessage } from "./abnf";
+
 const parsingPositive: Object = require("../../../test/parsing_positive.json");
 const parsingNegative: Object = require("../../../test/parsing_negative.json");
 
 //
 describe("Successfully parses with ABNF Client", () => {
-	let ParsedMessage;
-	beforeEach(
-		async () => (ParsedMessage = (await import("./abnf")).ParsedMessage)
-	);
-
 	test.concurrent.each(Object.entries(parsingPositive))(
 		"Parses message successfully: %s",
 		(test_name, test) => {
@@ -24,11 +21,6 @@ describe("Successfully parses with ABNF Client", () => {
 });
 
 describe("Successfully fails with ABNF Client", () => {
-	let ParsedMessage;
-	beforeEach(
-		async () => (ParsedMessage = (await import("./abnf")).ParsedMessage)
-	);
-
 	test.concurrent.each(Object.entries(parsingNegative))(
 		"Fails to parse message: %s",
 		(test_name, test) => {
