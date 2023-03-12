@@ -26,7 +26,7 @@
     "apg-js": "^4.1.1"
   },
   "peerDependencies": {
-    "ethers": "5.5.1"
+    "ethers": "^5.5.1"
   },
   "repository": {
     "type": "git",
