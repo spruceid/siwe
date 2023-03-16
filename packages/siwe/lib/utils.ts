@@ -1,9 +1,8 @@
 import { randomStringForEntropy } from '@stablelib/random';
-import { Contract, providers, Signer, utils } from 'ethers';
+import { providers, Signer } from 'ethers';
+import { verifyMessage } from '@ambire/signature-validator';
 import type { SiweMessage } from './client';
 
-const EIP1271_ABI = ["function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)"];
-const EIP1271_MAGICVALUE = "0x1626ba7e";
 const ISO8601 = /^(?<date>[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
 
 /**
@@ -22,13 +21,16 @@ export const checkContractWalletSignature = async (
     return false;
   }
 
-  const walletContract = new Contract(message.address, EIP1271_ABI, provider);
-  const hashMessage = utils.hashMessage(message.prepareMessage());
-  const res = await walletContract.isValidSignature(
-    hashMessage,
-    signature
-  );
-  return res == EIP1271_MAGICVALUE;
+  if (provider instanceof Signer) {
+    provider = provider.provider;
+  }
+
+  return await verifyMessage({
+    signer: message.address,
+    message: message.prepareMessage(),
+    signature: signature,
+    provider: provider,
+  });
 };
 
 /**
