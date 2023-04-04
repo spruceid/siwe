@@ -23,7 +23,7 @@
   ],
   "homepage": "https://github.com/spruceid/siwe",
   "dependencies": {
-    "@spruceid/siwe-parser": "file:../siwe-parser",
+    "@spruceid/siwe-parser": "*",
     "@stablelib/random": "^1.0.1",
     "uri-js": "^4.4.1",
     "valid-url": "^1.0.9"

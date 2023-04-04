@@ -49,8 +49,7 @@ audit. We welcome continued feedback on the usability, architecture, and securit
 of this implementation.
 
 ## Mono Repo Install and Build
-Run `npm install` to install dependencies, then `npm run bootstrap` to link the dependencies
-in their respective packages. Afteward run `npm run build` to build the library.
+Run `npm install` to install dependencies, then `npm run build` to build the library.
 Development can occur on the `package/*` level with tests being run on each package itself.
 
 To run all tests: `npm run test`
