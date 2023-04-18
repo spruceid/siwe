@@ -460,14 +460,14 @@ export class SiweMessage {
     if (!exists(this.nonce) || this.nonce === '') {
       throw new SiweError(
         SiweErrorType.INVALID_NONCE,
-        `Length > 8. Alphanumeric.`,
+        `Length >= 8. Alphanumeric.`,
         this.nonce
       );
     } else {
       if (typeof this.nonce !== 'string') {
         throw new SiweError(
           SiweErrorType.INVALID_NONCE,
-          `Length > 8. String. Alphanumeric.`,
+          `Length >= 8. String. Alphanumeric.`,
           this.nonce
         );
       }
@@ -476,7 +476,7 @@ export class SiweMessage {
       if (this.nonce.length < 8 || nonce[0] !== this.nonce) {
         throw new SiweError(
           SiweErrorType.INVALID_NONCE,
-          `Length > 8 (${nonce.length}). Alphanumeric.`,
+          `Length >= 8 (${nonce.length}). Alphanumeric.`,
           this.nonce
         );
       }
