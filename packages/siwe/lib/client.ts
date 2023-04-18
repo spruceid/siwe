@@ -457,7 +457,7 @@ export class SiweMessage {
     }
 
     /** Check if the nonce is alphanumeric and bigger then 8 characters */
-    if (!exists(this.nonce)) {
+    if (!exists(this.nonce) || this.nonce === '') {
       throw new SiweError(
         SiweErrorType.INVALID_NONCE,
         `Length > 8. Alphanumeric.`,
