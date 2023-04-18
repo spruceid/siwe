@@ -1,9 +1,5 @@
 // TODO: Figure out how to get types from this lib:
-import {
-  isEIP55Address,
-  ParsedMessage,
-  parseIntegerNumber,
-} from '@spruceid/siwe-parser';
+import { isEIP55Address, ParsedMessage } from '@spruceid/siwe-parser';
 import { providers } from 'ethers';
 import * as uri from 'valid-url';
 
@@ -22,6 +18,7 @@ import {
   generateNonce,
   checkInvalidKeys,
   isValidISO8601Date,
+  exists,
 } from './utils';
 
 export class SiweMessage {
@@ -94,11 +91,7 @@ export class SiweMessage {
       this.notBefore = param?.notBefore;
       this.requestId = param?.requestId;
       this.resources = param?.resources;
-      if (typeof this.chainId === 'string') {
-        this.chainId = parseIntegerNumber(this.chainId);
-      }
     }
-    this.nonce = this.nonce || generateNonce();
     this.validateMessage();
   }
 
@@ -119,11 +112,7 @@ export class SiweMessage {
     let prefix = [header, this.address].join('\n');
     const versionField = `Version: ${this.version}`;
 
-    if (!this.nonce) {
-      this.nonce = generateNonce();
-    }
-
-    const chainField = `Chain ID: ` + this.chainId || '1';
+    const chainField = `Chain ID: ` + this.chainId;
 
     const nonceField = `Nonce: ${this.nonce}`;
 
@@ -399,7 +388,8 @@ export class SiweMessage {
 
     /** `domain` check. */
     if (
-      !this.domain ||
+      !exists(this.domain) ||
+      typeof this.domain !== 'string' ||
       this.domain.length === 0 ||
       !/[^#?]*/.test(this.domain)
     ) {
@@ -410,7 +400,11 @@ export class SiweMessage {
     }
 
     /** EIP-55 `address` check. */
-    if (!isEIP55Address(this.address)) {
+    if (
+      !exists(this.address) ||
+      typeof this.address !== 'string' ||
+      !isEIP55Address(this.address)
+    ) {
       throw new SiweError(
         SiweErrorType.INVALID_ADDRESS,
         getAddress(this.address),
@@ -418,8 +412,23 @@ export class SiweMessage {
       );
     }
 
+    if (
+      exists(this.statement) &&
+      (typeof this.statement !== 'string' || this.statement.includes('\n'))
+    ) {
+      throw new SiweError(
+        SiweErrorType.INVALID_MESSAGE_STATEMENT,
+        '`statement` to be a valid string and not contain \\n',
+        this.statement
+      );
+    }
+
     /** Check if the URI is valid. */
-    if (!uri.isUri(this.uri)) {
+    if (
+      !exists(this.uri) ||
+      typeof this.uri !== 'string' ||
+      !uri.isUri(this.uri)
+    ) {
       throw new SiweError(
         SiweErrorType.INVALID_URI,
         `${this.uri} to be a valid uri.`
@@ -427,7 +436,11 @@ export class SiweMessage {
     }
 
     /** Check if the version is 1. */
-    if (this.version !== '1') {
+    if (
+      !exists(this.version) ||
+      typeof this.version !== 'string' ||
+      this.version !== '1'
+    ) {
       throw new SiweError(
         SiweErrorType.INVALID_MESSAGE_VERSION,
         '1',
@@ -435,34 +448,85 @@ export class SiweMessage {
       );
     }
 
-    /** Check if the nonce is alphanumeric and bigger then 8 characters */
-    const nonce = this?.nonce?.match(/[a-zA-Z0-9]{8,}/);
-    if (!nonce || this.nonce.length < 8 || nonce[0] !== this.nonce) {
+    if (!exists(this.chainId) || typeof this.chainId !== 'number') {
       throw new SiweError(
-        SiweErrorType.INVALID_NONCE,
-        `Length > 8 (${nonce.length}). Alphanumeric.`,
-        this.nonce
+        SiweErrorType.INVALID_CHAIN_ID,
+        'Any number representing a `chainId`',
+        `${this.chainId}`
       );
     }
 
+    /** Check if the nonce is alphanumeric and bigger then 8 characters */
+    if (!exists(this.nonce)) {
+      throw new SiweError(
+        SiweErrorType.INVALID_NONCE,
+        `Length > 8. Alphanumeric.`,
+        this.nonce
+      );
+    } else {
+      if (typeof this.nonce !== 'string') {
+        throw new SiweError(
+          SiweErrorType.INVALID_NONCE,
+          `Length > 8. String. Alphanumeric.`,
+          this.nonce
+        );
+      }
+
+      const nonce = this.nonce.match(/[a-zA-Z0-9]{8,}/);
+      if (this.nonce.length < 8 || nonce[0] !== this.nonce) {
+        throw new SiweError(
+          SiweErrorType.INVALID_NONCE,
+          `Length > 8 (${nonce.length}). Alphanumeric.`,
+          this.nonce
+        );
+      }
+    }
+
     /** `issuedAt` conforms to ISO-8601 and is a valid date. */
-    if (this.issuedAt) {
+    if (exists(this.issuedAt)) {
+      if (typeof this.issuedAt !== 'string') {
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
+      }
+
       if (!isValidISO8601Date(this.issuedAt)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
       }
     }
 
     /** `expirationTime` conforms to ISO-8601 and is a valid date. */
-    if (this.expirationTime) {
+    if (exists(this.expirationTime)) {
+      if (typeof this.expirationTime !== 'string') {
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
+      }
+
       if (!isValidISO8601Date(this.expirationTime)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
       }
     }
 
     /** `notBefore` conforms to ISO-8601 and is a valid date. */
-    if (this.notBefore) {
+    if (exists(this.notBefore)) {
+      if (typeof this.notBefore !== 'string') {
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
+      }
+
       if (!isValidISO8601Date(this.notBefore)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
+        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
+      }
+    }
+
+    /** `requestId` is a string if it exists */
+    if (exists(this.requestId)) {
+      if (typeof this.requestId !== 'string') {
+        throw new SiweError('Invalid field type for `requestId`.');
+      }
+    }
+
+    /** `resources` is an Array of strings if it exists */
+    if (exists(this.resources)) {
+      if (Array.isArray(this.resources)) {
+        if (!this.resources.every(res => typeof res === 'string'))
+          throw new SiweError('Invalid field type for `resources`.');
       }
     }
   }
