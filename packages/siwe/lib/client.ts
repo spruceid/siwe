@@ -454,6 +454,14 @@ export class SiweMessage {
         'Any number representing a `chainId`',
         `${this.chainId}`
       );
+    } else {
+      if (!Number.isFinite(this.chainId)) {
+        throw new SiweError(
+          SiweErrorType.INVALID_CHAIN_ID,
+          'Any number representing a `chainId`',
+          `${this.chainId}`
+        );
+      }
     }
 
     /** Check if the nonce is alphanumeric and bigger then 8 characters */
