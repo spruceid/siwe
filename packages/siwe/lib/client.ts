@@ -17,7 +17,12 @@ import {
   VerifyParams,
   VerifyParamsKeys,
 } from './types';
-import { checkContractWalletSignature, generateNonce, checkInvalidKeys, isValidISO8601Date } from './utils';
+import {
+  checkContractWalletSignature,
+  generateNonce,
+  checkInvalidKeys,
+  isValidISO8601Date,
+} from './utils';
 
 export class SiweMessage {
   /**RFC 4501 dns authority that is requesting the signing. */
@@ -77,7 +82,18 @@ export class SiweMessage {
       this.chainId = parsedMessage.chainId;
       this.resources = parsedMessage.resources;
     } else {
-      Object.assign(this, param);
+      this.domain = param.domain;
+      this.address = param.address;
+      this.statement = param?.statement;
+      this.uri = param.uri;
+      this.version = param.version;
+      this.chainId = param.chainId;
+      this.nonce = param.nonce;
+      this.issuedAt = param?.issuedAt;
+      this.expirationTime = param?.expirationTime;
+      this.notBefore = param?.notBefore;
+      this.requestId = param?.requestId;
+      this.resources = param?.resources;
       if (typeof this.chainId === 'string') {
         this.chainId = parseIntegerNumber(this.chainId);
       }
@@ -202,22 +218,32 @@ export class SiweMessage {
         }
       };
 
-      const invalidParams: Array<keyof VerifyParams> = checkInvalidKeys<VerifyParams>(params, VerifyParamsKeys);
-      if(invalidParams.length > 0) {
+      const invalidParams: Array<keyof VerifyParams> =
+        checkInvalidKeys<VerifyParams>(params, VerifyParamsKeys);
+      if (invalidParams.length > 0) {
         fail({
           success: false,
           data: this,
-          error: new Error(`${invalidParams.join(', ')} is/are not valid key(s) for VerifyParams.`),
-        })
+          error: new Error(
+            `${invalidParams.join(
+              ', '
+            )} is/are not valid key(s) for VerifyParams.`
+          ),
+        });
       }
 
-      const invalidOpts: Array<keyof VerifyOpts> = checkInvalidKeys<VerifyOpts>(opts, VerifyOptsKeys);
-      if(invalidParams.length > 0) {
+      const invalidOpts: Array<keyof VerifyOpts> = checkInvalidKeys<VerifyOpts>(
+        opts,
+        VerifyOptsKeys
+      );
+      if (invalidParams.length > 0) {
         fail({
           success: false,
           data: this,
-          error: new Error(`${invalidOpts.join(', ')} is/are not valid key(s) for VerifyOpts.`),
-        })
+          error: new Error(
+            `${invalidOpts.join(', ')} is/are not valid key(s) for VerifyOpts.`
+          ),
+        });
       }
 
       const { signature, domain, nonce, time } = params;
@@ -303,7 +329,11 @@ export class SiweMessage {
           data: this,
         });
       } else {
-        const EIP1271Promise = checkContractWalletSignature(this, signature, opts.provider)
+        const EIP1271Promise = checkContractWalletSignature(
+          this,
+          signature,
+          opts.provider
+        )
           .then(isValid => {
             if (!isValid) {
               return {
@@ -331,7 +361,10 @@ export class SiweMessage {
 
         Promise.all([
           EIP1271Promise,
-          opts?.verificationFallback?.(params, opts, this, EIP1271Promise)?.then(res => res)?.catch((res: SiweResponse) => res)
+          opts
+            ?.verificationFallback?.(params, opts, this, EIP1271Promise)
+            ?.then(res => res)
+            ?.catch((res: SiweResponse) => res),
         ]).then(([EIP1271Response, fallbackResponse]) => {
           if (fallbackResponse) {
             if (fallbackResponse.success) {
@@ -342,8 +375,7 @@ export class SiweMessage {
           } else {
             if (EIP1271Response.success) {
               return resolve(EIP1271Response);
-            }
-            else {
+            } else {
               fail(EIP1271Response);
             }
           }
@@ -414,7 +446,7 @@ export class SiweMessage {
     }
 
     /** `issuedAt` conforms to ISO-8601 and is a valid date. */
-    if(this.issuedAt) {
+    if (this.issuedAt) {
       if (!isValidISO8601Date(this.issuedAt)) {
         throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
       }
