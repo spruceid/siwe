@@ -30,7 +30,7 @@ export const checkContractWalletSignature = async (
   const walletContract = new Contract(message.address, EIP1271_ABI, provider);
   const hashedMessage = hashMessage(message.prepareMessage());
   const res = await walletContract.isValidSignature(hashedMessage, signature);
-  return res == EIP1271_MAGICVALUE;
+  return res === EIP1271_MAGICVALUE;
 };
 
 /**

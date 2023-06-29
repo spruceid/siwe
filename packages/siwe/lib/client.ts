@@ -490,13 +490,8 @@ export class SiweMessage {
       }
     }
 
-    /** `issuedAt` conforms to ISO-8601 and is a valid date. */
     if (exists(this.issuedAt)) {
       if (typeof this.issuedAt !== 'string') {
-        throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
-      }
-
-      if (!isValidISO8601Date(this.issuedAt)) {
         throw new SiweError(SiweErrorType.INVALID_TIME_FORMAT);
       }
     }
