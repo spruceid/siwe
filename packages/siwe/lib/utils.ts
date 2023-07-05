@@ -77,6 +77,11 @@ export const isValidISO8601Date = (inputDate: string): boolean => {
   return inputMatch.groups.date === parsedInputMatch.groups.date;
 };
 
+/**
+ * Checks if the provided object contains all keys in the provided keys array
+ * @param obj any object of type T
+ * @param keys an array of keyof T
+ */
 export const checkInvalidKeys = <T>(
   obj: T,
   keys: Array<keyof T>
@@ -88,4 +93,21 @@ export const checkInvalidKeys = <T>(
     }
   });
   return invalidKeys;
+};
+
+/**
+ * A function to assert if given value is null or undefined
+ * @param value any value to have it's existence checked
+ * @returns A boolean containing the result of the validation
+ */
+export const exists = (value: any): boolean => {
+  if (value === null) {
+    return false;
+  }
+
+  if (value === undefined) {
+    return false;
+  }
+
+  return true;
 };

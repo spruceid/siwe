@@ -65,7 +65,9 @@ describe(`Message verification without suppressExceptions`, () => {
           .then(async ({ data }) => {
             jest
               .useFakeTimers()
-              .setSystemTime(new Date((test_fields as any).time || test_fields.issuedAt));
+              .setSystemTime(
+                new Date((test_fields as any).time || test_fields.issuedAt)
+              );
             const res = await msg.validate(test_fields.signature);
             return res === data;
           })

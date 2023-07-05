@@ -30,7 +30,12 @@ export interface VerifyOpts {
   suppressExceptions?: boolean;
 
   /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
-  verificationFallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage, EIP1271Promise: Promise<SiweResponse>) => Promise<SiweResponse>;
+  verificationFallback?: (
+    params: VerifyParams,
+    opts: VerifyOpts,
+    message: SiweMessage,
+    EIP1271Promise: Promise<SiweResponse>
+  ) => Promise<SiweResponse>;
 }
 
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
@@ -57,14 +62,18 @@ export interface SiweResponse {
  * Interface used to return errors in SiweResponses.
  */
 export class SiweError {
-  constructor(type: SiweErrorType | string, expected?: string, received?: string) {
+  constructor(
+    type: SiweErrorType | string,
+    expected?: string,
+    received?: string
+  ) {
     this.type = type;
     this.expected = expected;
     this.received = received;
   }
 
-    /** Type of the error. */
-    type: SiweErrorType | string;
+  /** Type of the error. */
+  type: SiweErrorType | string;
 
   /** Expected value or condition to pass. */
   expected?: string;
@@ -109,6 +118,18 @@ export enum SiweErrorType {
 
   /** `version` is not 1. */
   INVALID_MESSAGE_VERSION = 'Invalid message version.',
+
+  /** `statement` is not valid. */
+  INVALID_MESSAGE_STATEMENT = 'Invalid message statement.',
+
+  /** `chainId` is not valid. */
+  INVALID_CHAIN_ID = 'Invalid chainId.',
+
+  /** `requestId` is not valid. */
+  INVALID_REQUEST_ID = 'Invalid requestId.',
+
+  /** `resources` is not valid. */
+  INVALID_RESOURCES = 'Invalid resources.',
 
   /** Thrown when some required field is missing. */
   UNABLE_TO_PARSE = 'Unable to parse the message.',
