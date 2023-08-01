@@ -1,6 +1,6 @@
 import apgApi from "apg-js/src/apg-api/api";
 import apgLib from "apg-js/src/apg-lib/node-exports";
-import { isEIP55Address, parseIntegerNumber } from "./utils";
+import { isEIP55Address, parseIntegerNumber, containsRtlChar } from "./utils";
 
 const GRAMMAR = `
 sign-in-with-ethereum =
@@ -187,6 +187,12 @@ export class ParsedMessage {
 					phraseIndex,
 					phraseLength
 				);
+        if (data.domain.length === 0) {
+          throw new Error('Domain may not be empty.');
+        }
+        if (containsRtlChar(data.domain)) {
+          throw new Error("Domain may not contain RTLO characters.");
+        }
 			}
 			return ret;
 		};
@@ -199,7 +205,10 @@ export class ParsedMessage {
 					phraseIndex,
 					phraseLength
 				);
-			}
+			}		
+      if (!isEIP55Address(data.address)) {
+			  throw new Error("Address not conformant to EIP-55.");
+		  }
 			return ret;
 		};
 		parser.ast.callbacks.address = address;
@@ -225,6 +234,9 @@ export class ParsedMessage {
 						phraseIndex,
 						phraseLength
 					);
+          if (containsRtlChar(data.uri)) {
+            throw new Error("URI may not contain RTLO characters.");
+          }
 				}
 			}
 			return ret;
@@ -237,7 +249,7 @@ export class ParsedMessage {
 					chars,
 					phraseIndex,
 					phraseLength
-				);
+  		  );
 			}
 			return ret;
 		};
@@ -325,13 +337,19 @@ export class ParsedMessage {
 					.charsToString(chars, phraseIndex, phraseLength)
 					.slice(3)
 					.split("\n- ");
+        data.resources.forEach(r => {
+          if (containsRtlChar(r)) {
+            throw new Error("Resources may not contain RTLO characters.");
+          }
+        });
 			}
 			return ret;
 		};
 		parser.ast.callbacks.resources = resources;
 
 		const result = parser.parse(GrammarApi.grammarObj, "sign-in-with-ethereum", msg);
-		if (!result.success) {
+
+    if (!result.success) {
 			throw new Error(`Invalid message: ${JSON.stringify(result)}`);
 		}
 		const elements = {};
@@ -340,13 +358,5 @@ export class ParsedMessage {
 		for (const [key, value] of Object.entries(elements)) {
 			this[key] = value;
 		}
-
-		if (this.domain.length === 0) {
-			throw new Error("Domain cannot be empty.");
-		}
-
-		if (!isEIP55Address(this.address)) {
-			throw new Error("Address not conformant to EIP-55.");
-		}
-	}
+  }
 }

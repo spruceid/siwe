@@ -14,6 +14,22 @@
             "https://service.org/login"
         ]
     },
+    "malicious domain with rtlo character": {
+      "domain": "service.org",
+      "address": "0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946",
+      "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
+      "uri": "\u202ehttps://service.org/login#moc.live",
+      "version": "1",
+      "chainId": 1,
+      "nonce": "12341234",
+      "issuedAt": "2022-03-17T12:45:13.610Z",
+      "expirationTime": "2023-03-17T12:45:13.610Z",
+      "notBefore": "2022-03-17T12:45:13.610Z",
+      "requestId": "some_id",
+      "resources": [
+          "\u202ehttps://service.org/login#moc.live"
+      ]
+    },
     "missing address": {
         "domain": "service.org",
         "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",
