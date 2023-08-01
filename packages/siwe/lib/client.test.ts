@@ -47,33 +47,26 @@ describe(`Message Generation`, () => {
   );
 });
 
-describe(`Message verification without suppressExceptions`, () => {
+describe(`Message verification`, () => {
   test.concurrent.each(Object.entries(verificationPositive))(
     'Verifies message successfully: %s',
     async (_, test_fields: any) => {
       const msg = new SiweMessage(test_fields);
+      const params = {
+        signature: test_fields.signature,
+        time: (test_fields as any).time || test_fields.issuedAt,
+        domain: (test_fields as any).domain,
+        nonce: (test_fields as any).nonce,
+      };
       await expect(
-        msg
-          .verify({
-            signature: test_fields.signature,
-            time: (test_fields as any).time || test_fields.issuedAt,
-            domain: (test_fields as any).domainBinding,
-            nonce: (test_fields as any).matchNonce,
-          })
-          // when validate is removed uncomment this and remove the following then
-          // .then(({ success }) => success)
-          .then(async ({ data }) => {
-            jest
-              .useFakeTimers()
-              .setSystemTime(
-                new Date((test_fields as any).time || test_fields.issuedAt)
-              );
-            const res = await msg.validate(test_fields.signature);
-            return res === data;
-          })
-      ).resolves.toBeTruthy();
-
-      jest.useRealTimers();
+        msg.verify(params).then(async () => {
+          jest
+            .useFakeTimers()
+            .setSystemTime(
+              new Date((test_fields as any).time || test_fields.issuedAt)
+            );
+        })
+      ).resolves.toBeUndefined();
     }
   );
 
@@ -83,14 +76,12 @@ describe(`Message verification without suppressExceptions`, () => {
       try {
         const msg = new SiweMessage(test_fields);
         await expect(
-          msg
-            .verify({
-              signature: test_fields.signature,
-              time: (test_fields as any).time || test_fields.issuedAt,
-              domain: (test_fields as any).domainBinding,
-              nonce: (test_fields as any).matchNonce,
-            })
-            .then(({ success }) => success)
+          msg.verify({
+            signature: test_fields.signature,
+            time: (test_fields as any).time || test_fields.issuedAt,
+            domain: (test_fields as any).domain,
+            nonce: (test_fields as any).matchNonce,
+          })
         ).rejects.toBeFalsy();
       } catch (error) {
         expect(Object.values(SiweErrorType).includes(error));
@@ -99,28 +90,23 @@ describe(`Message verification without suppressExceptions`, () => {
   );
 });
 
-describe(`Message verification with suppressExceptions`, () => {
-  test.concurrent.each(Object.entries(verificationNegative))(
-    'Fails to verify message: %s but still resolves the promise',
-    async (n, test_fields: any) => {
-      try {
-        const msg = new SiweMessage(test_fields);
-        await expect(
-          msg
-            .verify(
-              {
-                signature: test_fields.signature,
-                time: (test_fields as any).time || test_fields.issuedAt,
-                domain: (test_fields as any).domainBinding,
-                nonce: (test_fields as any).matchNonce,
-              },
-              { suppressExceptions: true }
-            )
-            .then(({ success }) => success)
-        ).resolves.toBeFalsy();
-      } catch (error) {
-        expect(Object.values(SiweErrorType).includes(error));
-      }
+describe(`Round Trip`, () => {
+  const wallet = Wallet.createRandom();
+  test.concurrent.each(Object.entries(parsingPositive))(
+    'Generates a Successfully Verifying message: %s',
+    async (_, test: any) => {
+      const msg = new SiweMessage(test.fields);
+      msg.address = wallet.address;
+      const signature = await wallet.signMessage(msg.toMessage());
+      const { domain, nonce } = test.fields;
+      await expect(
+        msg.verify({
+          signature,
+          domain,
+          nonce,
+          time: new Date().toLocaleString(),
+        })
+      ).resolves.toBeUndefined();
     }
   );
 });
@@ -133,24 +119,15 @@ describe(`Round Trip`, () => {
       const msg = new SiweMessage(test.fields);
       msg.address = wallet.address;
       const signature = await wallet.signMessage(msg.toMessage());
+      const { domain, nonce } = test.fields;
       await expect(
-        msg.verify({ signature }).then(({ success }) => success)
-      ).resolves.toBeTruthy();
-    }
-  );
-});
-
-describe(`Round Trip`, () => {
-  const wallet = Wallet.createRandom();
-  test.concurrent.each(Object.entries(parsingPositive))(
-    'Generates a Successfully Verifying message: %s',
-    async (_, test: any) => {
-      const msg = new SiweMessage(test.fields);
-      msg.address = wallet.address;
-      const signature = await wallet.signMessage(msg.toMessage());
-      await expect(
-        msg.verify({ signature }).then(({ success }) => success)
-      ).resolves.toBeTruthy();
+        msg.verify({
+          signature,
+          domain,
+          nonce,
+          time: new Date().toLocaleString(),
+        })
+      ).resolves.toBeUndefined();
     }
   );
 });
@@ -168,17 +145,18 @@ describe(`EIP1271`, () => {
       const provider = getProviderCompat(1);
       const msg = new SiweMessage(test_fields.message);
       await expect(
-        msg
-          .verify(
-            {
-              signature: test_fields.signature,
-            },
-            {
-              provider,
-            }
-          )
-          .then(({ success }) => success)
-      ).resolves.toBeTruthy();
+        msg.verify(
+          {
+            signature: test_fields.signature,
+            domain: test_fields.domain,
+            nonce: test_fields.nonce,
+            time: new Date().toLocaleString(),
+          },
+          {
+            provider: new providers.CloudflareProvider(1),
+          }
+        )
+      ).resolves.toBeUndefined();
     }
   );
 });
@@ -208,7 +186,7 @@ describe(`Unit`, () => {
 
   test('Should not throw if params are valid.', async () => {
     const wallet = Wallet.createRandom();
-    const msg = new SiweMessage({
+    const params = {
       address: wallet.address,
       domain: 'login.xyz',
       statement: 'Sign-In With Ethereum Example Statement',
@@ -218,15 +196,22 @@ describe(`Unit`, () => {
       issuedAt: '2022-01-27T17:09:38.578Z',
       chainId: 1,
       expirationTime: '2100-01-07T14:31:43.952Z',
-    });
+    };
+    const msg = new SiweMessage(params);
     const signature = await wallet.signMessage(msg.toMessage());
-    const result = await (msg as any).verify({ signature });
-    expect(result.success).toBeTruthy();
+    const { domain, nonce } = params;
+    const result = await (msg as any).verify({
+      signature,
+      domain,
+      nonce,
+      time: new Date().toLocaleString(),
+    });
+    expect(result).toBeUndefined();
   });
 
   test('Should throw if params are invalid.', async () => {
     const wallet = Wallet.createRandom();
-    const msg = new SiweMessage({
+    const params = {
       address: wallet.address,
       domain: 'login.xyz',
       statement: 'Sign-In With Ethereum Example Statement',
@@ -236,7 +221,8 @@ describe(`Unit`, () => {
       issuedAt: '2022-01-27T17:09:38.578Z',
       chainId: 1,
       expirationTime: '2100-01-07T14:31:43.952Z',
-    });
+    };
+    const msg = new SiweMessage(params);
     const signature = await wallet.signMessage(msg.toMessage());
     try {
       await (msg as any).verify({
@@ -244,8 +230,7 @@ describe(`Unit`, () => {
         invalidKey: 'should throw',
       });
     } catch (e) {
-      expect(e.success).toBeFalsy();
-      expect(e.error).toEqual(
+      expect(e).toEqual(
         new Error('invalidKey is/are not valid key(s) for VerifyParams.')
       );
     }
@@ -266,13 +251,9 @@ describe(`Unit`, () => {
     });
     const signature = await wallet.signMessage(msg.toMessage());
     try {
-      await (msg as any).verify(
-        { signature },
-        { suppressExceptions: true, invalidKey: 'should throw' }
-      );
+      await (msg as any).verify({ signature }, { invalidKey: 'should throw' });
     } catch (e) {
-      expect(e.success).toBeFalsy();
-      expect(e.error).toEqual(
+      expect(e).toEqual(
         new Error('invalidKey is/are not valid key(s) for VerifyOpts.')
       );
     }

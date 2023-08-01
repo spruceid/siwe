@@ -1,5 +1,4 @@
 import { providers } from 'ethers';
-import { SiweMessage } from './client';
 
 export interface VerifyParams {
   /** Signature of the message signed by the wallet */
@@ -25,38 +24,9 @@ export const VerifyParamsKeys: Array<keyof VerifyParams> = [
 export interface VerifyOpts {
   /** ethers provider to be used for EIP-1271 validation */
   provider?: providers.Provider;
-
-  /** If the library should reject promises on errors, defaults to false */
-  suppressExceptions?: boolean;
-
-  /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
-  verificationFallback?: (
-    params: VerifyParams,
-    opts: VerifyOpts,
-    message: SiweMessage,
-    EIP1271Promise: Promise<SiweResponse>
-  ) => Promise<SiweResponse>;
 }
 
-export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
-  'provider',
-  'suppressExceptions',
-  'verificationFallback',
-];
-
-/**
- * Returned on verifications.
- */
-export interface SiweResponse {
-  /** Boolean representing if the message was verified with success. */
-  success: boolean;
-
-  /** If present `success` MUST be false and will provide extra information on the failure reason. */
-  error?: SiweError;
-
-  /** Original message that was verified. */
-  data: SiweMessage;
-}
+export const VerifyOptsKeys: Array<keyof VerifyOpts> = ['provider'];
 
 /**
  * Interface used to return errors in SiweResponses.
