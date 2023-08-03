@@ -280,7 +280,7 @@ export class SiweMessage {
 
     const isValid = await checkContractWalletSignature(
       this,
-      normalizedSignature,
+      signature,
       provider
     );
 
