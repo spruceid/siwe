@@ -6,12 +6,7 @@ const verificationPositive = require('../../../test/verification_positive.json')
 const verificationNegative = require('../../../test/verification_negative.json');
 const EIP1271 = require('../../../test/eip1271.json');
 
-import {
-  providers,
-  // @ts-expect-error -- ethers v6 compatibility hack
-  InfuraProvider,
-  Wallet,
-} from 'ethers';
+import { providers, Wallet } from 'ethers';
 import { SiweMessage } from './client';
 import { SiweErrorType } from './types';
 
@@ -133,16 +128,10 @@ describe(`Round Trip`, () => {
 });
 
 describe(`EIP1271`, () => {
-  function getProviderCompat(networkId: number | string) {
-    return typeof providers?.InfuraProvider !== 'undefined'
-      ? new providers.InfuraProvider(networkId)
-      : new InfuraProvider(networkId);
-  }
-
   test.concurrent.each(Object.entries(EIP1271))(
     'Verifies message successfully: %s',
     async (_, test_fields: any) => {
-      const provider = getProviderCompat(1);
+      const provider = new providers.InfuraProvider(1);
       const msg = new SiweMessage(test_fields.message);
       await expect(
         msg.verify(

@@ -1,9 +1,8 @@
 // TODO: Figure out how to get types from this lib:
 import { isEIP55Address, ParsedMessage } from '@spruceid/siwe-parser';
-import { providers, Signer } from 'ethers';
+import { providers, Signer, utils } from 'ethers';
 import * as uri from 'valid-url';
 
-import { getAddress, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
@@ -271,7 +270,7 @@ export class SiweMessage {
     const normalizedSignature = '0x' + normalizedSignatureBuf.toString('hex');
 
     /** Recover address from signature */
-    let addr = verifyMessage(EIP4361Message, normalizedSignature);
+    let addr = utils.verifyMessage(EIP4361Message, normalizedSignature);
 
     /** Match signature with message's address */
     if (addr === this.address) {
@@ -327,7 +326,7 @@ export class SiweMessage {
     ) {
       throw new SiweError(
         SiweErrorType.INVALID_ADDRESS,
-        getAddress(this.address),
+        utils.getAddress(this.address),
         this.address
       );
     }
