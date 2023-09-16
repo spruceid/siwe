@@ -184,7 +184,7 @@
             "https://service.org/login"
         ]
     },
-    "nonce with less then 8 chars": {
+    "nonce with less than 8 chars": {
         "domain": "service.org",
         "address": "0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946",
         "statement": "I accept the ServiceOrg Terms of Service: https://service.org/tos",

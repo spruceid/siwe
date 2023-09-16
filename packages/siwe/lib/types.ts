@@ -95,8 +95,8 @@ export enum SiweErrorType {
   /** `uri` does not conform to RFC 3986. */
   INVALID_URI = 'URI does not conform to RFC 3986.',
 
-  /** `nonce` is smaller then 8 characters or is not alphanumeric */
-  INVALID_NONCE = 'Nonce size smaller then 8 characters or is not alphanumeric.',
+  /** `nonce` is smaller than 8 characters or is not alphanumeric */
+  INVALID_NONCE = 'Nonce size smaller than 8 characters or is not alphanumeric.',
 
   /** `notBefore` is present and in the future. */
   NOT_YET_VALID_MESSAGE = 'Message is not valid yet.',
