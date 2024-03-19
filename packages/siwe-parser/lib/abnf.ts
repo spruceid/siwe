@@ -4,7 +4,7 @@ import { isEIP55Address, parseIntegerNumber } from "./utils";
 
 const GRAMMAR = `
 sign-in-with-ethereum =
-    domain %s" wants you to sign in with your Ethereum account:" LF
+    [ scheme "://" ] domain %s" wants you to sign in with your Ethereum account:" LF
     address LF
     LF
     [ statement LF ]
@@ -161,6 +161,7 @@ class GrammarApi {
 }
 
 export class ParsedMessage {
+	scheme: string | null;
 	domain: string;
 	address: string;
 	statement: string | null;
@@ -178,6 +179,19 @@ export class ParsedMessage {
 		const parser = new apgLib.parser();
 		parser.ast = new apgLib.ast();
 		const id = apgLib.ids;
+
+		const scheme = function (state, chars, phraseIndex, phraseLength, data) {
+			const ret = id.SEM_OK;
+			if (state === id.SEM_PRE && phraseIndex === 0) {
+				data.scheme = apgLib.utils.charsToString(
+					chars,
+					phraseIndex,
+					phraseLength
+				);
+			}
+			return ret;
+		};
+		parser.ast.callbacks.scheme = scheme;
 
 		const domain = function (state, chars, phraseIndex, phraseLength, data) {
 			const ret = id.SEM_OK;

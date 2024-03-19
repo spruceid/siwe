@@ -216,5 +216,33 @@
             "nonce": "15050747",
             "issuedAt": "2022-06-30T14:08:51.382Z"
         }
+    },
+    "domain contains optional scheme": {
+        "message": "https://example.com wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\nI accept the ExampleOrg Terms of Service: https://example.com/tos\n\nURI: https://example.com/login\nVersion: 1\nChain ID: 1\nNonce: 32891756\nIssued At: 2021-09-30T16:25:24Z",
+        "fields": {
+            "scheme": "https",
+            "domain": "example.com",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "statement": "I accept the ExampleOrg Terms of Service: https://example.com/tos",
+            "uri": "https://example.com/login",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891756",
+            "issuedAt": "2021-09-30T16:25:24Z"
+        }
+    },
+    "scheme is not parsed from elsehwere in message": {
+        "message": "localhost:3030 wants you to sign in with your Ethereum account:\n0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2\n\nI accept the ExampleOrg Terms of Service: http://localhost:3030/tos\n\nURI: http://localhost:3030/login\nVersion: 1\nChain ID: 1\nNonce: 32891756\nIssued At: 2021-09-30T16:25:24Z",
+        "fields": {
+            "scheme": null,
+            "domain": "localhost:3030",
+            "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            "statement": "I accept the ExampleOrg Terms of Service: http://localhost:3030/tos",
+            "uri": "http://localhost:3030/login",
+            "version": "1",
+            "chainId": 1,
+            "nonce": "32891756",
+            "issuedAt": "2021-09-30T16:25:24Z"
+        }
     }
 }
