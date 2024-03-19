@@ -4,7 +4,7 @@ import { isEIP55Address, parseIntegerNumber } from "./utils";
 
 const GRAMMAR = `
 sign-in-with-ethereum =
-    domain %s" wants you to sign in with your Ethereum account:" LF
+    [ scheme "://" ] domain %s" wants you to sign in with your Ethereum account:" LF
     address LF
     LF
     [ statement LF ]
