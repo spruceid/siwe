@@ -25,6 +25,8 @@ import {
 } from './utils';
 
 export class SiweMessage {
+  /**RFC 3986 URI scheme */
+  scheme?: string;
   /**RFC 4501 dns authority that is requesting the signing. */
   domain: string;
   /**Ethereum address performing the signing conformant to capitalization
@@ -69,6 +71,7 @@ export class SiweMessage {
   constructor(param: string | Partial<SiweMessage>) {
     if (typeof param === 'string') {
       const parsedMessage = new ParsedMessage(param);
+      this.scheme = parsedMessage.scheme;
       this.domain = parsedMessage.domain;
       this.address = parsedMessage.address;
       this.statement = parsedMessage.statement;
@@ -82,6 +85,7 @@ export class SiweMessage {
       this.chainId = parsedMessage.chainId;
       this.resources = parsedMessage.resources;
     } else {
+      this.scheme = param?.scheme;
       this.domain = param.domain;
       this.address = param.address;
       this.statement = param?.statement;
@@ -113,8 +117,8 @@ export class SiweMessage {
   toMessage(): string {
     /** Validates all fields of the object */
     this.validateMessage();
-
-    const header = `${this.domain} wants you to sign in with your Ethereum account:`;
+    const headerPrefx = this.scheme ? `${this.scheme}://${this.domain}` : this.domain;
+    const header =  `${headerPrefx} wants you to sign in with your Ethereum account:`;
     const uriField = `URI: ${this.uri}`;
     let prefix = [header, this.address].join('\n');
     const versionField = `Version: ${this.version}`;
