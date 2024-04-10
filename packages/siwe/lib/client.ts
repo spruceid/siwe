@@ -4,6 +4,7 @@ import {
   ParsedMessage,
   parseIntegerNumber,
 } from '@spruceid/siwe-parser';
+// @ts-expect-error -- ethers v6 compatibility hack
 import { providers } from 'ethers';
 import * as uri from 'valid-url';
 

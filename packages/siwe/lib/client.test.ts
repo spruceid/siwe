@@ -8,8 +8,8 @@ const verificationNegative: object = JSON.parse(fs.readFileSync('../../test/veri
 const EIP1271: object = JSON.parse(fs.readFileSync('../../test/eip1271.json', 'utf8'));
 
 import {
-  providers,
   // @ts-expect-error -- ethers v6 compatibility hack
+  providers,
   InfuraProvider,
   Wallet,
 } from 'ethers';
