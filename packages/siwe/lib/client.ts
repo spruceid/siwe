@@ -25,7 +25,7 @@ import {
 } from './utils';
 
 export class SiweMessage {
-  /**RFC 3986 URI scheme */
+  /**RFC 3986 URI scheme for the authority that is requesting the signing. */
   scheme?: string;
   /**RFC 4501 dns authority that is requesting the signing. */
   domain: string;
@@ -118,7 +118,7 @@ export class SiweMessage {
     /** Validates all fields of the object */
     this.validateMessage();
     const headerPrefx = this.scheme ? `${this.scheme}://${this.domain}` : this.domain;
-    const header =  `${headerPrefx} wants you to sign in with your Ethereum account:`;
+    const header = `${headerPrefx} wants you to sign in with your Ethereum account:`;
     const uriField = `URI: ${this.uri}`;
     let prefix = [header, this.address].join('\n');
     const versionField = `Version: ${this.version}`;
@@ -250,7 +250,20 @@ export class SiweMessage {
         });
       }
 
-      const { signature, domain, nonce, time } = params;
+      const { signature, scheme, domain, nonce, time } = params;
+
+      /** Scheme for domain binding */
+      if (scheme && scheme !== this.scheme) {
+        fail({
+          success: false,
+          data: this,
+          error: new SiweError(
+            SiweErrorType.SCHEME_MISMATCH,
+            scheme,
+            this.scheme
+          ),
+        });
+      }
 
       /** Domain binding */
       if (domain && domain !== this.domain) {
