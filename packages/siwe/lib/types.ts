@@ -5,6 +5,9 @@ export interface VerifyParams {
   /** Signature of the message signed by the wallet */
   signature: string;
 
+  /** RFC 3986 URI scheme for the authority that is requesting the signing. */
+  scheme?: string;
+
   /** RFC 4501 dns authority that is requesting the signing. */
   domain?: string;
 
@@ -17,6 +20,7 @@ export interface VerifyParams {
 
 export const VerifyParamsKeys: Array<keyof VerifyParams> = [
   'signature',
+  'scheme',
   'domain',
   'nonce',
   'time',
@@ -63,8 +67,8 @@ export class SiweError {
     this.received = received;
   }
 
-    /** Type of the error. */
-    type: SiweErrorType | string;
+  /** Type of the error. */
+  type: SiweErrorType | string;
 
   /** Expected value or condition to pass. */
   expected?: string;
@@ -82,6 +86,9 @@ export enum SiweErrorType {
 
   /** `domain` is not a valid authority or is empty. */
   INVALID_DOMAIN = 'Invalid domain.',
+
+  /** `scheme` don't match the scheme provided for verification. */
+  SCHEME_MISMATCH = 'Scheme does not match provided scheme for verification.',
 
   /** `domain` don't match the domain provided for verification. */
   DOMAIN_MISMATCH = 'Domain does not match provided domain for verification.',

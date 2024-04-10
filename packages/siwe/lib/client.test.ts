@@ -57,6 +57,7 @@ describe(`Message verification without suppressExceptions`, () => {
           .verify({
             signature: test_fields.signature,
             time: (test_fields as any).time || test_fields.issuedAt,
+            scheme: (test_fields as any).scheme,
             domain: (test_fields as any).domainBinding,
             nonce: (test_fields as any).matchNonce,
           })
@@ -85,6 +86,7 @@ describe(`Message verification without suppressExceptions`, () => {
             .verify({
               signature: test_fields.signature,
               time: (test_fields as any).time || test_fields.issuedAt,
+              scheme: (test_fields as any).scheme,
               domain: (test_fields as any).domainBinding,
               nonce: (test_fields as any).matchNonce,
             })
@@ -109,6 +111,7 @@ describe(`Message verification with suppressExceptions`, () => {
               {
                 signature: test_fields.signature,
                 time: (test_fields as any).time || test_fields.issuedAt,
+                scheme: (test_fields as any).scheme,
                 domain: (test_fields as any).domainBinding,
                 nonce: (test_fields as any).matchNonce,
               },
