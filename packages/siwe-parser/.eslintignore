@@ -1,4 +1,3 @@
 dist
 node_modules
 jest.config.js
-jest.setup.js

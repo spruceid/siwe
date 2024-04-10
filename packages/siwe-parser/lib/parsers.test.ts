@@ -1,7 +1,8 @@
 import { ParsedMessage } from "./abnf";
+import * as fs from "fs";
 
-const parsingPositive: Object = require("../../../test/parsing_positive.json");
-const parsingNegative: Object = require("../../../test/parsing_negative.json");
+const parsingPositive: object = JSON.parse(fs.readFileSync('../../test/parsing_positive.json', 'utf8'));
+const parsingNegative: object = JSON.parse(fs.readFileSync('../../test/parsing_negative.json', 'utf8'));
 
 //
 describe("Successfully parses with ABNF Client", () => {

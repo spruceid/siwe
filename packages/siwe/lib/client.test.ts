@@ -1,10 +1,11 @@
-/* eslint @typescript-eslint/no-explicit-any: 0 */
-const parsingPositive = require('../../../test/parsing_positive.json');
-const parsingNegative = require('../../../test/parsing_negative.json');
-const parsingNegativeObjects = require('../../../test/parsing_negative_objects.json');
-const verificationPositive = require('../../../test/verification_positive.json');
-const verificationNegative = require('../../../test/verification_negative.json');
-const EIP1271 = require('../../../test/eip1271.json');
+import * as fs from "fs";
+
+const parsingPositive: object = JSON.parse(fs.readFileSync('../../test/parsing_positive.json', 'utf8'));
+const parsingNegative: object = JSON.parse(fs.readFileSync('../../test/parsing_negative.json', 'utf8'));
+const parsingNegativeObjects: object = JSON.parse(fs.readFileSync('../../test/parsing_negative_objects.json', 'utf8'));
+const verificationPositive: object = JSON.parse(fs.readFileSync('../../test/verification_positive.json', 'utf8'));
+const verificationNegative: object = JSON.parse(fs.readFileSync('../../test/verification_negative.json', 'utf8'));
+const EIP1271: object = JSON.parse(fs.readFileSync('../../test/eip1271.json', 'utf8'));
 
 import {
   providers,
