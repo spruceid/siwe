@@ -1,6 +1,6 @@
 {
   "name": "@spruceid/siwe-parser",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Parse Messages that conform to EIP-4361: Sign-In with Ethereum (SIWE)",
   "main": "dist/parsers.js",
   "types": "dist/parsers.d.ts",
@@ -24,18 +24,18 @@
   "homepage": "https://github.com/spruceid/siwe",
   "license": "Apache-2.0",
   "dependencies": {
+    "@noble/hashes": "^1.1.2",
     "apg-js": "^4.1.1",
     "uri-js": "^4.4.1",
-    "valid-url": "^1.0.9",
-    "@noble/hashes": "^1.1.2"
+    "valid-url": "^1.0.9"
   },
-"devDependencies": {
-  "@typescript-eslint/eslint-plugin": "^5.23.0",
-  "@typescript-eslint/parser": "^5.23.0",
-  "eslint": "^8.15.0",
-  "eslint-config-prettier": "^8.5.0",
-  "prettier": "^2.6.2"
-},
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.6.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/spruceid/siwe.git"
