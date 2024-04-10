@@ -27,3 +27,5 @@ jobs:
         npm run build
     - name: Run tests
       run: ETHERSJS_VERSION=${{ matrix.ethers }} npm run test
+    - name: Run lints
+      run: npm run lint

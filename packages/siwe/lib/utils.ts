@@ -1,4 +1,5 @@
 import { randomStringForEntropy } from '@stablelib/random';
+// @ts-expect-error -- ethers v6 compatibility hack
 import { Contract, providers, Signer } from 'ethers';
 
 import type { SiweMessage } from './client';

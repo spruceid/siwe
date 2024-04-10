@@ -8,6 +8,7 @@
   "scripts": {
     "build": "lerna run build",
     "test": "lerna run --stream test",
+    "lint": "lerna run lint",
     "docs": "typedoc --plugin nlfurniss-typedoc-plugin-sourcefile-url --plugin typedoc-plugin-extras --sourcefile-url-prefix 'https://github.com/spruceid/siwe' --favicon ./favicon.svg --out docs packages/siwe/lib/siwe.ts"
   },
   "author": "Spruce Systems Inc.",
@@ -20,7 +21,7 @@
     "lerna": "^6.5.1",
     "nlfurniss-typedoc-plugin-sourcefile-url": "^2.0.0",
     "ts-jest": "^29.0.5",
-    "typedoc": "^0.23.12",
+    "typedoc": "^0.24.8",
     "typedoc-plugin-extras": "^2.2.1",
     "typescript": "^4.4.4"
   }

@@ -1,3 +1,4 @@
+// @ts-expect-error -- ethers v6 compatibility hack
 import { providers } from 'ethers';
 import { SiweMessage } from './client';
 
