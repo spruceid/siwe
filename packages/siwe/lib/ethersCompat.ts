@@ -1,10 +1,4 @@
-import {
-  // @ts-expect-error -- ethers v6 compatibility hack
-  utils,
-  verifyMessage as ethersVerifyMessage,
-  hashMessage as ethersHashMessage,
-  getAddress as ethersGetAddress,
-} from 'ethers';
+import ethers from 'ethers';
 
 type Ethers6BigNumberish = string | number | bigint;
 
@@ -13,37 +7,41 @@ type Ethers6BigNumberish = string | number | bigint;
 type Ethers6SignatureLike =
   | string
   | {
-    r: string;
-    s: string;
-    v: Ethers6BigNumberish;
-    yParity?: 0 | 1;
-    yParityAndS?: string;
-  }
+      r: string;
+      s: string;
+      v: Ethers6BigNumberish;
+      yParity?: 0 | 1;
+      yParityAndS?: string;
+    }
   | {
-    r: string;
-    yParityAndS: string;
-    yParity?: 0 | 1;
-    s?: string;
-    v?: number;
-  }
+      r: string;
+      yParityAndS: string;
+      yParity?: 0 | 1;
+      s?: string;
+      v?: number;
+    }
   | {
-    r: string;
-    s: string;
-    yParity: 0 | 1;
-    v?: Ethers6BigNumberish;
-    yParityAndS?: string;
-  };
+      r: string;
+      s: string;
+      yParity: 0 | 1;
+      v?: Ethers6BigNumberish;
+      yParityAndS?: string;
+    };
 
 export const verifyMessage =
-  utils?.verifyMessage ??
-  (ethersVerifyMessage as (
+  // @ts-expect-error -- ethers v6 compatibility hack
+  ethers?.utils.verifyMessage ??
+  (ethers?.verifyMessage as (
     message: Uint8Array | string,
     sig: Ethers6SignatureLike
   ) => string);
 
 export const hashMessage =
-  utils?.hashMessage ??
-  (ethersHashMessage as (message: Uint8Array | string) => string);
+  // @ts-expect-error -- ethers v6 compatibility hack
+  ethers.utils?.hashMessage ??
+  (ethers?.hashMessage as (message: Uint8Array | string) => string);
 
 export const getAddress =
-  utils?.getAddress ?? (ethersGetAddress as (address: string) => string);
+  // @ts-expect-error -- ethers v6 compatibility hack
+  ethers.utils?.getAddress ??
+  (ethers?.getAddress as (address: string) => string);
