@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 type Ethers6BigNumberish = string | number | bigint;
 
 // NB: This compatibility type omits the `Signature` class defined in ethers v6;
@@ -31,21 +33,23 @@ let ethersHashMessage = null;
 let ethersGetAddress = null;
 
 try {
-  const { utils } = require('ethers');
-  ethersVerifyMessage = utils.verifyMessage;
-  ethersHashMessage = utils.hashMessage;
-  ethersGetAddress = utils.getAddress;
-} catch (error) {
-  const { verifyMessage, getAddress, hashMessage } = require('ethers');
-
-  ethersVerifyMessage = verifyMessage as (
+  // @ts-expect-error -- v6 compatibility hack
+  ethersVerifyMessage = ethers.utils.verifyMessage;
+  // @ts-expect-error -- v6 compatibility hack
+  ethersHashMessage = ethers.utils.hashMessage;
+  // @ts-expect-error -- v6 compatibility hack
+  ethersGetAddress = ethers.utils.getAddress;
+} catch {
+  ethersVerifyMessage = ethers.verifyMessage as (
     message: Uint8Array | string,
     sig: Ethers6SignatureLike
   ) => string;
 
-  ethersHashMessage = hashMessage as (message: Uint8Array | string) => string;
+  ethersHashMessage = ethers.hashMessage as (
+    message: Uint8Array | string
+  ) => string;
 
-  ethersGetAddress = getAddress as (address: string) => string;
+  ethersGetAddress = ethers.getAddress as (address: string) => string;
 }
 
 export const verifyMessage = ethersVerifyMessage;
