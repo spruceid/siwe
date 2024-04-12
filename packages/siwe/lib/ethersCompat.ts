@@ -52,6 +52,11 @@ try {
   ethersGetAddress = ethers.getAddress as (address: string) => string;
 }
 
+// @ts-expect-error -- v6 compatibility hack
+type ProviderV5 = ethers.providers.Provider
+type ProviderV6 = ethers.Provider
+
+export type Provider = ProviderV6 extends undefined ? ProviderV5 : ProviderV6
 export const verifyMessage = ethersVerifyMessage;
 export const hashMessage = ethersHashMessage;
 export const getAddress = ethersGetAddress;
