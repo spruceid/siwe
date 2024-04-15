@@ -4,11 +4,9 @@ import {
   ParsedMessage,
   parseIntegerNumber,
 } from '@spruceid/siwe-parser';
-// @ts-expect-error -- ethers v6 compatibility hack
-import { providers } from 'ethers';
 import * as uri from 'valid-url';
 
-import { getAddress, verifyMessage } from './ethersCompat';
+import { getAddress, Provider, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
@@ -194,7 +192,7 @@ export class SiweMessage {
    * @param signature Signature to match the address in the message.
    * @param provider Ethers provider to be used for EIP-1271 validation
    */
-  async validate(signature: string, provider?: providers.Provider) {
+  async validate(signature: string, provider?: Provider) {
     console.warn(
       'validate() has been deprecated, please update your code to use verify(). validate() may be removed in future versions.'
     );
