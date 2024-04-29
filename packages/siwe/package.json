@@ -24,9 +24,7 @@
   "homepage": "https://github.com/spruceid/siwe",
   "dependencies": {
     "@spruceid/siwe-parser": "^2.1.2",
-    "@stablelib/random": "^1.0.1",
-    "uri-js": "^4.4.1",
-    "valid-url": "^1.0.9"
+    "@stablelib/random": "^1.0.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.23.0",

@@ -1,10 +1,8 @@
 // TODO: Figure out how to get types from this lib:
-import {
-  isEIP55Address,
-  ParsedMessage,
-  parseIntegerNumber,
-} from '@spruceid/siwe-parser';
-import * as uri from 'valid-url';
+// import { ParsedMessage, parseIntegerNumber } from '@spruceid/siwe-parser';
+// workaround because build cannot find '@spruceid/siwe-parser'
+import { ParsedMessage } from '../../siwe-parser/lib/abnf';
+import { parseIntegerNumber } from '../../siwe-parser/lib/utils';
 
 import { getAddress, Provider, verifyMessage } from './ethersCompat';
 import {
@@ -116,7 +114,9 @@ export class SiweMessage {
   toMessage(): string {
     /** Validates all fields of the object */
     this.validateMessage();
-    const headerPrefx = this.scheme ? `${this.scheme}://${this.domain}` : this.domain;
+    const headerPrefx = this.scheme
+      ? `${this.scheme}://${this.domain}`
+      : this.domain;
     const header = `${headerPrefx} wants you to sign in with your Ethereum account:`;
     const uriField = `URI: ${this.uri}`;
     let prefix = [header, this.address].join('\n');
@@ -426,21 +426,10 @@ export class SiweMessage {
     }
 
     /** EIP-55 `address` check. */
-    if (!isEIP55Address(this.address)) {
-      throw new SiweError(
-        SiweErrorType.INVALID_ADDRESS,
-        getAddress(this.address),
-        this.address
-      );
-    }
+    // this test is done in siwe-parser, callback function "address"
 
     /** Check if the URI is valid. */
-    if (!uri.isUri(this.uri)) {
-      throw new SiweError(
-        SiweErrorType.INVALID_URI,
-        `${this.uri} to be a valid uri.`
-      );
-    }
+    // If the siwe-parser succeeds, the URI is valid.
 
     /** Check if the version is 1. */
     if (this.version !== '1') {
