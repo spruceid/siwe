@@ -1,9 +1,8 @@
-import Grammar from "../lib/siwe-grammar.js";
+import { grammar } from "./siwe-grammar";
 import { cb } from "./callbacks";
 import apgLib from "apg-js/src/apg-lib/node-exports";
-// only needed if doTrace = true (debugging)
-// import * as fs from "node:fs";
-// import { cwd } from "node:process";
+import * as fs from "node:fs";
+import { cwd } from "node:process";
 
 export class ParsedMessage {
   scheme: string | undefined;
@@ -29,10 +28,9 @@ export class ParsedMessage {
     fragment: string | undefined;
   };
 
-  // For debugging: if doTrace = true apg-js will trace the parse tree
   // and display it on an HTML page.
   constructor(msg: string, doTrace = false) {
-    const grammarObj = new Grammar();
+    const grammarObj = new grammar();
     const parser = new apgLib.parser();
     parser.callbacks["sign-in-with-ethereum"] = cb.signInWithEtherium;
     parser.callbacks["oscheme"] = cb.oscheme;
@@ -102,27 +100,25 @@ export class ParsedMessage {
         fragment: undefined,
       },
     };
-    // uncomment for tracing
-    // if (doTrace) {
-    //   parser.trace = new apgLib.trace();
-    //   parser.trace.filter.operators["<ALL>"] = true;
-    // }
+    if (doTrace === true) {
+      parser.trace = new apgLib.trace();
+      parser.trace.filter.operators["<ALL>"] = true;
+    }
     const result = parser.parse(grammarObj, 0, msg, elements);
-    // uncomment for tracing
-    // if (doTrace) {
-    //   const html = parser.trace.toHtmlPage("ascii", "siwe, default trace");
-    //   const dir = `${cwd()}/output`;
-    //   const name = `${dir}/siwe-trace.html`;
-    //   try {
-    //     fs.mkdirSync(dir);
-    //   } catch (e) {
-    //     if (e.code !== "EEXIST") {
-    //       throw new Error(`fs.mkdir failed: ${e.message}`);
-    //     }
-    //   }
-    //   fs.writeFileSync(name, html);
-    //   console.log(`view "${name}" in any browser to display parser's trace`);
-    // }
+    if (doTrace === true) {
+      const html = parser.trace.toHtmlPage("ascii", "siwe-parser trace");
+      const dir = `${cwd()}/output`;
+      const name = `${dir}/siwe-parser-trace.html`;
+      try {
+        fs.mkdirSync(dir);
+      } catch (e) {
+        if (e.code !== "EEXIST") {
+          throw new Error(`fs.mkdir failed: ${e.message}`);
+        }
+      }
+      fs.writeFileSync(name, html);
+      console.log(`view "${name}" in any browser to display parser's trace`);
+    }
     let throwMsg = "";
     for (let i = 0; i < elements.errors.length; i += 1) {
       throwMsg += elements.errors[i] + "\n";

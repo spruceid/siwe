@@ -2,3 +2,4 @@ assets/
 docs/
 favicon.svg
 jest.config.js
+**/output/*
