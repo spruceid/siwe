@@ -42,6 +42,7 @@ export class ParsedMessage {
     parser.callbacks["re-title"] = cb.reTitle;
     parser.callbacks["address"] = cb.address;
     parser.callbacks["statement"] = cb.statement;
+    parser.callbacks["empty-statement"] = cb.emptyStatement;
     parser.callbacks["version"] = cb.version;
     parser.callbacks["chain-id"] = cb.chainId;
     parser.callbacks["nonce"] = cb.nonce;

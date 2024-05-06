@@ -35,7 +35,9 @@ export const cb = {
     }
   },
   reTitle: function reTitle(result, chars, phraseIndex, data) {
-    if (result.state === id.NOMATCH) {
+    if (result.state === id.MATCH) {
+      data.resources = [];
+    } else if (result.state === id.NOMATCH) {
       data.lineno -= 1;
     }
   },
@@ -91,6 +93,11 @@ export const cb = {
         phraseIndex,
         result.phraseLength
       );
+    }
+  },
+  emptyStatement: function emptyStatement(result, chars, phraseIndex, data) {
+    if (result.state === id.MATCH) {
+      data.statement = "";
     }
   },
   version: function version(result, chars, phraseIndex, data) {
@@ -211,9 +218,6 @@ export const cb = {
   resource: function resource(result, chars, phraseIndex, data) {
     switch (result.state) {
       case id.MATCH:
-        if (!data.resources) {
-          data.resources = [];
-        }
         data.resources.push(data.uriR);
         delete data.uriR;
         break;

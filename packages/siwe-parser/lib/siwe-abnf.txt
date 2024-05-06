@@ -1,4 +1,4 @@
-; LDT 10/21/3023 
+; LDT 05/06/2024 
 ; modified in several significant ways
 ; 1) Literal strings are replaced with numbers and ranges (%d32 & %d32-126, etc.) when possible.
 ;    TRB and especially TRG operators are much more efficient than TLS operators.
@@ -22,14 +22,15 @@
 ;    prevent failure with a reg-name that begins with an IPv4 address.
 ; 6) NOTE: host = 1.1.1.256 is a valid host name even though it is an invalid IPv4address.
 ;          The IPv4address alternative fails but the reg-name alternative succeeds.
+; 7) The Ethereum spec (https://eips.ethereum.org/EIPS/eip-4361) message format ABNF
+;    allows for empty statements. Because of the "first success disambiguation" of APG
+;    the an explicit "empty-statement" rule is required to match the spec's intent.
 
 
 sign-in-with-ethereum =
     oscheme domain %s" wants you to sign in with your Ethereum account:" LF
     address LF
-    LF
-    [ statement LF ]
-    LF
+    ((LF statement LF LF) / empty-statement / (LF LF))
     %s"URI: " URI LF
     %s"Version: " version LF
     %s"Chain ID: " chain-id LF
@@ -53,6 +54,7 @@ address         = "0x" 40*40HEXDIG
 statement       = 1*( %d97-122 / %d65-90 / %d48-57 / %d32-33 / %d35-36 / %d38-59 / %d61 / %d63-64 / %d91 / %d93 / %d95 / %d126)
     ; The purpose is to exclude LF (line breaks).
     ; LDT 10/04/2023: Do you mean %d32-126? All printing characters
+empty-statement = LF LF LF
 version         = "1"
 nonce           = 8*( ALPHA / DIGIT )
 issued-at       = date-time
