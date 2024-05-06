@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 // import { cwd } from "node:process";
 // console.log(`Current Working Directory: ${cwd()}`);
-import Grammar from "./siwe-grammar.js";
+import { grammar as Grammar } from "./siwe-grammar";
 import apgLib from "apg-js/src/apg-lib/node-exports";
 const grammarObj = new Grammar();
 const alpha = "abcdefghijklmnopqrstuvwxyz";

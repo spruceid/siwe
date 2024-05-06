@@ -343,6 +343,7 @@ export const cb = {
         data.errors.push(
           `line ${data.lineno}: invalid URI - path-empty must be empty`
         );
+        break;
       case id.EMPTY:
         data.uriElements.path = "";
         break;
