@@ -1,10 +1,8 @@
 // TODO: Figure out how to get types from this lib:
-// import { ParsedMessage, parseIntegerNumber } from '@spruceid/siwe-parser';
-// workaround because build cannot find '@spruceid/siwe-parser'
-import { ParsedMessage } from '../../siwe-parser/lib/abnf';
-import { parseIntegerNumber } from '../../siwe-parser/lib/utils';
+import { ParsedMessage, parseIntegerNumber } from '@spruceid/siwe-parser';
 
-import { getAddress, Provider, verifyMessage } from './ethersCompat';
+// import { getAddress, Provider, verifyMessage } from './ethersCompat';
+import { Provider, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
