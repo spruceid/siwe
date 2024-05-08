@@ -1,8 +1,13 @@
 // TODO: Figure out how to get types from this lib:
-import { ParsedMessage, parseIntegerNumber } from '@spruceid/siwe-parser';
+import {
+  ParsedMessage,
+  // isUri,
+  isEIP55Address,
+  parseIntegerNumber,
+} from '@spruceid/siwe-parser';
+import { isUri } from '../../siwe-parser/lib/abnf';
 
-// import { getAddress, Provider, verifyMessage } from './ethersCompat';
-import { Provider, verifyMessage } from './ethersCompat';
+import { getAddress, Provider, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
@@ -80,6 +85,31 @@ export class SiweMessage {
       this.chainId = parsedMessage.chainId;
       this.resources = parsedMessage.resources;
     } else {
+      if (!isEIP55Address(param.address)) {
+        throw new SiweError(
+          SiweErrorType.INVALID_ADDRESS,
+          getAddress(param.address),
+          param.address
+        );
+      }
+      if (!isUri(param.uri)) {
+        throw new SiweError(
+          SiweErrorType.INVALID_URI,
+          `a valid uri`,
+          `${param.uri}`
+        );
+      }
+      if (param.resources) {
+        param.resources.forEach(uri => {
+          if (!isUri(uri)) {
+            throw new SiweError(
+              SiweErrorType.INVALID_URI,
+              `a valid resource uri`,
+              `${uri}`
+            );
+          }
+        });
+      }
       this.scheme = param?.scheme;
       this.domain = param.domain;
       this.address = param.address;
@@ -422,12 +452,6 @@ export class SiweMessage {
         `${this.domain} to be a valid domain.`
       );
     }
-
-    /** EIP-55 `address` check. */
-    // this test is done in siwe-parser, callback function "address"
-
-    /** Check if the URI is valid. */
-    // If the siwe-parser succeeds, the URI is valid.
 
     /** Check if the version is 1. */
     if (this.version !== '1') {

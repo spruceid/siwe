@@ -3,6 +3,7 @@ import { cb } from "./callbacks";
 import apgLib from "apg-js/src/apg-lib/node-exports";
 import * as fs from "node:fs";
 import { cwd } from "node:process";
+const grammarObj = new grammar();
 
 export class ParsedMessage {
   scheme: string | undefined;
@@ -30,7 +31,6 @@ export class ParsedMessage {
 
   // and display it on an HTML page.
   constructor(msg: string, doTrace = false) {
-    const grammarObj = new grammar();
     const parser = new apgLib.parser();
     parser.callbacks["sign-in-with-ethereum"] = cb.signInWithEtherium;
     parser.callbacks["oscheme"] = cb.oscheme;
@@ -145,15 +145,40 @@ export class ParsedMessage {
     this.requestId = elements.requestId;
     this.resources = elements.resources;
     this.uriElements = elements.uriElements;
-
-    // This test has already been done in the parser callback functions "domain()".
-    // if (this.domain.length === 0) {
-    //   throw new Error("Domain cannot be empty.");
-    // }
-
-    // This test has already been done in the parser callback functions "address()".
-    // if (!isEIP55Address(this.address)) {
-    //   throw new Error("Address not conformant to EIP-55.");
-    // }
   }
 }
+
+export const isUri = (uri: string, doTrace = false) => {
+  const parser = new apgLib.parser();
+  parser.callbacks["IP-literal"] = cb.ipLiteral;
+  parser.callbacks["IPv4address"] = cb.ipv4;
+  parser.callbacks["nodcolon"] = cb.nodcolon;
+  parser.callbacks["dcolon"] = cb.dcolon;
+  parser.callbacks["h16"] = cb.h16;
+  parser.callbacks["h16c"] = cb.h16;
+  parser.callbacks["h16n"] = cb.h16;
+  parser.callbacks["h16cn"] = cb.h16;
+  parser.callbacks["dec-octet"] = cb.decOctet;
+  parser.callbacks["dec-digit"] = cb.decDigit;
+  if (doTrace === true) {
+    parser.trace = new apgLib.trace();
+    parser.trace.filter.operators["<ALL>"] = true;
+  }
+  const data = { errors: [] };
+  const result = parser.parse(grammarObj, "uri-r", uri, data);
+  if (doTrace === true) {
+    const html = parser.trace.toHtmlPage("ascii", "isUri trace");
+    const dir = `${cwd()}/output`;
+    const name = `${dir}/isUri-trace.html`;
+    try {
+      fs.mkdirSync(dir);
+    } catch (e) {
+      if (e.code !== "EEXIST") {
+        throw new Error(`fs.mkdir failed: ${e.message}`);
+      }
+    }
+    fs.writeFileSync(name, html);
+    console.log(`view "${name}" in any browser to display parser's trace`);
+  }
+  return result.success;
+};
