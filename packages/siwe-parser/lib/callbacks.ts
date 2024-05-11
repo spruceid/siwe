@@ -2,6 +2,11 @@ import apgLib from "apg-js/src/apg-lib/node-exports";
 const utils = apgLib.utils;
 const id = apgLib.ids;
 import { isEIP55Address, parseIntegerNumber } from "./utils";
+
+/* copied from siwe/lib/utils.tx */
+const ISO8601 =
+  /^(?<date>[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))[Tt]([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(.[0-9]+)?(([Zz])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
+
 export const cb = {
   signInWithEtherium: function (result, chars, phraseIndex, data) {
     switch (result.state) {
@@ -136,9 +141,16 @@ export const cb = {
           phraseIndex,
           result.phraseLength
         );
+        if (!ISO8601.exec(data.issuedAt)) {
+          data.errors.push(
+            `line ${data.lineno}: invalid issued-at date time semantics`
+          );
+        }
         break;
       case id.NOMATCH:
-        data.errors.push(`line ${data.lineno}: invalid issued-at date time`);
+        data.errors.push(
+          `line ${data.lineno}: invalid issued-at date time syntax`
+        );
         break;
     }
   },
@@ -150,10 +162,15 @@ export const cb = {
           phraseIndex,
           result.phraseLength
         );
+        if (!ISO8601.exec(data.expirationTime)) {
+          data.errors.push(
+            `line ${data.lineno}: invalid expiration-time date time semantics`
+          );
+        }
         break;
       case id.NOMATCH:
         data.errors.push(
-          `line ${data.lineno}: invalid expiration-time date time `
+          `line ${data.lineno}: invalid expiration-time date time syntax`
         );
         break;
     }
@@ -166,9 +183,16 @@ export const cb = {
           phraseIndex,
           result.phraseLength
         );
+        if (!ISO8601.exec(data.notBefore)) {
+          data.errors.push(
+            `line ${data.lineno}: invalid not-before date time semantics`
+          );
+        }
         break;
       case id.NOMATCH:
-        data.errors.push(`line ${data.lineno}: invalid not-before date time`);
+        data.errors.push(
+          `line ${data.lineno}: invalid not-before date time syntax`
+        );
         break;
     }
   },

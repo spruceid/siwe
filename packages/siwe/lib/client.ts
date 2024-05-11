@@ -1,13 +1,7 @@
 // TODO: Figure out how to get types from this lib:
-import {
-  ParsedMessage,
-  // isUri,
-  isEIP55Address,
-  parseIntegerNumber,
-} from '@spruceid/siwe-parser';
-import { isUri } from '../../siwe-parser/lib/abnf';
+import { ParsedMessage, parseIntegerNumber } from '@spruceid/siwe-parser';
 
-import { getAddress, Provider, verifyMessage } from './ethersCompat';
+import { Provider, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
@@ -21,7 +15,6 @@ import {
   checkContractWalletSignature,
   generateNonce,
   checkInvalidKeys,
-  isValidISO8601Date,
 } from './utils';
 
 export class SiweMessage {
@@ -85,31 +78,6 @@ export class SiweMessage {
       this.chainId = parsedMessage.chainId;
       this.resources = parsedMessage.resources;
     } else {
-      if (!isEIP55Address(param.address)) {
-        throw new SiweError(
-          SiweErrorType.INVALID_ADDRESS,
-          getAddress(param.address),
-          param.address
-        );
-      }
-      if (!isUri(param.uri)) {
-        throw new SiweError(
-          SiweErrorType.INVALID_URI,
-          `a valid uri`,
-          `${param.uri}`
-        );
-      }
-      if (param.resources) {
-        param.resources.forEach(uri => {
-          if (!isUri(uri)) {
-            throw new SiweError(
-              SiweErrorType.INVALID_URI,
-              `a valid resource uri`,
-              `${uri}`
-            );
-          }
-        });
-      }
       this.scheme = param?.scheme;
       this.domain = param.domain;
       this.address = param.address;
@@ -128,7 +96,7 @@ export class SiweMessage {
       }
     }
     this.nonce = this.nonce || generateNonce();
-    this.validateMessage();
+    new ParsedMessage(this.prepareMessage());
   }
 
   /**
@@ -141,7 +109,7 @@ export class SiweMessage {
    */
   toMessage(): string {
     /** Validates all fields of the object */
-    this.validateMessage();
+    // this.validateMessage();
     const headerPrefx = this.scheme
       ? `${this.scheme}://${this.domain}`
       : this.domain;
@@ -186,7 +154,7 @@ export class SiweMessage {
 
     const suffix = suffixArray.join('\n');
     prefix = [prefix, this.statement].join('\n\n');
-    if (this.statement) {
+    if (this.statement !== undefined) {
       prefix += '\n';
     }
     return [prefix, suffix].join('\n');
@@ -426,71 +394,5 @@ export class SiweMessage {
         });
       }
     });
-  }
-
-  /**
-   * Validates the values of this object fields.
-   * @throws Throws an {ErrorType} if a field is invalid.
-   */
-  private validateMessage(...args) {
-    /** Checks if the user might be using the function to verify instead of validate. */
-    if (args.length > 0) {
-      throw new SiweError(
-        SiweErrorType.UNABLE_TO_PARSE,
-        `Unexpected argument in the validateMessage function.`
-      );
-    }
-
-    /** `domain` check. */
-    if (
-      !this.domain ||
-      this.domain.length === 0 ||
-      !/[^#?]*/.test(this.domain)
-    ) {
-      throw new SiweError(
-        SiweErrorType.INVALID_DOMAIN,
-        `${this.domain} to be a valid domain.`
-      );
-    }
-
-    /** Check if the version is 1. */
-    if (this.version !== '1') {
-      throw new SiweError(
-        SiweErrorType.INVALID_MESSAGE_VERSION,
-        '1',
-        this.version
-      );
-    }
-
-    /** Check if the nonce is alphanumeric and bigger then 8 characters */
-    const nonce = this?.nonce?.match(/[a-zA-Z0-9]{8,}/);
-    if (!nonce || this.nonce.length < 8 || nonce[0] !== this.nonce) {
-      throw new SiweError(
-        SiweErrorType.INVALID_NONCE,
-        `Length > 8 (${nonce.length}). Alphanumeric.`,
-        this.nonce
-      );
-    }
-
-    /** `issuedAt` conforms to ISO-8601 and is a valid date. */
-    if (this.issuedAt) {
-      if (!isValidISO8601Date(this.issuedAt)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
-      }
-    }
-
-    /** `expirationTime` conforms to ISO-8601 and is a valid date. */
-    if (this.expirationTime) {
-      if (!isValidISO8601Date(this.expirationTime)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
-      }
-    }
-
-    /** `notBefore` conforms to ISO-8601 and is a valid date. */
-    if (this.notBefore) {
-      if (!isValidISO8601Date(this.notBefore)) {
-        throw new Error(SiweErrorType.INVALID_TIME_FORMAT);
-      }
-    }
   }
 }
