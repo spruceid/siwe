@@ -63,6 +63,7 @@ export class SiweMessage {
    */
   constructor(param: string | Partial<SiweMessage>) {
     if (typeof param === 'string') {
+      /* the message string (including nonce) is valid or ParsedMessage will throw */
       const parsedMessage = new ParsedMessage(param);
       this.scheme = parsedMessage.scheme;
       this.domain = parsedMessage.domain;
@@ -94,9 +95,10 @@ export class SiweMessage {
       if (typeof this.chainId === 'string') {
         this.chainId = parseIntegerNumber(this.chainId);
       }
+      this.nonce = this.nonce || generateNonce();
+      /* the message object is valid or parsing its stringified value will throw */
+      new ParsedMessage(this.prepareMessage());
     }
-    this.nonce = this.nonce || generateNonce();
-    new ParsedMessage(this.prepareMessage());
   }
 
   /**
