@@ -64,7 +64,7 @@ export const isValidISO8601Date = (inputDate: string): boolean => {
   const inputMatch = ISO8601.exec(inputDate);
 
   /* if inputMatch is null the date is not ISO-8601 */
-  if (!inputDate) {
+  if (!inputMatch) {
     return false;
   }
 

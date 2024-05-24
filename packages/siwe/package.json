@@ -11,6 +11,7 @@
     "test": "jest",
     "build": "tsc",
     "lint": "eslint --ext .js,.ts .",
+    "obj": "tsc && node dist/make-object-tests.js",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
   },
   "author": "Spruce Systems Inc.",
