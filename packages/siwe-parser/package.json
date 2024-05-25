@@ -11,7 +11,8 @@
     "test": "jest",
     "build": "tsc",
     "lint": "eslint --ext .js,.ts .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "apg": "../../node_modules/apg-js/bin/apg.sh -i ./lib/siwe-abnf.txt -o ./lib/siwe-grammar --typescript"
   },
   "author": "Spruce Systems Inc.",
   "keywords": [
@@ -25,9 +26,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@noble/hashes": "^1.1.2",
-    "apg-js": "^4.3.0",
-    "uri-js": "^4.4.1",
-    "valid-url": "^1.0.9"
+    "apg-js": "^4.4.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.23.0",

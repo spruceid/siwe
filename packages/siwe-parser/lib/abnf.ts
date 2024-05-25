@@ -1,366 +1,186 @@
-import apgApi from "apg-js/src/apg-api/api";
+import { grammar } from "./siwe-grammar";
+import { cb } from "./callbacks";
 import apgLib from "apg-js/src/apg-lib/node-exports";
-import { isEIP55Address, parseIntegerNumber } from "./utils";
-
-const GRAMMAR = `
-sign-in-with-ethereum =
-    [ scheme "://" ] domain %s" wants you to sign in with your Ethereum account:" LF
-    address LF
-    LF
-    [ statement LF ]
-    LF
-    %s"URI: " URI LF
-    %s"Version: " version LF
-    %s"Chain ID: " chain-id LF
-    %s"Nonce: " nonce LF
-    %s"Issued At: " issued-at
-    [ LF %s"Expiration Time: " expiration-time ]
-    [ LF %s"Not Before: " not-before ]
-    [ LF %s"Request ID: " request-id ]
-    [ LF %s"Resources:"
-    resources ]
-
-domain = authority
-
-address = "0x" 40*40HEXDIG
-    ; Must also conform to captilization
-    ; checksum encoding specified in EIP-55
-    ; where applicable (EOAs).
-
-statement = 1*( reserved / unreserved / " " )
-    ; The purpose is to exclude LF (line breaks).
-
-version = "1"
-
-nonce = 8*( ALPHA / DIGIT )
-
-issued-at = date-time
-expiration-time = date-time
-not-before = date-time
-
-request-id = *pchar
-
-chain-id = 1*DIGIT
-    ; See EIP-155 for valid CHAIN_IDs.
-
-resources = *( LF resource )
-
-resource = "- " URI
-
-; ------------------------------------------------------------------------------
-; RFC 3986
-
-URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
-
-hier-part     = "//" authority path-abempty
-              / path-absolute
-              / path-rootless
-              / path-empty
-
-scheme        = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-
-authority     = [ userinfo "@" ] host [ ":" port ]
-userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
-host          = IP-literal / IPv4address / reg-name
-port          = *DIGIT
-
-IP-literal    = "[" ( IPv6address / IPvFuture  ) "]"
-
-IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
-
-IPv6address   =                            6( h16 ":" ) ls32
-              /                       "::" 5( h16 ":" ) ls32
-              / [               h16 ] "::" 4( h16 ":" ) ls32
-              / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
-              / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
-              / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
-              / [ *4( h16 ":" ) h16 ] "::"              ls32
-              / [ *5( h16 ":" ) h16 ] "::"              h16
-              / [ *6( h16 ":" ) h16 ] "::"
-
-h16           = 1*4HEXDIG
-ls32          = ( h16 ":" h16 ) / IPv4address
-IPv4address   = dec-octet "." dec-octet "." dec-octet "." dec-octet
-dec-octet     = DIGIT                 ; 0-9
-                 / %x31-39 DIGIT         ; 10-99
-                 / "1" 2DIGIT            ; 100-199
-                 / "2" %x30-34 DIGIT     ; 200-249
-                 / "25" %x30-35          ; 250-255
-
-reg-name      = *( unreserved / pct-encoded / sub-delims )
-
-path-abempty  = *( "/" segment )
-path-absolute = "/" [ segment-nz *( "/" segment ) ]
-path-rootless = segment-nz *( "/" segment )
-path-empty    = 0pchar
-
-segment       = *pchar
-segment-nz    = 1*pchar
-
-pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
-
-query         = *( pchar / "/" / "?" )
-
-fragment      = *( pchar / "/" / "?" )
-
-pct-encoded   = "%" HEXDIG HEXDIG
-
-unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
-reserved      = gen-delims / sub-delims
-gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
-sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
-              / "*" / "+" / "," / ";" / "="
-
-; ------------------------------------------------------------------------------
-; RFC 3339
-
-date-fullyear   = 4DIGIT
-date-month      = 2DIGIT  ; 01-12
-date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
-                          ; month/year
-time-hour       = 2DIGIT  ; 00-23
-time-minute     = 2DIGIT  ; 00-59
-time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
-                          ; rules
-time-secfrac    = "." 1*DIGIT
-time-numoffset  = ("+" / "-") time-hour ":" time-minute
-time-offset     = "Z" / time-numoffset
-
-partial-time    = time-hour ":" time-minute ":" time-second
-                  [time-secfrac]
-full-date       = date-fullyear "-" date-month "-" date-mday
-full-time       = partial-time time-offset
-
-date-time       = full-date "T" full-time
-
-; ------------------------------------------------------------------------------
-; RFC 5234
-
-ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
-LF             =  %x0A
-                  ; linefeed
-DIGIT          =  %x30-39
-                  ; 0-9
-HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
-`;
-
-class GrammarApi {
-	static grammarObj = this.generateApi();
-
-	static generateApi() {
-		const api = new apgApi(GRAMMAR);
-		api.generate();
-		if (api.errors.length) {
-			console.error(api.errorsToAscii());
-			console.error(api.linesToAscii());
-			console.log(api.displayAttributeErrors());
-			throw new Error(`ABNF grammar has errors`);
-		}
-		return api.toObject();
-	}
-}
+// import * as fs from "node:fs";
+// import { cwd } from "node:process";
+const grammarObj = new grammar();
 
 export class ParsedMessage {
-	scheme: string | null;
-	domain: string;
-	address: string;
-	statement: string | null;
-	uri: string;
-	version: string;
-	chainId: number;
-	nonce: string;
-	issuedAt: string;
-	expirationTime: string | null;
-	notBefore: string | null;
-	requestId: string | null;
-	resources: Array<string> | null;
+  scheme: string | undefined;
+  domain: string;
+  address: string;
+  statement: string | undefined;
+  uri: string;
+  version: string;
+  chainId: number;
+  nonce: string;
+  issuedAt: string;
+  expirationTime: string | undefined;
+  notBefore: string | undefined;
+  requestId: string | undefined;
+  resources: Array<string> | undefined;
+  uriElements: {
+    scheme: string;
+    userinfo: string | undefined;
+    host: string | undefined;
+    port: string | undefined;
+    path: string;
+    query: string | undefined;
+    fragment: string | undefined;
+  };
 
-	constructor(msg: string) {
-		const parser = new apgLib.parser();
-		parser.ast = new apgLib.ast();
-		const id = apgLib.ids;
+  // and display it on an HTML page.
+  // constructor(msg: string, doTrace = false) {
+  constructor(msg: string) {
+    const parser = new apgLib.parser();
+    parser.callbacks["sign-in-with-ethereum"] = cb.signInWithEtherium;
+    parser.callbacks["oscheme"] = cb.oscheme;
+    parser.callbacks["domain"] = cb.domain;
+    parser.callbacks["LF"] = cb.lineno;
+    parser.callbacks["ex-title"] = cb.exTitle;
+    parser.callbacks["nb-title"] = cb.nbTitle;
+    parser.callbacks["ri-title"] = cb.riTitle;
+    parser.callbacks["re-title"] = cb.reTitle;
+    parser.callbacks["address"] = cb.address;
+    parser.callbacks["statement"] = cb.statement;
+    parser.callbacks["empty-statement"] = cb.emptyStatement;
+    parser.callbacks["version"] = cb.version;
+    parser.callbacks["chain-id"] = cb.chainId;
+    parser.callbacks["nonce"] = cb.nonce;
+    parser.callbacks["issued-at"] = cb.issuedAt;
+    parser.callbacks["expiration-time"] = cb.expirationTime;
+    parser.callbacks["not-before"] = cb.notBefore;
+    parser.callbacks["request-id"] = cb.requestId;
+    parser.callbacks["uri"] = cb.uri;
+    parser.callbacks["uri-r"] = cb.uriR;
+    parser.callbacks["resource"] = cb.resource;
+    parser.callbacks["scheme"] = cb.scheme;
+    parser.callbacks["userinfo-at"] = cb.userinfo;
+    parser.callbacks["host"] = cb.host;
+    parser.callbacks["IP-literal"] = cb.ipLiteral;
+    parser.callbacks["port"] = cb.port;
+    parser.callbacks["path-abempty"] = cb.pathAbempty;
+    parser.callbacks["path-absolute"] = cb.pathAbsolute;
+    parser.callbacks["path-rootless"] = cb.pathRootless;
+    parser.callbacks["path-empty"] = cb.pathEmpty;
+    parser.callbacks["query"] = cb.query;
+    parser.callbacks["fragment"] = cb.fragment;
+    parser.callbacks["IPv4address"] = cb.ipv4;
+    parser.callbacks["nodcolon"] = cb.nodcolon;
+    parser.callbacks["dcolon"] = cb.dcolon;
+    parser.callbacks["h16"] = cb.h16;
+    parser.callbacks["h16c"] = cb.h16;
+    parser.callbacks["h16n"] = cb.h16;
+    parser.callbacks["h16cn"] = cb.h16;
+    parser.callbacks["dec-octet"] = cb.decOctet;
+    parser.callbacks["dec-digit"] = cb.decDigit;
 
-		const scheme = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE && phraseIndex === 0) {
-				data.scheme = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.scheme = scheme;
+    // initialize parsed elements
+    const elements = {
+      errors: [],
+      lineno: 1,
+      scheme: undefined,
+      domain: undefined,
+      address: undefined,
+      statement: undefined,
+      uri: undefined,
+      version: undefined,
+      chainId: undefined,
+      nonce: undefined,
+      issuedAt: undefined,
+      expirationTime: undefined,
+      notBefore: undefined,
+      requestId: undefined,
+      resources: undefined,
+      uriElements: {
+        scheme: undefined,
+        userinfo: undefined,
+        host: undefined,
+        port: undefined,
+        path: undefined,
+        query: undefined,
+        fragment: undefined,
+      },
+    };
+    // if (doTrace === true) {
+    //   parser.trace = new apgLib.trace();
+    //   parser.trace.filter.operators["<ALL>"] = true;
+    // }
+    const result = parser.parse(grammarObj, 0, msg, elements);
+    // if (doTrace === true) {
+    //   const html = parser.trace.toHtmlPage("ascii", "siwe-parser trace");
+    //   const dir = `${cwd()}/output`;
+    //   const name = `${dir}/siwe-parser-trace.html`;
+    //   try {
+    //     fs.mkdirSync(dir);
+    //   } catch (e) {
+    //     if (e.code !== "EEXIST") {
+    //       throw new Error(`fs.mkdir failed: ${e.message}`);
+    //     }
+    //   }
+    //   fs.writeFileSync(name, html);
+    //   console.log(`view "${name}" in any browser to display parser's trace`);
+    // }
+    let throwMsg = "";
+    for (let i = 0; i < elements.errors.length; i += 1) {
+      throwMsg += elements.errors[i] + "\n";
+    }
+    if (!result.success) {
+      throwMsg += `Invalid message: ${JSON.stringify(result)}`;
+    }
+    if (throwMsg !== "") {
+      throw new Error(throwMsg);
+    }
 
-		const domain = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.domain = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.domain = domain;
-		const address = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.address = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.address = address;
-
-		const statement = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.statement = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.statement = statement;
-		const uri = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				if (!data.uri) {
-					data.uri = apgLib.utils.charsToString(
-						chars,
-						phraseIndex,
-						phraseLength
-					);
-				}
-			}
-			return ret;
-		};
-		parser.ast.callbacks.uri = uri;
-		const version = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.version = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.version = version;
-		const chainId = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.chainId = parseIntegerNumber(
-					apgLib.utils.charsToString(chars, phraseIndex, phraseLength)
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks["chain-id"] = chainId;
-		const nonce = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.nonce = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks.nonce = nonce;
-		const issuedAt = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.issuedAt = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks["issued-at"] = issuedAt;
-		const expirationTime = function (
-			state,
-			chars,
-			phraseIndex,
-			phraseLength,
-			data
-		) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.expirationTime = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks["expiration-time"] = expirationTime;
-		const notBefore = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.notBefore = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks["not-before"] = notBefore;
-		const requestId = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.requestId = apgLib.utils.charsToString(
-					chars,
-					phraseIndex,
-					phraseLength
-				);
-			}
-			return ret;
-		};
-		parser.ast.callbacks["request-id"] = requestId;
-		const resources = function (state, chars, phraseIndex, phraseLength, data) {
-			const ret = id.SEM_OK;
-			if (state === id.SEM_PRE) {
-				data.resources = apgLib.utils
-					.charsToString(chars, phraseIndex, phraseLength)
-					.slice(3)
-					.split("\n- ");
-			}
-			return ret;
-		};
-		parser.ast.callbacks.resources = resources;
-
-		const result = parser.parse(GrammarApi.grammarObj, "sign-in-with-ethereum", msg);
-		if (!result.success) {
-			throw new Error(`Invalid message: ${JSON.stringify(result)}`);
-		}
-		const elements = {};
-		parser.ast.translate(elements);
-
-		for (const [key, value] of Object.entries(elements)) {
-			this[key] = value;
-		}
-
-		if (this.domain.length === 0) {
-			throw new Error("Domain cannot be empty.");
-		}
-
-		if (!isEIP55Address(this.address)) {
-			throw new Error("Address not conformant to EIP-55.");
-		}
-	}
+    this.scheme = elements.scheme;
+    this.domain = elements.domain;
+    this.address = elements.address;
+    this.statement = elements.statement;
+    this.uri = elements.uri;
+    this.version = elements.version;
+    this.chainId = elements.chainId;
+    this.nonce = elements.nonce;
+    this.issuedAt = elements.issuedAt;
+    this.expirationTime = elements.expirationTime;
+    this.notBefore = elements.notBefore;
+    this.requestId = elements.requestId;
+    this.resources = elements.resources;
+    this.uriElements = elements.uriElements;
+  }
 }
+
+// export const isUri = (uri: string, doTrace = false) => {
+export const isUri = (uri: string) => {
+  const parser = new apgLib.parser();
+  parser.callbacks["IP-literal"] = cb.ipLiteral;
+  parser.callbacks["IPv4address"] = cb.ipv4;
+  parser.callbacks["nodcolon"] = cb.nodcolon;
+  parser.callbacks["dcolon"] = cb.dcolon;
+  parser.callbacks["h16"] = cb.h16;
+  parser.callbacks["h16c"] = cb.h16;
+  parser.callbacks["h16n"] = cb.h16;
+  parser.callbacks["h16cn"] = cb.h16;
+  parser.callbacks["dec-octet"] = cb.decOctet;
+  parser.callbacks["dec-digit"] = cb.decDigit;
+  // if (doTrace === true) {
+  //   parser.trace = new apgLib.trace();
+  //   parser.trace.filter.operators["<ALL>"] = true;
+  // }
+  const data = { errors: [] };
+  const result = parser.parse(grammarObj, "uri-r", uri, data);
+  // if (doTrace === true) {
+  //   const html = parser.trace.toHtmlPage("ascii", "isUri trace");
+  //   const dir = `${cwd()}/output`;
+  //   const name = `${dir}/isUri-trace.html`;
+  //   try {
+  //     fs.mkdirSync(dir);
+  //   } catch (e) {
+  //     if (e.code !== "EEXIST") {
+  //       throw new Error(`fs.mkdir failed: ${e.message}`);
+  //     }
+  //   }
+  //   fs.writeFileSync(name, html);
+  //   console.log(`view "${name}" in any browser to display parser's trace`);
+  // }
+  return result.success;
+};
