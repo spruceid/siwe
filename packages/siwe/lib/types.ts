@@ -121,3 +121,8 @@ export enum SiweErrorType {
   /** Thrown when some required field is missing. */
   UNABLE_TO_PARSE = 'Unable to parse the message.',
 }
+
+export interface SiweMessageConstructorOptions { 
+  /** If the library should validate the address against EIP-55, defaults to true */
+  validateEIP55Address?: boolean
+}

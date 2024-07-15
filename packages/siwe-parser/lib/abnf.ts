@@ -175,7 +175,7 @@ export class ParsedMessage {
 	requestId: string | null;
 	resources: Array<string> | null;
 
-	constructor(msg: string) {
+	constructor(msg: string, parserOptions = { validateEIP55Address: true }) {
 		const parser = new apgLib.parser();
 		parser.ast = new apgLib.ast();
 		const id = apgLib.ids;
@@ -359,7 +359,7 @@ export class ParsedMessage {
 			throw new Error("Domain cannot be empty.");
 		}
 
-		if (!isEIP55Address(this.address)) {
+		if (parserOptions.validateEIP55Address && !isEIP55Address(this.address)) {
 			throw new Error("Address not conformant to EIP-55.");
 		}
 	}

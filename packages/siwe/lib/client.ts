@@ -10,6 +10,7 @@ import { getAddress, Provider, verifyMessage } from './ethersCompat';
 import {
   SiweError,
   SiweErrorType,
+  SiweMessageConstructorOptions,
   SiweResponse,
   VerifyOpts,
   VerifyOptsKeys,
@@ -61,15 +62,24 @@ export class SiweMessage {
    * expressed as RFC 3986 URIs separated by `\n- `. */
   resources?: Array<string>;
 
+  /** If the library should validate the address against EIP-55, defaults to true */
+  validateEIP55Address = true;
+
   /**
    * Creates a parsed Sign-In with Ethereum Message (EIP-4361) object from a
    * string or an object. If a string is used an ABNF parser is called to
    * validate the parameter, otherwise the fields are attributed.
    * @param param {string | SiweMessage} Sign message as a string or an object.
    */
-  constructor(param: string | Partial<SiweMessage>) {
+  constructor(param: string | Partial<SiweMessage>, options?: SiweMessageConstructorOptions) {
+    if(options.validateEIP55Address !== undefined){
+      this.validateEIP55Address = options.validateEIP55Address;
+    }
+
     if (typeof param === 'string') {
-      const parsedMessage = new ParsedMessage(param);
+      const parsedMessage = new ParsedMessage(param, {
+        validateEIP55Address: this.validateEIP55Address
+      });
       this.scheme = parsedMessage.scheme;
       this.domain = parsedMessage.domain;
       this.address = parsedMessage.address;
@@ -426,7 +436,7 @@ export class SiweMessage {
     }
 
     /** EIP-55 `address` check. */
-    if (!isEIP55Address(this.address)) {
+    if (this.validateEIP55Address && !isEIP55Address(this.address)) {
       throw new SiweError(
         SiweErrorType.INVALID_ADDRESS,
         getAddress(this.address),
