@@ -237,7 +237,7 @@ export class SiweMessage {
         opts,
         VerifyOptsKeys
       );
-      if (invalidParams.length > 0) {
+      if (invalidOpts.length > 0) {
         fail({
           success: false,
           data: this,
