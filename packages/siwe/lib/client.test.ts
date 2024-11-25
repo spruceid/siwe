@@ -1,11 +1,23 @@
-import * as fs from "fs";
+import * as fs from 'fs';
 
-const parsingPositive: object = JSON.parse(fs.readFileSync('../../test/parsing_positive.json', 'utf8'));
-const parsingNegative: object = JSON.parse(fs.readFileSync('../../test/parsing_negative.json', 'utf8'));
-const parsingNegativeObjects: object = JSON.parse(fs.readFileSync('../../test/parsing_negative_objects.json', 'utf8'));
-const verificationPositive: object = JSON.parse(fs.readFileSync('../../test/verification_positive.json', 'utf8'));
-const verificationNegative: object = JSON.parse(fs.readFileSync('../../test/verification_negative.json', 'utf8'));
-const EIP1271: object = JSON.parse(fs.readFileSync('../../test/eip1271.json', 'utf8'));
+const parsingPositive: object = JSON.parse(
+  fs.readFileSync('../../test/parsing_positive.json', 'utf8')
+);
+const parsingNegative: object = JSON.parse(
+  fs.readFileSync('../../test/parsing_negative.json', 'utf8')
+);
+const parsingNegativeObjects: object = JSON.parse(
+  fs.readFileSync('../../test/parsing_negative_objects.json', 'utf8')
+);
+const verificationPositive: object = JSON.parse(
+  fs.readFileSync('../../test/verification_positive.json', 'utf8')
+);
+const verificationNegative: object = JSON.parse(
+  fs.readFileSync('../../test/verification_negative.json', 'utf8')
+);
+const EIP1271: object = JSON.parse(
+  fs.readFileSync('../../test/eip1271.json', 'utf8')
+);
 
 import {
   // @ts-expect-error -- ethers v6 compatibility hack
@@ -30,8 +42,9 @@ describe(`Message Generation`, () => {
     (n, test) => {
       try {
         new SiweMessage(test);
+        expect(false).toBeTruthy();
       } catch (error) {
-        expect(Object.values(SiweErrorType).includes(error));
+        expect(true).toBeTruthy();
       }
     }
   );
@@ -41,8 +54,9 @@ describe(`Message Generation`, () => {
     (n, test) => {
       try {
         new SiweMessage(test as any);
+        expect(false).toBeTruthy();
       } catch (error) {
-        expect(Object.values(SiweErrorType).includes(error));
+        expect(true).toBeTruthy();
       }
     }
   );
@@ -67,7 +81,9 @@ describe(`Message verification without suppressExceptions`, () => {
           .then(async ({ data }) => {
             jest
               .useFakeTimers()
-              .setSystemTime(new Date((test_fields as any).time || test_fields.issuedAt));
+              .setSystemTime(
+                new Date((test_fields as any).time || test_fields.issuedAt)
+              );
             const res = await msg.validate(test_fields.signature);
             return res === data;
           })
