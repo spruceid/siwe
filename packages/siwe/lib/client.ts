@@ -185,23 +185,6 @@ export class SiweMessage {
   }
 
   /**
-   * @deprecated
-   * Verifies the integrity of the object by matching its signature.
-   * @param signature Signature to match the address in the message.
-   * @param provider Ethers provider to be used for EIP-1271 validation
-   */
-  async validate(signature: string, provider?: Provider) {
-    console.warn(
-      'validate() has been deprecated, please update your code to use verify(). validate() may be removed in future versions.'
-    );
-    return this.verify({ signature }, { provider, suppressExceptions: false })
-      .then(({ data }) => data)
-      .catch(({ error }) => {
-        throw error;
-      });
-  }
-
-  /**
    * Verifies the integrity of the object by matching its signature.
    * @param params Parameters to verify the integrity of the message, signature is required.
    * @returns {Promise<SiweMessage>} This object if valid.

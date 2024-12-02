@@ -76,17 +76,7 @@ describe(`Message verification without suppressExceptions`, () => {
             domain: (test_fields as any).domainBinding,
             nonce: (test_fields as any).matchNonce,
           })
-          // when validate is removed uncomment this and remove the following then
-          // .then(({ success }) => success)
-          .then(async ({ data }) => {
-            jest
-              .useFakeTimers()
-              .setSystemTime(
-                new Date((test_fields as any).time || test_fields.issuedAt)
-              );
-            const res = await msg.validate(test_fields.signature);
-            return res === data;
-          })
+          .then(({ success }) => success)
       ).resolves.toBeTruthy();
 
       jest.useRealTimers();
