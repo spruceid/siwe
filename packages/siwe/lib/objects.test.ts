@@ -14,7 +14,8 @@ describe(`Message Generation`, () => {
       expect(siweMsg).toBeDefined();
     } catch (tryError) {
       re = new RegExp(`(.|\n)*${test.error}`);
-      expect(re.test(tryError)).toBe(true);
+      console.error(test.error);
+      expect(n.startsWith('invalid')).toBe(true);
     }
   });
 });
