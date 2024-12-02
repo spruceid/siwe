@@ -31,7 +31,7 @@ let result;
 
 /*
   The ABNF in the siwe message format and RFC3986 have a number of rules
-  for primative strings that are processed many times during the parsing of a message.
+  for primitive strings that are processed many times during the parsing of a message.
   apg-js processes the terminal nodes the strings are defined by much more
   efficiently than the rule names themselves.
   The terminal nodes are processed most efficiently in the order
@@ -40,7 +40,7 @@ let result;
   The "valid character" and "invalid character" tests check that these
   expansions have been done correctly.
 */
-describe("Valid character tests - rules with characters expanded to primatives.", () => {
+describe("Valid character tests - rules with characters expanded to primitives.", () => {
   test.concurrent.each(Object.entries(validChars))(
     "Rule: %s",
     (test_name, test) => {
@@ -49,7 +49,7 @@ describe("Valid character tests - rules with characters expanded to primatives."
     }
   );
 });
-describe("Invalid character tests - rules with characters expanded to primatives.", () => {
+describe("Invalid character tests - rules with characters expanded to primitives.", () => {
   test.concurrent.each(Object.entries(invalidChars))(
     "Rule + invalid character: %s",
     (test_name, test) => {
@@ -86,7 +86,7 @@ describe("Valid Resource URIs", () => {
     }
   );
 });
-describe("Invalid resourses URI", () => {
+describe("Invalid resources URI", () => {
   test.concurrent.each(Object.entries(invalidResources))(
     "%s",
     (test_name, test) => {
@@ -100,7 +100,7 @@ describe("Invalid resourses URI", () => {
   These tests verify that the siwe-parser matches the specification on
   these points.
 */
-describe("Statment, request-id & resources may be present, empty or missing.", () => {
+describe("Statement, request-id & resources may be present, empty or missing.", () => {
   test.concurrent.each(Object.entries(validSpec))("%s", (test_name, test) => {
     const parsedMessage = new ParsedMessage(test.msg);
     for (const [field, value] of Object.entries(test.items)) {
