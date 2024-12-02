@@ -112,7 +112,7 @@ export enum SiweErrorType {
   /** Signature doesn't match the address of the message. */
   INVALID_SIGNATURE = 'Signature does not match address of the message.',
 
-  /** `expirationTime`, `notBefore` or `issuedAt` not complient to ISO-8601. */
+  /** `expirationTime`, `notBefore` or `issuedAt` not compliant to ISO-8601. */
   INVALID_TIME_FORMAT = 'Invalid time format.',
 
   /** `version` is not 1. */

@@ -57,7 +57,7 @@ export const generateNonce = (): string => {
  * This method matches the given date string against the ISO-8601 regex and also
  * performs checks if it's a valid date.
  * @param inputDate any string to be validated against ISO-8601
- * @returns boolean indicating if the providade date is valid and conformant to ISO-8601
+ * @returns boolean indicating if the provided date is valid and conformant to ISO-8601
  */
 export const isValidISO8601Date = (inputDate: string): boolean => {
   /* Split groups and make sure inputDate is in ISO8601 format */

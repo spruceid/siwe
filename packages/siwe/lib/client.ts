@@ -102,20 +102,20 @@ export class SiweMessage {
   }
 
   /**
-   * This function can be used to retrieve an EIP-4361 formated message for
+   * This function can be used to retrieve an EIP-4361 formatted message for
    * signature, although you can call it directly it's advised to use
    * [prepareMessage()] instead which will resolve to the correct method based
    * on the [type] attribute of this object, in case of other formats being
    * implemented.
-   * @returns {string} EIP-4361 formated message, ready for EIP-191 signing.
+   * @returns {string} EIP-4361 formatted message, ready for EIP-191 signing.
    */
   toMessage(): string {
     /** Validates all fields of the object */
     // this.validateMessage();
-    const headerPrefx = this.scheme
+    const headerPrefix = this.scheme
       ? `${this.scheme}://${this.domain}`
       : this.domain;
-    const header = `${headerPrefx} wants you to sign in with your Ethereum account:`;
+    const header = `${headerPrefix} wants you to sign in with your Ethereum account:`;
     const uriField = `URI: ${this.uri}`;
     let prefix = [header, this.address].join('\n');
     const versionField = `Version: ${this.version}`;
