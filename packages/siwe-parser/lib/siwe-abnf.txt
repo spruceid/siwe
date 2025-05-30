@@ -99,7 +99,7 @@ h16n          = 1*4HEXDIG !%d46
 h16cn         = %d58 1*4HEXDIG !%d46
 IPv4address   = dec-octet "." dec-octet "." dec-octet "." dec-octet
 ; Here we will will use callback functions to evaluate and validate the (possibly zero-padded) dec-octet.
-dec-octet     =  *3dec-digit
+dec-octet     =  1*3dec-digit
 dec-digit     = %d48-57
 reg-name      = *reg-name-char
 reg-name-char = %d97-122 / %d65-90 / %d48-57 / pct-encoded / %d33 / %d36 / %d38-46 / %d59 / %d61 /%d95 / %d126
