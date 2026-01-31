@@ -1,0 +1,42 @@
+{
+  "scheme": {
+    "rule": "scheme",
+    "input": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-.",
+    "answer": true
+  },
+  "statement": {
+    "rule": "statement",
+    "input": ":/?#[]@!$&'()*+,;= abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~",
+    "answer": true
+  },
+  "pct-encoded": {
+    "rule": "pct-encoded",
+    "input": "%20",
+    "answer": true
+  },
+  "userinfo": {
+    "rule": "userinfo",
+    "input": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,;=:%00%ff%FF%0a%0A%20",
+    "answer": true
+  },
+  "IPvFuture": {
+    "rule": "IPvFuture",
+    "input": "v123.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,;=:",
+    "answer": true
+  },
+  "reg-name": {
+    "rule": "reg-name",
+    "input": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,;=%00%ff%FF%0a%0A%20",
+    "answer": true
+  },
+  "pchar": {
+    "rule": "segment-nz",
+    "input": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,;=:@%00%ff%FF%0a%0A%20",
+    "answer": true
+  },
+  "fragment": {
+    "rule": "fragment",
+    "input": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~!$&'()*+,;=:@%00%ff%FF%0a%0A%20/?",
+    "answer": true
+  }
+}

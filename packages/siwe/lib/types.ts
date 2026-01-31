@@ -35,7 +35,12 @@ export interface VerifyOpts {
   suppressExceptions?: boolean;
 
   /** Enables a custom verification function that will be ran alongside EIP-1271 check. */
-  verificationFallback?: (params: VerifyParams, opts: VerifyOpts, message: SiweMessage, EIP1271Promise: Promise<SiweResponse>) => Promise<SiweResponse>;
+  verificationFallback?: (
+    params: VerifyParams,
+    opts: VerifyOpts,
+    message: SiweMessage,
+    EIP1271Promise: Promise<SiweResponse>
+  ) => Promise<SiweResponse>;
 }
 
 export const VerifyOptsKeys: Array<keyof VerifyOpts> = [
@@ -62,7 +67,11 @@ export interface SiweResponse {
  * Interface used to return errors in SiweResponses.
  */
 export class SiweError {
-  constructor(type: SiweErrorType | string, expected?: string, received?: string) {
+  constructor(
+    type: SiweErrorType | string,
+    expected?: string,
+    received?: string
+  ) {
     this.type = type;
     this.expected = expected;
     this.received = received;
@@ -112,7 +121,7 @@ export enum SiweErrorType {
   /** Signature doesn't match the address of the message. */
   INVALID_SIGNATURE = 'Signature does not match address of the message.',
 
-  /** `expirationTime`, `notBefore` or `issuedAt` not complient to ISO-8601. */
+  /** `expirationTime`, `notBefore` or `issuedAt` not compliant to ISO-8601. */
   INVALID_TIME_FORMAT = 'Invalid time format.',
 
   /** `version` is not 1. */

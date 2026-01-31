@@ -1,0 +1,202 @@
+{
+  "scheme + SP": {
+    "rule": "scheme",
+    "input": " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-.",
+    "answer": false
+  },
+  "scheme + :": {
+    "rule": "scheme",
+    "input": ":",
+    "answer": false
+  },
+  "scheme + #": {
+    "rule": "scheme",
+    "input": "#",
+    "answer": false
+  },
+  "scheme + ?": {
+    "rule": "scheme",
+    "input": "?",
+    "answer": false
+  },
+  "scheme + @": {
+    "rule": "scheme",
+    "input": "@",
+    "answer": false
+  },
+  "scheme + !": {
+    "rule": "scheme",
+    "input": "!",
+    "answer": false
+  },
+  "scheme + ~": {
+    "rule": "scheme",
+    "input": "~",
+    "answer": false
+  },
+  "statement + `": {
+    "rule": "statement",
+    "input": "`",
+    "answer": false
+  },
+  "statement + <": {
+    "rule": "statement",
+    "input": "<",
+    "answer": false
+  },
+  "statement + >": {
+    "rule": "statement",
+    "input": ">",
+    "answer": false
+  },
+  "statement + {": {
+    "rule": "statement",
+    "input": "{",
+    "answer": false
+  },
+  "statement + |": {
+    "rule": "statement",
+    "input": "|",
+    "answer": false
+  },
+  "statement + }": {
+    "rule": "statement",
+    "input": "}",
+    "answer": false
+  },
+  "userinfo + /": {
+    "rule": "userinfo",
+    "input": "/",
+    "answer": false
+  },
+  "userinfo + #": {
+    "rule": "userinfo",
+    "input": "#",
+    "answer": false
+  },
+  "userinfo + ?": {
+    "rule": "userinfo",
+    "input": "?",
+    "answer": false
+  },
+  "userinfo + @": {
+    "rule": "userinfo",
+    "input": "@",
+    "answer": false
+  },
+  "userinfo + [": {
+    "rule": "userinfo",
+    "input": "[",
+    "answer": false
+  },
+  "userinfo + ]": {
+    "rule": "userinfo",
+    "input": "]",
+    "answer": false
+  },
+  "IPvFuture + /": {
+    "rule": "IPvFuture",
+    "input": "/",
+    "answer": false
+  },
+  "IPvFuture + #": {
+    "rule": "IPvFuture",
+    "input": "#",
+    "answer": false
+  },
+  "IPvFuture + ?": {
+    "rule": "IPvFuture",
+    "input": "?",
+    "answer": false
+  },
+  "IPvFuture + @": {
+    "rule": "IPvFuture",
+    "input": "@",
+    "answer": false
+  },
+  "IPvFuture + [": {
+    "rule": "IPvFuture",
+    "input": "[",
+    "answer": false
+  },
+  "IPvFuture + ]": {
+    "rule": "IPvFuture",
+    "input": "]",
+    "answer": false
+  },
+  "reg-name + /": {
+    "rule": "reg-name",
+    "input": "/",
+    "answer": false
+  },
+  "reg-name + #": {
+    "rule": "reg-name",
+    "input": "#",
+    "answer": false
+  },
+  "reg-name + ?": {
+    "rule": "reg-name",
+    "input": "?",
+    "answer": false
+  },
+  "reg-name + @": {
+    "rule": "reg-name",
+    "input": "@",
+    "answer": false
+  },
+  "reg-name + [": {
+    "rule": "reg-name",
+    "input": "[",
+    "answer": false
+  },
+  "reg-name + ]": {
+    "rule": "reg-name",
+    "input": "]",
+    "answer": false
+  },
+  "pchar + ^": {
+    "rule": "segment-nz",
+    "input": "^",
+    "answer": false
+  },
+  "pchar + `": {
+    "rule": "segment-nz",
+    "input": "`",
+    "answer": false
+  },
+  "pchar + |": {
+    "rule": "segment-nz",
+    "input": "|",
+    "answer": false
+  },
+  "pchar + %": {
+    "rule": "segment-nz",
+    "input": "%",
+    "answer": false
+  },
+  "pchar + ?": {
+    "rule": "segment-nz",
+    "input": "?",
+    "answer": false
+  },
+  "pchar + #": {
+    "rule": "segment-nz",
+    "input": "#",
+    "answer": false
+  },
+  "pchar + [": {
+    "rule": "segment-nz",
+    "input": "[",
+    "answer": false
+  },
+  "fragment + #": {
+    "rule": "fragment",
+    "input": "#",
+    "answer": false
+  },
+  "fragment + [": {
+    "rule": "fragment",
+    "input": "[",
+    "answer": false
+  }
+}

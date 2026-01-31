@@ -1,0 +1,54 @@
+{
+  "valid message object: missing resources": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "none"
+  },
+  "valid message object: empty resources": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id","resources":[]},
+    "error": "none"
+  },
+  "valid message object: single resources URI": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id","resources":["ftp://mystuff.com"]},
+    "error": "none"
+  },
+  "valid message object: multiple resources URIs": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id","resources":["ftp://mystuff.com","uri:"]},
+    "error": "none"
+  },
+  "invalid message object: invalid EIP-55 address": {
+    "msg": {"domain":"service.org","address":"0xe5a12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "invalid EIP-55 address"
+  },
+  "invalid message object: invalid resource URI": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id","resources":["sample.org"]},
+    "error": "invalid resource URI"
+  },
+  "invalid message object: multiple resources one good one bad}": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://sample.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id","resources":["https://sample.org","sample.org"]},
+    "error": "invalid resource URI"
+  },
+  "invalid issuedAt data time: invalid issued-at date time syntax": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"garbage","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "invalid issued-at date time syntax"
+  },
+  "invalid issuedAt data time month - 2022-13-17T12:45:13.610Z: invalid issued-at date time semantics": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-13-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "invalid issued-at date time semantics"
+  },
+  "invalid expirationTime data time: invalid expiration-time date time syntax": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"garbage","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "invalid expiration-time date time syntax"
+  },
+  "invalid expirationTime data time day - 2023-03-32T12:45:13.610Z: invalid expiration-time date time semantics": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-32T12:45:13.610Z","notBefore":"2022-03-17T12:45:13.610Z","requestId":"some_id"},
+    "error": "invalid expiration-time date time semantics"
+  },
+  "invalid notBefore data time: invalid not-before date time syntax": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"garbage","requestId":"some_id"},
+    "error": "invalid not-before date time syntax"
+  },
+  "invalid notBefore data time hour - 2023-03-17T25:45:13.610Z: invalid not-before date time semantics": {
+    "msg": {"domain":"service.org","address":"0xe5A12547fe4E872D192E3eCecb76F2Ce1aeA4946","statement":"I accept the ServiceOrg Terms of Service: https://service.org/tos","uri":"https://service.org","version":"1","chainId":1,"nonce":"12341234","issuedAt":"2022-03-17T12:45:13.610Z","expirationTime":"2023-03-17T12:45:13.610Z","notBefore":"2023-03-17T25:45:13.610Z","requestId":"some_id"},
+    "error": "invalid not-before date time semantics"
+  }
+}
