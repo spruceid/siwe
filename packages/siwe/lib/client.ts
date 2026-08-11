@@ -316,8 +316,11 @@ export class SiweMessage {
       let addr;
       try {
         addr = verifyMessage(EIP4361Message, signature);
-      } catch (e) {
-        console.error(e);
+      } catch {
+        // The signer address could not be recovered from the signature (e.g.
+        // a malformed signature). Leave addr undefined so the address match
+        // below fails as an invalid signature. It is intentionally not logged
+        // so applications with custom logging flows are not affected.
       }
       /** Match signature with message's address */
       if (addr === this.address) {
