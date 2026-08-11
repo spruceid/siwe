@@ -286,3 +286,44 @@ describe(`Unit`, () => {
     }
   });
 });
+
+describe(`Message verification with invalid signature`, () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  test('Does not write to console.error when the signature cannot be recovered', async () => {
+    const msg = new SiweMessage({
+      domain: 'login.xyz',
+      address: '0x6Da01670d8fc844e736095918bbE11fE8D564163',
+      statement: 'Sign-In With Ethereum Example Statement',
+      uri: 'https://login.xyz',
+      version: '1',
+      nonce: 'rmplqh1gf',
+      issuedAt: '2022-01-05T14:31:43.954Z',
+      chainId: 1,
+      expirationTime: '2100-01-07T14:31:43.952Z',
+    });
+    await expect(
+      msg
+        .verify(
+          {
+            signature:
+              '0xf2e8420fc1b722bf4941f5a0464f98172a758ceda5039f622e425fb69fd19b20e444bba7c9a8a8d7e2b5e453553efe7c9460be5d211abe473fc146d51bb04d0cb1b',
+          },
+          { suppressExceptions: true }
+        )
+        .then(({ success }) => success)
+    ).resolves.toBeFalsy();
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+});
