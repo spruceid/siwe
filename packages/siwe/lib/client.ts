@@ -17,6 +17,23 @@ import {
   checkInvalidKeys,
 } from './utils';
 
+/**
+ * ECDSA signatures recovered via ecrecover are 65 bytes (r||s||v) or
+ * 64 bytes (EIP-2098 compact). Contract-wallet / multisig signatures
+ * (EIP-1271) are other lengths; ethers `verifyMessage` throws
+ * `invalid raw signature length` for those.
+ */
+function isEcdsaSignature(signature?: string): boolean {
+  if (!signature) {
+    return false;
+  }
+  const hex =
+    signature.startsWith('0x') || signature.startsWith('0X')
+      ? signature.slice(2)
+      : signature;
+  return hex.length === 130 || hex.length === 128;
+}
+
 export class SiweMessage {
   /**RFC 3986 URI scheme for the authority that is requesting the signing. */
   scheme?: string;
@@ -312,12 +329,18 @@ export class SiweMessage {
         });
       }
 
-      /** Recover address from signature */
+      /** Recover address from signature.
+       *  Only 65-byte (r||s||v) and 64-byte (EIP-2098) signatures can be
+       *  recovered with ecrecover. Longer contract-wallet / multisig
+       *  signatures make ethers throw `invalid raw signature length`;
+       *  skip straight to EIP-1271 for those. */
       let addr;
-      try {
-        addr = verifyMessage(EIP4361Message, signature);
-      } catch (e) {
-        console.error(e);
+      if (isEcdsaSignature(signature)) {
+        try {
+          addr = verifyMessage(EIP4361Message, signature);
+        } catch (e) {
+          console.error(e);
+        }
       }
       /** Match signature with message's address */
       if (addr === this.address) {
