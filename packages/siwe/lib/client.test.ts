@@ -285,4 +285,81 @@ describe(`Unit`, () => {
       );
     }
   });
+
+  test('Should reject unparseable verification time instead of skipping lifetime checks.', async () => {
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
+      address: wallet.address,
+      domain: 'login.xyz',
+      statement: 'Sign-In With Ethereum Example Statement',
+      uri: 'https://login.xyz',
+      version: '1',
+      nonce: 'bTyXgcQxn2htgkjJn',
+      issuedAt: '2022-01-27T17:09:38.578Z',
+      chainId: 1,
+      expirationTime: '2022-01-27T17:09:38.578Z',
+    });
+    const signature = await wallet.signMessage(msg.toMessage());
+    await expect(
+      msg.verify({
+        signature,
+        time: 'never',
+      })
+    ).rejects.toMatchObject({
+      success: false,
+      error: expect.objectContaining({
+        type: SiweErrorType.INVALID_TIME_FORMAT,
+      }),
+    });
+  });
+
+  test('Should reject an expired message when verification time is valid.', async () => {
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
+      address: wallet.address,
+      domain: 'login.xyz',
+      statement: 'Sign-In With Ethereum Example Statement',
+      uri: 'https://login.xyz',
+      version: '1',
+      nonce: 'bTyXgcQxn2htgkjJn',
+      issuedAt: '2022-01-27T17:09:38.578Z',
+      chainId: 1,
+      expirationTime: '2022-01-27T17:09:38.578Z',
+    });
+    const signature = await wallet.signMessage(msg.toMessage());
+    await expect(
+      msg.verify({
+        signature,
+        time: '2022-01-27T17:09:38.579Z',
+      })
+    ).rejects.toMatchObject({
+      success: false,
+      error: expect.objectContaining({
+        type: SiweErrorType.EXPIRED_MESSAGE,
+      }),
+    });
+  });
+
+  test('Should reject a mutated unparseable expirationTime.', async () => {
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
+      address: wallet.address,
+      domain: 'login.xyz',
+      statement: 'Sign-In With Ethereum Example Statement',
+      uri: 'https://login.xyz',
+      version: '1',
+      nonce: 'bTyXgcQxn2htgkjJn',
+      issuedAt: '2022-01-27T17:09:38.578Z',
+      chainId: 1,
+      expirationTime: '2100-01-07T14:31:43.952Z',
+    });
+    const signature = await wallet.signMessage(msg.toMessage());
+    msg.expirationTime = 'never';
+    await expect(msg.verify({ signature })).rejects.toMatchObject({
+      success: false,
+      error: expect.objectContaining({
+        type: SiweErrorType.INVALID_TIME_FORMAT,
+      }),
+    });
+  });
 });
