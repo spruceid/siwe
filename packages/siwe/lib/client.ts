@@ -15,7 +15,20 @@ import {
   checkContractWalletSignature,
   generateNonce,
   checkInvalidKeys,
+  isValidISO8601Date,
 } from './utils';
+
+/** Parse a SIWE timestamp. Invalid Date is truthy, so callers must reject NaN. */
+const parseSiweDate = (value: string): Date | undefined => {
+  if (!isValidISO8601Date(value)) {
+    return undefined;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+  return parsed;
+};
 
 export class SiweMessage {
   /**RFC 3986 URI scheme for the authority that is requesting the signing. */
@@ -267,12 +280,42 @@ export class SiweMessage {
         });
       }
 
-      /** Check time or now */
-      const checkTime = new Date(time || new Date());
+      /** Check time or now. Unparseable time must not skip lifetime checks. */
+      let checkTime: Date;
+      if (time) {
+        const parsedTime = parseSiweDate(time);
+        if (!parsedTime) {
+          fail({
+            success: false,
+            data: this,
+            error: new SiweError(
+              SiweErrorType.INVALID_TIME_FORMAT,
+              'ISO-8601 datetime',
+              time
+            ),
+          });
+          return;
+        }
+        checkTime = parsedTime;
+      } else {
+        checkTime = new Date();
+      }
 
       /** Message not expired */
       if (this.expirationTime) {
-        const expirationDate = new Date(this.expirationTime);
+        const expirationDate = parseSiweDate(this.expirationTime);
+        if (!expirationDate) {
+          fail({
+            success: false,
+            data: this,
+            error: new SiweError(
+              SiweErrorType.INVALID_TIME_FORMAT,
+              'ISO-8601 datetime',
+              this.expirationTime
+            ),
+          });
+          return;
+        }
         if (checkTime.getTime() >= expirationDate.getTime()) {
           fail({
             success: false,
@@ -288,7 +331,19 @@ export class SiweMessage {
 
       /** Message is valid already */
       if (this.notBefore) {
-        const notBefore = new Date(this.notBefore);
+        const notBefore = parseSiweDate(this.notBefore);
+        if (!notBefore) {
+          fail({
+            success: false,
+            data: this,
+            error: new SiweError(
+              SiweErrorType.INVALID_TIME_FORMAT,
+              'ISO-8601 datetime',
+              this.notBefore
+            ),
+          });
+          return;
+        }
         if (checkTime.getTime() < notBefore.getTime()) {
           fail({
             success: false,
