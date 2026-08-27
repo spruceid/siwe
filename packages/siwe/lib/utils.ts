@@ -3,7 +3,7 @@ import { randomStringForEntropy } from '@stablelib/random';
 import { Contract, providers, Signer } from 'ethers';
 
 import type { SiweMessage } from './client';
-import { hashMessage } from './ethersCompat';
+import { getJsonRpcProvider, hashMessage } from './ethersCompat';
 
 const EIP1271_ABI = [
   'function isValidSignature(bytes32 _message, bytes _signature) public view returns (bytes4)',
@@ -22,13 +22,16 @@ const ISO8601 =
 export const checkContractWalletSignature = async (
   message: SiweMessage,
   signature: string,
-  provider?: providers.Provider | Signer
+  provider?: providers.Provider | Signer | string
 ): Promise<boolean> => {
   if (!provider) {
     return false;
   }
 
-  const walletContract = new Contract(message.address, EIP1271_ABI, provider);
+  const resolvedProvider =
+    typeof provider === 'string' ? getJsonRpcProvider(provider) : provider;
+
+  const walletContract = new Contract(message.address, EIP1271_ABI, resolvedProvider);
   const hashedMessage = hashMessage(message.prepareMessage());
   const res = await walletContract.isValidSignature(hashedMessage, signature);
   return res === EIP1271_MAGICVALUE;
