@@ -57,6 +57,18 @@ type ProviderV5 = ethers.providers.Provider;
 type ProviderV6 = ethers.Provider;
 
 export type Provider = ProviderV6 extends undefined ? ProviderV5 : ProviderV6;
+
+let ethersJsonRpcProvider: any = null;
+try {
+  // @ts-expect-error -- v6 compatibility hack
+  ethersJsonRpcProvider = ethers.providers.JsonRpcProvider;
+} catch {
+  ethersJsonRpcProvider = (ethers as any).JsonRpcProvider;
+}
+
+export const getJsonRpcProvider = (url: string): Provider =>
+  new ethersJsonRpcProvider(url);
+
 export const verifyMessage = ethersVerifyMessage;
 export const hashMessage = ethersHashMessage;
 export const getAddress = ethersGetAddress;

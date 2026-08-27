@@ -26,6 +26,7 @@ import {
   Wallet,
 } from 'ethers';
 import { SiweMessage } from './client';
+import { checkContractWalletSignature } from './utils';
 import { SiweErrorType } from './types';
 
 describe(`Message Generation`, () => {
@@ -284,5 +285,45 @@ describe(`Unit`, () => {
         new Error('invalidKey is/are not valid key(s) for VerifyOpts.')
       );
     }
+  });
+
+  test('Should accept RPC URL string as provider in verify opts.', async () => {
+    const wallet = Wallet.createRandom();
+    const msg = new SiweMessage({
+      address: wallet.address,
+      domain: 'login.xyz',
+      statement: 'Sign-In With Ethereum Example Statement',
+      uri: 'https://login.xyz',
+      version: '1',
+      nonce: 'bTyXgcQxn2htgkjJn',
+      issuedAt: '2022-01-27T17:09:38.578Z',
+      chainId: 1,
+      expirationTime: '2100-01-07T14:31:43.952Z',
+    });
+    const signature = await wallet.signMessage(msg.toMessage());
+    const res = await msg.verify(
+      { signature },
+      { provider: 'https://rpc.example.com' }
+    );
+    expect(res.success).toBeTruthy();
+  });
+
+  test('checkContractWalletSignature accepts string RPC provider', async () => {
+    const msg = new SiweMessage({
+      domain: 'service.org',
+      address: '0x1234567890123456789012345678901234567890',
+      statement: 'Sign-In With Ethereum',
+      uri: 'https://service.org/login',
+      version: '1',
+      chainId: 1,
+      nonce: '32891757',
+      issuedAt: '2021-09-30T16:25:24.000Z',
+    });
+    const err = await checkContractWalletSignature(
+      msg,
+      '0x1234',
+      'http://127.0.0.1:8545'
+    ).catch(e => e);
+    expect(err.message).not.toContain('contract runner does not support');
   });
 });

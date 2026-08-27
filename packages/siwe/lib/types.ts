@@ -28,8 +28,8 @@ export const VerifyParamsKeys: Array<keyof VerifyParams> = [
 ];
 
 export interface VerifyOpts {
-  /** ethers provider to be used for EIP-1271 validation */
-  provider?: providers.Provider;
+  /** ethers provider or RPC URL to be used for EIP-1271 validation */
+  provider?: providers.Provider | string;
 
   /** If the library should reject promises on errors, defaults to false */
   suppressExceptions?: boolean;
